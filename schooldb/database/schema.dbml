@@ -1,0 +1,233 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+
+Table student {
+  student_id int [pk]
+  first_name varchar
+  middle_name varchar
+  last_name varchar
+  dob date
+  email varchar [unique]
+  ohio_ssid varchar [unique]
+}
+
+Table school_enrollment {
+  student_id int [ref: > student.student_id]
+  first_day date
+  last_day date
+}
+
+// Family
+
+Table family_member {
+  family_member_id int [pk]
+  first_name varchar
+  middle_name varchar
+  last_name varchar
+  email varchar [unique]
+  phone_number varchar
+}
+
+Table relationship_type {
+  relationship_type_id int [pk]
+  relationship_type varchar
+}
+
+Table family_group {
+  student_id int [ref : > student.student_id]
+  family_member_id int [ ref: > family_member.family_member_id]
+  parent_guardian bool
+  emergency_pickup bool
+  relationship_type_id int [ref: > relationship_type.relationship_type_id]
+}
+
+//Attendance 
+Table daily_attendance {
+  student_id int [ref : > student.student_id]
+  date date
+  attendance_type int [ref:> attendance_types.attendance_type_id]
+  arrival datetime
+  departure datetime
+  excuse_note varchar
+}
+
+Table attendance_types {
+  attendance_type_id int [pk]
+  attendance_type varchar // full, partial, absent
+}
+
+// Staff organization
+Table staff {
+  staff_id int [pk, increment]
+  first_name varchar
+  middle_name varchar
+  last_name varchar
+  email varchar [unique]
+  position varchar
+}
+
+Table department {
+  department_id int [pk, increment]
+  department_name varchar
+}
+
+Table staff_department { //JOIN TABLE
+  department_id int [ref : > department.department_id]
+  staff_id int [ref:> staff.staff_id]
+}
+
+//Grade Levels
+Table grade_levels {
+  grade_level_id int [pk]
+  grade_level_name varchar
+  grade_level_chair varchar [ref: > staff.staff_id]
+}
+
+Table staff_grade_levels { //JOIN TABLE
+  grade_level int [ref: > grade_levels.grade_level_id]
+  staff_id int [ref: > staff.staff_id]
+}
+
+Table student_grade_levels { //JOIN TABLE
+    grade_level int [ref: > grade_levels.grade_level_id]
+    student_id int [ref: > student.student_id]
+}
+
+// Classes, courses and academics
+Table course {
+  course_id int [pk, increment]
+  lead_teacher_id int [ref: > staff.staff_id]
+  grade_level_id int [ref: > grade_levels.grade_level_id] 
+}
+
+Table course_staff { //JOIN TABLE
+  course_id int [ref: > course.course_id]
+  staff_id int [ref: > staff.staff_id]
+}
+
+Table course_student { //JOIN TABLE
+student_id int [ref: > student.student_id]
+course_id int [ref: > course.course_id]
+}
+
+Table assignment { 
+  assignment_id int [pk]
+  assignment_title varchar
+  assignment_type_id int [ref:> assignment_types.assignment_type_id]
+  date_assigned date
+  date_due date
+  weight float [default: 1]
+  course_id int [ref:>course.course_id]
+}
+
+Table assignment_types {
+  assignment_type_id int [pk]
+  assignment_type varchar
+}
+
+Table student_score {
+  student_id int [ref:>student.student_id]
+  assignment_id int [ref:> assignment.assignment_id]
+  percentage_score float
+}
+
+
+// SPED
+Table sped_roster{
+  student_id int [ref: > student.student_id]
+  has_iep bool
+  has_504 bool
+}
+
+Table sped_categories{
+  category_id int [pk]
+  sped_category varchar
+}
+
+Table students_sped_categories {
+  student_id int [ref: > student.student_id]
+  category_id int [ref: > sped_categories.category_id]
+}
+
+Table iep {
+  iep_id int [pk]
+  student_id int [ref:> student.student_id]
+  last_updated date
+}
+
+Table iep_goals {
+  iep_id int [ref: > iep.iep_id]
+  goal varchar
+}
+
+Table iep_accomodations {
+    iep_id int [ref: > iep.iep_id]
+    accomodation varchar
+}
+
+Table etr {
+  etr_id int [pk]
+  student_id int [ref: > student.student_id]
+  last_updated date
+  executive_summary varchar
+}
+
+
+//Behavior
+Table behavior_referrals {
+  student_id int [ref: > student.student_id]
+  reporting_staff int [ref: > staff.staff_id]
+  date date
+  period_id int [ref: > period_list.period_id]
+  student_report varchar
+  internal_report varchar
+}
+
+Table behavior_plan {
+  student_id int [ref: > student.student_id]
+  plan_description varchar
+  staff_author int [ref: > staff.staff_id]
+  adoption_date date
+  active bool
+}
+
+Table suspensions {
+  suspension_id int [pk]
+  student_id int [ref:>student.student_id]
+  startdate date
+  enddate date
+}
+
+Table expulsions {
+  expulsion_id int [pk]
+  student_id int [ref:> student.student_id]
+  date date [not null]
+  days_length int [not null]
+  expulsion_report varchar [not null]
+}
+
+// Scheduling
+Table period_list {
+  period_id int [pk]
+  period_name varchar
+  start_time datetime
+  end_time datetime
+}
+
+Table rooms {
+  room_id int [pk]
+  room_name varchar
+}
+
+Table course_period_room {
+  course_id int [ref:> course.course_id]
+  room_id int [ref:> rooms.room_id]
+  period_id int [ref:> period_list.period_id]
+}
+
+
+
+
+
+Ref: "family_member"."family_member_id" < "family_group"."parent_guardian"

@@ -1,8 +1,8 @@
 CREATE TABLE "student" (
   "student_id" int PRIMARY KEY,
-  "first_name" varchar,
+  "first_name" varchar NOT NULL,
   "middle_name" varchar,
-  "last_name" varchar,
+  "last_name" varchar NOT NULL,
   "dob" date,
   "email" varchar UNIQUE,
   "ohio_ssid" varchar UNIQUE
