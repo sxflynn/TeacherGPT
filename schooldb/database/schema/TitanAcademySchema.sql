@@ -1,11 +1,52 @@
+DROP TABLE IF EXISTS 
+    "course_period_room",
+    "expulsions",
+    "suspensions",
+    "behavior_plan",
+    "behavior_referrals",
+    "etr",
+    "iep_accomodations",
+    "iep_goals",
+    "iep",
+    "students_sped_categories",
+    "sped_categories",
+    "sped_roster",
+    "student_score",
+    "assignment",
+    "course_student",
+    "course_staff",
+    "course",
+    "student_grade_levels",
+    "staff_grade_levels",
+    "grade_levels",
+    "staff_department",
+    "department",
+    "staff",
+    "attendance_types",
+    "daily_attendance",
+    "school_enrollment",
+    "student" CASCADE;
+
+-- BEGIN TRANSACTION;
+
+-- CREATE EXTENSION citext;
+
+-- CREATE DOMAIN email AS citext
+--   CHECK ( value ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$' );
+-- ERROR:  permission denied to create extension "citext"
+-- HINT:  Must have CREATE privilege on current database to create this extension. 
+
 CREATE TABLE "student" (
   "student_id" int PRIMARY KEY,
-  "first_name" varchar NOT NULL,
-  "middle_name" varchar,
-  "last_name" varchar NOT NULL,
+  "first_name" varchar(255) NOT NULL,
+  "middle_name" varchar(255),
+  "last_name" varchar(255) NOT NULL,
   "dob" date,
   "email" varchar UNIQUE,
-  "ohio_ssid" varchar UNIQUE
+  "ohio_ssid" varchar UNIQUE NOT NULL,
+  CONSTRAINT "chk_ohio_ssid_format" CHECK ("ohio_ssid" ~ '^[A-Za-z]{2}[0-9]{7}$')
+  -- CONSTRAINT "chk_email_format" CHECK ("email" ~ '^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
+  --  CONSTRAINT "chk_email_format" CHECK ("email" ~ '^[a-zA-Z0-9.!#$%&''*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$')
 );
 
 CREATE TABLE "school_enrollment" (
@@ -18,8 +59,8 @@ CREATE TABLE "daily_attendance" (
   "student_id" int,
   "date" date,
   "attendance_type" int,
-  "arrival" datetime,
-  "departure" datetime,
+  "arrival" timestamptz,
+  "departure" timestamptz,
   "excuse_note" varchar
 );
 
@@ -50,7 +91,7 @@ CREATE TABLE "staff_department" (
 CREATE TABLE "grade_levels" (
   "grade_level_id" int PRIMARY KEY,
   "grade_level_name" varchar,
-  "grade_level_chair" varchar
+  "grade_level_chair" int
 );
 
 CREATE TABLE "staff_grade_levels" (
@@ -174,8 +215,8 @@ CREATE TABLE "expulsions" (
 CREATE TABLE "period_list" (
   "period_id" int PRIMARY KEY,
   "period_name" varchar,
-  "start_time" datetime,
-  "end_time" datetime
+  "start_time" timestamptz,
+  "end_time" timestamptz
 );
 
 CREATE TABLE "rooms" (
