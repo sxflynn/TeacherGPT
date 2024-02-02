@@ -23,6 +23,9 @@ DROP TABLE IF EXISTS
     "department",
     "staff",
     "attendance_types",
+    "assignment_types",
+    "period_list",
+    "rooms",
     "daily_attendance",
     "school_enrollment",
     "student" CASCADE;
@@ -37,7 +40,7 @@ DROP TABLE IF EXISTS
 -- HINT:  Must have CREATE privilege on current database to create this extension. 
 
 CREATE TABLE "student" (
-  "student_id" int PRIMARY KEY,
+  "student_id" SERIAL PRIMARY KEY,
   "first_name" varchar(255) NOT NULL,
   "middle_name" varchar(255),
   "last_name" varchar(255) NOT NULL,
@@ -65,7 +68,7 @@ CREATE TABLE "daily_attendance" (
 );
 
 CREATE TABLE "attendance_types" (
-  "attendance_type_id" int PRIMARY KEY,
+  "attendance_type_id" SERIAL PRIMARY KEY,
   "attendance_type" varchar
 );
 
@@ -89,7 +92,7 @@ CREATE TABLE "staff_department" (
 );
 
 CREATE TABLE "grade_levels" (
-  "grade_level_id" int PRIMARY KEY,
+  "grade_level_id" SERIAL PRIMARY KEY,
   "grade_level_name" varchar,
   "grade_level_chair" int
 );
@@ -121,7 +124,7 @@ CREATE TABLE "course_student" (
 );
 
 CREATE TABLE "assignment" (
-  "assignment_id" int PRIMARY KEY,
+  "assignment_id" SERIAL PRIMARY KEY,
   "assignment_title" varchar,
   "assignment_type_id" int,
   "date_assigned" date,
@@ -131,7 +134,7 @@ CREATE TABLE "assignment" (
 );
 
 CREATE TABLE "assignment_types" (
-  "assignment_type_id" int PRIMARY KEY,
+  "assignment_type_id" SERIAL PRIMARY KEY,
   "assignment_type" varchar
 );
 
@@ -148,7 +151,7 @@ CREATE TABLE "sped_roster" (
 );
 
 CREATE TABLE "sped_categories" (
-  "category_id" int PRIMARY KEY,
+  "category_id" SERIAL PRIMARY KEY,
   "sped_category" varchar
 );
 
@@ -158,7 +161,7 @@ CREATE TABLE "students_sped_categories" (
 );
 
 CREATE TABLE "iep" (
-  "iep_id" int PRIMARY KEY,
+  "iep_id" SERIAL PRIMARY KEY,
   "student_id" int,
   "last_updated" date
 );
@@ -174,7 +177,7 @@ CREATE TABLE "iep_accomodations" (
 );
 
 CREATE TABLE "etr" (
-  "etr_id" int PRIMARY KEY,
+  "etr_id" SERIAL PRIMARY KEY,
   "student_id" int,
   "last_updated" date,
   "executive_summary" varchar
@@ -198,14 +201,14 @@ CREATE TABLE "behavior_plan" (
 );
 
 CREATE TABLE "suspensions" (
-  "suspension_id" int PRIMARY KEY,
+  "suspension_id" SERIAL PRIMARY KEY,
   "student_id" int,
   "startdate" date,
   "enddate" date
 );
 
 CREATE TABLE "expulsions" (
-  "expulsion_id" int PRIMARY KEY,
+  "expulsion_id" SERIAL PRIMARY KEY,
   "student_id" int,
   "date" date NOT NULL,
   "days_length" int NOT NULL,
@@ -213,14 +216,14 @@ CREATE TABLE "expulsions" (
 );
 
 CREATE TABLE "period_list" (
-  "period_id" int PRIMARY KEY,
+  "period_id" SERIAL PRIMARY KEY,
   "period_name" varchar,
   "start_time" timestamptz,
   "end_time" timestamptz
 );
 
 CREATE TABLE "rooms" (
-  "room_id" int PRIMARY KEY,
+  "room_id" SERIAL PRIMARY KEY,
   "room_name" varchar
 );
 
