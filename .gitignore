@@ -1,2 +1,6 @@
 # General
 .DS_Store
+
+
+.env
+schooldb/.env
