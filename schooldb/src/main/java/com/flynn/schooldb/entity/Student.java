@@ -2,6 +2,7 @@ package com.flynn.schooldb.entity;
 import jakarta.persistence.*;
 import java.util.Date;
 
+
 @Entity
 @Table(name = "student")
 public class Student {
@@ -32,6 +33,19 @@ public class Student {
 
     @Column(name = "ohio_ssid", nullable = false, unique = true)
     private String ohioSsid;
+
+    public Student() {
+    }
+
+    public Student(String firstName, String middleName, String lastName, Character sex, Date dob, String email, String ohioSsid) {
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.sex = sex;
+        this.dob = dob;
+        this.email = email;
+        this.ohioSsid = ohioSsid;
+    }
 
     public Long getStudentId() {
         return studentId;

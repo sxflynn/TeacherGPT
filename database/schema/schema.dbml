@@ -44,6 +44,7 @@ Table family_group {
 
 //Attendance 
 Table daily_attendance {
+  attendance_type_id int [pk]
   student_id int [ref : > student.student_id]
   date date
   attendance_type int [ref:> attendance_types.attendance_type_id]

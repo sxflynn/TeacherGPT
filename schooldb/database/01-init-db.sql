@@ -83,6 +83,7 @@ CREATE TABLE "school_enrollment" (
 );
 
 CREATE TABLE "daily_attendance" (
+  "daily_attendance_id" int,
   "student_id" int,
   "date" date,
   "attendance_type" int,

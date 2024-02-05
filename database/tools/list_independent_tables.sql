@@ -11,3 +11,14 @@ WHERE c.relkind = 'r' -- regular table
     )
   AND nspname NOT IN ('pg_catalog', 'information_schema') -- exclude system tables
 ORDER BY schema_name, table_name;
+
+
+"student"
+"assignment_types"
+"attendance_types"
+"department"
+"period_list"
+"rooms"
+"sped_categories"
+"staff"
+"users"
