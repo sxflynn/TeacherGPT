@@ -4,27 +4,24 @@
 
 A proposed GPT chatbot for teachers that uses retrieval-augmentation  to answer questions about their students.
 
-# Aim
+## Project Status
+> ⚠️ This project is in active development and is not yet a minimally viable product (MVP).
+
+## Aim
 
 The aim of this project is to build a mock-up of a future product where teachers can use AI to save time on context-driven tasks. It uses a fictional school database to simulate a chatbot interacting with real school data.
 
-# Proposed Tech stack
+## Proposed tech stack
 
-💻 A web frontend, built in React, with a GPT-like chat interface that interacts with the LLM inference engine
+* 💻 A web frontend, built in React, with a GPT-like chat interface that interacts with the LLM inference engine
 
-⬇
+* 🐍 Python-based LLM server running FastAPI and a custom implementation of the OpenAI package with provider-agnostic dependency injection. Potentially would use Langchain (or custom build it) to implement retrieval augmented generation (RAG) logic, such as orchestration, agents and tool prompting. Uses GraphQL to retrieve data from Java server.
 
-🐍 Python-based LLM server running FastAPI and a custom implementation of the OpenAI package with provider-agnostic dependency injection. Potentially would use Langchain (or custom build it) to implement retrieval augmented generation (RAG) logic, such as orchestration, agents and tool prompting. Uses GraphQL to retrieve data from Java server.
+* ☕ Java server running Spring Data JPA that interfaces with the PostgreSQL data store. Responds to GraphQL requests.
 
-⬇ 
+* 🗄️🐘 PostgreSQL database that consolidates data from multiple school data stores
 
-☕ Java server running Spring Data JPA that interfaces with the PostgreSQL data store. Responds to GraphQL requests.
-
-⬇
-
-🗄️🐘 PostgreSQL database that consolidates data from multiple school data stores
-
-# How to contribute
+## How to contribute
 
 If you are passionate about helping teachers remove data barriers to their work and want to contribute to an open project, here are some ways you can help:
 
@@ -33,7 +30,7 @@ If you are passionate about helping teachers remove data barriers to their work 
 - If you have K-12 teaching experience, please introduce yourself and how you'd be interested in helping.
 - As the product becomes more mature, please test the product and contribute issues and pull requests.
 
-# Sample prompts
+## Sample prompts
 Once the product is built, these are the kinds of prompt interactions that a teacher would be able to have.
 
 Teacher:
@@ -135,7 +132,7 @@ TeacherGPT:
 > *(etc)*
 
 
-# Could this product ever be used in a school environment?
+## Could this product ever be used in a school environment?
 The short answer is yes, but there are caveats and considerations.
 
 ### Technical hurdles
