@@ -18,7 +18,7 @@ public class DailyAttendance {
 
     private LocalDate date;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attendance_type")
+    @JoinColumn(name = "attendance_type_id")
     private AttendanceType attendanceType;
 
     @Column(name = "arrival")
