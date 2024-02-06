@@ -39,93 +39,98 @@ Teacher:
 I am teaching my 3.10 lesson on Tuesday. Help me differentiate it for students with IEPs and other services.
 ```
 TeacherGPT:
-```
-For your 3.10 lesson on paragraph writing, it's important to tailor the assignment to meet the diverse needs of your students, especially those with IEPs and other support services. Here are some suggestions for differentiation:
 
-For Jamie, who struggles with writing fluency, consider allowing the use of a speech-to-text tool to help them articulate their ideas without the barrier of typing or handwriting.
+> For your 3.10 lesson on paragraph writing, it's important to tailor the assignment to meet the diverse needs of your students, especially those with IEPs and other support services. Here are some suggestions for differentiation:
+> 
+>For Jamie, who struggles with writing fluency, consider allowing the use of a speech-to-text tool to help them articulate their ideas without the barrier of typing or handwriting.
+>
+> For Alex, who has difficulty organizing thoughts, provide a graphic organizer. This tool can help them structure their paragraph with a clear beginning, middle, and end.
+>
+> For Taylor, who may need more time to process and write, extend the assignment deadline and break down the task into smaller, manageable steps with individual mini-deadlines.
+> 
+> For Jordan, who excels in creative thinking but struggles with grammar, focus less on penalizing grammatical errors and more on the content and organization of ideas. You can also pair Jordan with a peer for peer-review sessions where they can get feedback on their grammar in a supportive setting.
+> 
+> For Casey, who has an IEP focusing on reading comprehension, provide a written example of a well-structured paragraph and review it together. Highlighting each part of the paragraph (topic sentence, supporting details, conclusion) can serve as a model for their own writing.
+> 
+> Remember, the goal is to provide the right supports so each student can successfully express their ideas through writing. Encourage peer support, use technology as an aid, and offer personalized feedback to guide each student through the writing process.
 
-For Alex, who has difficulty organizing thoughts, provide a graphic organizer. This tool can help them structure their paragraph with a clear beginning, middle, and end.
-
-For Taylor, who may need more time to process and write, extend the assignment deadline and break down the task into smaller, manageable steps with individual mini-deadlines.
-
-For Jordan, who excels in creative thinking but struggles with grammar, focus less on penalizing grammatical errors and more on the content and organization of ideas. You can also pair Jordan with a peer for peer-review sessions where they can get feedback on their grammar in a supportive setting.
-
-For Casey, who has an IEP focusing on reading comprehension, provide a written example of a well-structured paragraph and review it together. Highlighting each part of the paragraph (topic sentence, supporting details, conclusion) can serve as a model for their own writing.
-
-Remember, the goal is to provide the right supports so each student can successfully express their ideas through writing. Encourage peer support, use technology as an aid, and offer personalized feedback to guide each student through the writing process.
-```
 Teacher:
 ```
 Compose a text message that I could send to Liliana's parents that summarizes her grades and behavior from the last 3 weeks. Also tell me their phone number.
 ```
 TeacherGPT:
-```
-Emilia González Montes is the primary contact and her number is 614-504-3445
 
-Here is the text:
+> Emilia González Montes is the primary contact and her number is 614-504-3445
+>
+> Here is the text:
+> 
+> Hi Emilia,
+> 
+> I hope you're well! Just wanted to share a quick update on Liliana. In the last 3 weeks, she's made great strides. In Math, her test scores have improved from a B- to a solid B+, and in Science, she's consistently maintaining an A-. She has earned 3 sets of behavior dollars for excellent participation in ELA, contributing to a rise in her grade to an A, and in History, she's engaging well, securing a B+.
+>
+> Let me know if you have any questions or thoughts!
 
-Hi Emilia,
-
-I hope you're well! Just wanted to share a quick update on Liliana. In the last 3 weeks, she's made great strides. In Math, her test scores have improved from a B- to a solid B+, and in Science, she's consistently maintaining an A-. She has earned 3 sets of behavior dollars for excellent participation in ELA, contributing to a rise in her grade to an A, and in History, she's engaging well, securing a B+.
-
-Let me know if you have any questions or thoughts!
-```
 
 Teacher:
 ```
 I am subbing for Mr. Estrada's 2nd period history class tomorrow. What sorts of behavior and academic issues might I expect from the class to help me be more prepared?
 ```
 TeacherGPT:
-```
-Substituting for Mr. Estrada's 2nd period history class, you might encounter a mix of behaviors and academic performance levels:
 
-Behavior Dollars: According to our behavior database, Jasmyne has been earning a significant number of behavior dollars for her positive contributions and engagement in class discussions. On the other hand, Ray has accumulated a few demerits recently for being off-task and using his phone during lessons.
+>Substituting for Mr. Estrada's 2nd period history class, you might encounter a mix of behaviors and academic performance levels:
+>
+>Behavior Dollars: According to our behavior database, Jasmyne has been earning a significant number of behavior dollars for her positive contributions and engagement in class discussions. On the other hand, Ray has accumulated a few demerits recently for being off-task and using his phone during lessons.
+>
+>Grade Trends: The academic database shows a range of grade trends. For example, Elena has shown steady improvement in her grades, moving from a C+ average at the start of the term to a current B+. Conversely, Carlos has experienced a slight decline, going from a B to a B- average, possibly indicating a need for additional support or motivation.
+>
+>Participation: Students like Sophia are noted for their consistent participation and willingness to engage in group work, making her a potential ally in fostering a collaborative classroom environment. In contrast, Alex might be more reserved, rarely volunteering information unless prompted directly.
+>
+>Homework Submission: The database indicates that Nathan has a perfect record of submitting homework ontime and often receives commendation for the quality of his work. On the flip side, Olivia has missed several homework deadlines, which might reflect in her overall grade and understanding of the material.
+>
+>Special Accommodations: Students such as Liam have flagged accommodations in the database, necessitating specific strategies like extra time for assignments or preferential seating to aid his learning experience.
+>
+>By preparing for these varied academic and behavioral profiles, you can tailor your approach to meet the diverse needs of Mr. Estrada's 2nd period history class. Utilizing engagement strategies like interactive discussions, group projects, and individualized support where needed will help maintain a positive and productive classroom atmosphere.
 
-Grade Trends: The academic database shows a range of grade trends. For example, Elena has shown steady improvement in her grades, moving from a C+ average at the start of the term to a current B+. Conversely, Carlos has experienced a slight decline, going from a B to a B- average, possibly indicating a need for additional support or motivation.
-
-Participation: Students like Sophia are noted for their consistent participation and willingness to engage in group work, making her a potential ally in fostering a collaborative classroom environment. In contrast, Alex might be more reserved, rarely volunteering information unless prompted directly.
-
-Homework Submission: The database indicates that Nathan has a perfect record of submitting homework ontime and often receives commendation for the quality of his work. On the flip side, Olivia has missed several homework deadlines, which might reflect in her overall grade and understanding of the material.
-
-Special Accommodations: Students such as Liam have flagged accommodations in the database, necessitating specific strategies like extra time for assignments or preferential seating to aid his learning experience.
-
-By preparing for these varied academic and behavioral profiles, you can tailor your approach to meet the diverse needs of Mr. Estrada's 2nd period history class. Utilizing engagement strategies like interactive discussions, group projects, and individualized support where needed will help maintain a positive and productive classroom atmosphere.
-```
 Teacher:
 ```
 List 5 students that are close to failing my math class and for each student list 3 graded homework assignments that are eligible to be redone.
 ```
 TeacherGPT:
-```
+
 Student: Jordan
 
-Homework 1: Algebraic Expressions
-    Assigned: September 10th
-    Turned In: September 15th
-    Score: 58%
-Homework 2: Linear Equations
-    Assigned: September 20th
-    Turned In: September 25th
-    Score: 62%
-Homework 3: Quadratic Functions
-    Assigned: October 1st
-    Turned In: October 6th
-    Score: 60%
-Student: Alex
-    Homework 1: Geometry Basics
-    Assigned: September 12th
-    Turned In: September 17th
-    Score: 55%
-Homework 2: Angles and Intersecting Lines
-    Assigned: September 22nd
-    Turned In: September 27th
-    Score: 58%
-Homework 3: Circles and Circumference
-    Assigned: October 3rd
-    Turned In: October 8th
-    Score: 62%
+> Homework 1: Algebraic Expressions
+> * Assigned: September 10th
+> * Turned In: September 15th
+> * Score: 58%
+>
+> Homework 2: Linear Equations
+> * Assigned: September 20th
+> * Turned In: September 25th
+> * Score: 62%
+>
+> Homework 3: Quadratic Functions
+> * Assigned: October 1st
+> * Turned In: October 6th
+> * Score: 60%
+> 
+> Student: Alex
+> * Homework 1: Geometry Basics
+> * Assigned: September 12th
+> * Turned In: September 17th
+> * Score: 55%
+>
+> Homework 2: Angles and Intersecting Lines
+> * Assigned: September 22nd
+> * Turned In: September 27th
+> * Score: 58%
+>
+> Homework 3: Circles and Circumference
+> * Assigned: October 3rd
+> * Turned In: October 8th
+> * Score: 62%
 (etc)
-```
+
 
 # Could this product ever be used in a school environment?
 The short answer is yes, but there are caveats and considerations.
