@@ -1,3 +1,5 @@
+![teachergpt_icon](https://github.com/sxflynn/TeacherGPT/assets/2034081/629df040-8548-40e0-a7a3-0965c0cb03b8)
+
 # TeacherGPT
 
 A proposed GPT chatbot for teachers that uses retrieval-augmentation  to answer questions about their students.
