@@ -153,9 +153,9 @@ In order to build this product, we have to combine two concepts:
  ### Economic hurdles
  AI RAG applications are very expensive to develop and operate, which is likely one of the largest barriers to its wider adoption. There are two drivers of cost:
  
-#### Cloud computing costs:
+### Cloud computing costs:
 LLM inference engines are already quite expensive. A single chat prompt and response could cost over $1 each. If teachers spread the word to each other of the utility of this product, you could easily see costs ballooning. Schools tend to prefer flat annual pricing for Edtech products, but paying per use would be a harder sell.
-#### Developer costs:
+### Developer costs:
 Even if an Edtech consulting firm could adopt an open source tool like this that provides, it takes a lot of developer time and skill to examine all the school databases and APIs and combine them into a single cohesive database that the AI can use.
-#### School staff costs:
+### School staff costs:
 Some school data is neatly packaged in obvious databases, like a School Information System which would have student contact information and grades. Other school data might be more haphazard. If a centralized behavior tracking system like [PowerSchool Behavior Support](https://www.powerschool.com/classroom/behavior-support/) isn't being adopted by the school, then you might have teachers creating their own unique data solutions, like a personal Google Sheets to collect behavior data, or a notebook. A school might require teachers to start using a centralized system to do this work in order to enable the use of AI, and having to adjust their workflows would create a burden on teachers.
