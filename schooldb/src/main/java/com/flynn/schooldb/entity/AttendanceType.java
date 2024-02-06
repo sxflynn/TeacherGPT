@@ -24,6 +24,15 @@ public class AttendanceType {
         this.attendanceType = attendanceType;
     }
 
+    @Override
+    public String toString() {
+        return "AttendanceType{" +
+                "attendanceTypeId=" + attendanceTypeId +
+                ", attendanceType='" + attendanceType + '\'' +
+                ", dailyAttendances=" + dailyAttendances +
+                '}';
+    }
+
     public Long getAttendanceTypeId() {
         return attendanceTypeId;
     }

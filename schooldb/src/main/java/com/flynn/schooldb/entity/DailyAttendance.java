@@ -43,6 +43,19 @@ public class DailyAttendance {
         this.excuseNote = excuseNote;
     }
 
+    @Override
+    public String toString() {
+        return "DailyAttendance{" +
+                "dailyAttendanceId=" + dailyAttendanceId +
+                ", student=" + student +
+                ", date=" + date +
+                ", attendanceType=" + attendanceType +
+                ", arrival=" + arrival +
+                ", departure=" + departure +
+                ", excuseNote='" + excuseNote + '\'' +
+                '}';
+    }
+
     public Long getDailyAttendanceId() {
         return dailyAttendanceId;
     }

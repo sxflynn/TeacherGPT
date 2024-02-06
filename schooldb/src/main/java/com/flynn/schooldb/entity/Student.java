@@ -1,6 +1,7 @@
 package com.flynn.schooldb.entity;
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -27,7 +28,7 @@ public class Student {
 
     @Column(name = "dob", nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date dob;
+    private LocalDate dob;
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
@@ -41,7 +42,7 @@ public class Student {
     public Student() {
     }
 
-    public Student(String firstName, String middleName, String lastName, Character sex, Date dob, String email, String ohioSsid) {
+    public Student(String firstName, String middleName, String lastName, Character sex, LocalDate dob, String email, String ohioSsid) {
         this.firstName = firstName;
         this.middleName = middleName;
         this.lastName = lastName;
@@ -49,6 +50,21 @@ public class Student {
         this.dob = dob;
         this.email = email;
         this.ohioSsid = ohioSsid;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "studentId=" + studentId +
+                ", firstName='" + firstName + '\'' +
+                ", middleName='" + middleName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", sex=" + sex +
+                ", dob=" + dob +
+                ", email='" + email + '\'' +
+                ", ohioSsid='" + ohioSsid + '\'' +
+                ", dailyAttendance=" + dailyAttendance +
+                '}';
     }
 
     public Long getStudentId() {
@@ -91,11 +107,11 @@ public class Student {
         this.sex = sex;
     }
 
-    public Date getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(Date dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 
