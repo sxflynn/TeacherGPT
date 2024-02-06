@@ -35,9 +35,9 @@ If you are passionate about helping teachers remove data barriers to their work 
 Once the product is built, these are the kinds of prompt interactions that a teacher would be able to have.
 
 Teacher:
-```
-I am teaching my 3.10 lesson on Tuesday. Help me differentiate it for students with IEPs and other services.
-```
+
+> **I am teaching my 3.10 lesson on Tuesday. Help me differentiate it for students with IEPs and other services.**
+
 TeacherGPT:
 
 > For your 3.10 lesson on paragraph writing, it's important to tailor the assignment to meet the diverse needs of your students, especially those with IEPs and other support services. Here are some suggestions for differentiation:
@@ -55,9 +55,9 @@ TeacherGPT:
 > Remember, the goal is to provide the right supports so each student can successfully express their ideas through writing. Encourage peer support, use technology as an aid, and offer personalized feedback to guide each student through the writing process.
 
 Teacher:
-```
-Compose a text message that I could send to Liliana's parents that summarizes her grades and behavior from the last 3 weeks. Also tell me their phone number.
-```
+
+> **Compose a text message that I could send to Liliana's parents that summarizes her grades and behavior from the last 3 weeks. Also tell me their phone number.**
+
 TeacherGPT:
 
 > Emilia González Montes is the primary contact and her number is 614-504-3445
@@ -72,9 +72,9 @@ TeacherGPT:
 
 
 Teacher:
-```
-I am subbing for Mr. Estrada's 2nd period history class tomorrow. What sorts of behavior and academic issues might I expect from the class to help me be more prepared?
-```
+
+> **I am subbing for Mr. Estrada's 2nd period history class tomorrow. What sorts of behavior and academic issues might I expect from the class to help me be more prepared?**
+
 TeacherGPT:
 
 >Substituting for Mr. Estrada's 2nd period history class, you might encounter a mix of behaviors and academic performance levels:
@@ -92,13 +92,13 @@ TeacherGPT:
 >By preparing for these varied academic and behavioral profiles, you can tailor your approach to meet the diverse needs of Mr. Estrada's 2nd period history class. Utilizing engagement strategies like interactive discussions, group projects, and individualized support where needed will help maintain a positive and productive classroom atmosphere.
 
 Teacher:
-```
-List 5 students that are close to failing my math class and for each student list 3 graded homework assignments that are eligible to be redone.
-```
+
+> **List 5 students that are close to failing my math class and for each student list 3 graded homework assignments that are eligible to be redone.**
+
 TeacherGPT:
 
-Student: Jordan
-
+> Student: Jordan
+> 
 > Homework 1: Algebraic Expressions
 > * Assigned: September 10th
 > * Turned In: September 15th
@@ -129,7 +129,8 @@ Student: Jordan
 > * Assigned: October 3rd
 > * Turned In: October 8th
 > * Score: 62%
-(etc)
+> 
+> *(etc)*
 
 
 # Could this product ever be used in a school environment?
