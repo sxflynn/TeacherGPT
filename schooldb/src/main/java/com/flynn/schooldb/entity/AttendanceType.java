@@ -2,6 +2,8 @@ package com.flynn.schooldb.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name="attendance_type")
 public class AttendanceType {
@@ -11,6 +13,9 @@ public class AttendanceType {
     private Long attendanceTypeId;
     @Column(name = "attendance_type", nullable = false)
     private String attendanceType;
+
+    @OneToMany(mappedBy = "attendanceType", fetch = FetchType.LAZY)
+    private List<DailyAttendance> dailyAttendances;
 
     public AttendanceType() {
     }
@@ -33,5 +38,13 @@ public class AttendanceType {
 
     public void setAttendanceType(String attendanceType) {
         this.attendanceType = attendanceType;
+    }
+
+    public List<DailyAttendance> getDailyAttendances() {
+        return dailyAttendances;
+    }
+
+    public void setDailyAttendances(List<DailyAttendance> dailyAttendances) {
+        this.dailyAttendances = dailyAttendances;
     }
 }

@@ -1,6 +1,7 @@
 package com.flynn.schooldb.entity;
 import jakarta.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 
 @Entity
@@ -33,6 +34,9 @@ public class Student {
 
     @Column(name = "ohio_ssid", nullable = false, unique = true)
     private String ohioSsid;
+
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<DailyAttendance> dailyAttendance;
 
     public Student() {
     }
@@ -109,5 +113,13 @@ public class Student {
 
     public void setOhioSsid(String ohioSsid) {
         this.ohioSsid = ohioSsid;
+    }
+
+    public List<DailyAttendance> getDailyAttendance() {
+        return dailyAttendance;
+    }
+
+    public void setDailyAttendance(List<DailyAttendance> dailyAttendance) {
+        this.dailyAttendance = dailyAttendance;
     }
 }
