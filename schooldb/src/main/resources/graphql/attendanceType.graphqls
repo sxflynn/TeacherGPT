@@ -1,0 +1,5 @@
+type AttendanceType {
+    attendanceTypeId: ID!
+    attendanceType: String!
+    dailyAttendances: [DailyAttendance]
+}

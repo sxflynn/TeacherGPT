@@ -1,0 +1,21 @@
+type Student {
+    studentId: ID!
+    firstName: String!
+    middleName: String
+    lastName: String!
+    sex: String
+    dob: String!
+    email: String!
+    ohioSsid: String!
+    dailyAttendance: [DailyAttendance]
+}
+
+type Query {
+    studentById(studentId: ID!): Student
+    studentsByLastName(lastName: String!): [Student]
+}
+
+#type Mutation {
+#    createStudent(firstName: String!, middleName: String, lastName: String!, sex: String, dob: String!, email: String!, ohioSsid: String!): Student
+#    updateStudent(studentId: ID!, firstName: String, middleName: String, lastName: String, sex: String, dob: String, email: String, ohioSsid: String): Student
+#}
