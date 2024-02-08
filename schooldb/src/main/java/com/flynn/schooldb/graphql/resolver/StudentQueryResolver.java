@@ -24,6 +24,11 @@ public class StudentQueryResolver {
     public List<Student> allStudents() {
         return studentService.getAllStudents();
     }
+
+    @QueryMapping
+    public List<Student> studentsByLastName(@Argument String lastName){
+        return studentService.findByLastNameIgnoreCase(lastName);
+    }
 }
 
 
