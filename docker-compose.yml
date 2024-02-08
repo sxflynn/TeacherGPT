@@ -10,7 +10,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./database:/docker-entrypoint-initdb.d
+      - ./schooldb/database:/docker-entrypoint-initdb.d
       - postgres-data:/var/lib/postgresql/data #DB data persisting
     networks:
       - network
