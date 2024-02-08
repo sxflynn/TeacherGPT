@@ -21,6 +21,63 @@ The aim of this project is to build a mock-up of a future product where teachers
 
 * 🗄️🐘 PostgreSQL database that consolidates data from multiple school data stores
 
+## Get started
+
+1. Install (Docker Desktop)[https://www.docker.com/products/docker-desktop/]
+
+1. Git clone the repo
+
+1. In your terminal `cd` into the repo and type:
+```
+docker compose up
+```
+It will fail the first time, so do `ctrl D` to stop, type `docker compose down` and then type `docker compose up` again and the Java server will boot correctly. *A healthcheck/reboot sequence is forthcoming*
+
+4. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
+
+Here is an example query to test it:
+```
+query GetAllStudents {
+  allStudents {
+    studentId
+    firstName
+    lastName
+    sex
+    dob
+    email
+    ohioSsid
+  }
+}
+```
+You should expect this response:
+```
+{
+  "data": {
+    "allStudents": [
+      {
+        "studentId": "1",
+        "firstName": "Monty",
+        "lastName": "Anthony",
+        "sex": "M",
+        "dob": "2010-03-18",
+        "email": "moanthony28@titanacademy.edu",
+        "ohioSsid": "WW4542553"
+      },
+      {
+        "studentId": "2",
+        "firstName": "Lacey",
+        "lastName": "Baldwin",
+        "sex": "F",
+        "dob": "2009-11-09",
+        "email": "labaldwin28@titanacademy.edu",
+        "ohioSsid": "QE2954355"
+      },
+      (etc)
+```
+
+Stay tuned for an outline of work that needs to be done.
+
+
 ## How to contribute
 
 If you are passionate about helping teachers remove data barriers to their work and want to contribute to an open project, here are some ways you can help:
