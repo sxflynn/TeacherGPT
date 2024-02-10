@@ -31,7 +31,7 @@ The aim of this project is to build a mock-up of a future product where teachers
 ```
 docker compose up
 ```
-It will fail the first time, so do `ctrl D` to stop, type `docker compose down` and then type `docker compose up` again and the Java server will boot correctly. *A healthcheck/reboot sequence is forthcoming*
+It might fail the first time, so do `ctrl C` to stop, type `docker compose down` and then type `docker compose up` again and the Java server will boot correctly. *A healthcheck/reboot sequence is forthcoming*
 
 4. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
 
