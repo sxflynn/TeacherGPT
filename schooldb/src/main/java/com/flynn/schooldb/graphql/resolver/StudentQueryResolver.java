@@ -1,7 +1,6 @@
 package com.flynn.schooldb.graphql.resolver;
 import com.flynn.schooldb.entity.Student;
 import com.flynn.schooldb.service.StudentService;
-import com.flynn.schooldb.service.StudentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
