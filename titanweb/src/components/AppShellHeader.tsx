@@ -1,12 +1,15 @@
 import { Title } from "@mantine/core";
+import { NavLink } from "react-router-dom";
+
 
 export function AppShellHeader() {
+  return (
 
-    return (
-        <>
-        <Title>
-    Titan Academy School Information System
-    </Title>
-        </>
-    );
+    <NavLink
+      to="/"
+    >
+      <Title
+      >Titan Academy School Information System</Title>
+    </NavLink>
+  );
 }
