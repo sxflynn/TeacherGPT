@@ -1,13 +1,38 @@
-import { List, ListItem } from "@mantine/core";
+import { NavLink } from "@mantine/core";
+import { IconFidgetSpinner, IconUser } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export function AppShellNavbar() {
+  const [active, setActive] = useState(location.pathname);
 
+  useEffect(() => {
+    setActive(location.pathname);
+  }, [location]);
+
+  const links = [
+    { link: "/students", label: "Students", icon: IconFidgetSpinner },
+    { link: "/Staff", label: "Staff", icon: IconUser },
+  ];
+
+  const navLinks = links.map((link) => {
     return (
-<>
-<List>
-    <ListItem>Students</ListItem>
-    <ListItem>Staff</ListItem>
-</List>
-</>
+          <NavLink component={Link}
+            to={link.link}
+            key={link.label}
+            label={link.label}
+            data-active={active === link.link || undefined}
+            onClick={() => setActive(link.link)}
+            leftSection={link.icon ? <link.icon /> : null}
+          />
     );
+  });
+
+  return (
+
+  <>
+  {navLinks}
+  </>
+  
+  );
 }
