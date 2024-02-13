@@ -51,6 +51,6 @@ export const studentMock = {
           email: "alcastro28@titanacademy.edu",
           ohioSsid: "QN7419694",
         },
-      ] as GenericObject[],
+      ],
     },
   };
