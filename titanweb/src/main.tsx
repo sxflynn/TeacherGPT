@@ -9,11 +9,13 @@ import {
 import App from "./App.tsx";
 import { Homepage } from "./pages/Homepage.tsx";
 import PageNotFound from "./pages/PageNotFound.tsx";
+import { StudentPage } from "./pages/StudentPage.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index element={<Homepage />} />{" "}
+      <Route path="students" element={<StudentPage/>}/>
       <Route path="*" element={<PageNotFound />} />
     </Route>
   )
