@@ -1,11 +1,11 @@
 import { Title } from "@mantine/core";
-import { StudentTable } from "../components/DataTables/StudentTable";
+import { StudentDataTable } from "../dataServices/students/studentDataTable";
 
 export function StudentPage() {
   return (
     <>
       <Title>Student Data</Title>
-      <StudentTable />
+      <StudentDataTable />
     </>
   );
 }
