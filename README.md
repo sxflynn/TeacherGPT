@@ -31,9 +31,18 @@ The aim of this project is to build a mock-up of a future product where teachers
 ```
 docker compose up
 ```
-It might fail the first time, so do `ctrl C` to stop, type `docker compose down` and then type `docker compose up` again and the Java server will boot correctly. *A healthcheck/reboot sequence is forthcoming*
 
-4. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
+4. `cd` into `titanweb`
+```
+cd titanweb
+```
+5. Start the web server
+```
+npm run dev
+```
+6. Go to [http://localhost:5173](http://localhost:5173) to view the school database website.
+
+7. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
 
 Here is an example query to test it:
 ```
@@ -97,17 +106,17 @@ Teacher:
 TeacherGPT:
 
 > For your 3.10 lesson on paragraph writing, it's important to tailor the assignment to meet the diverse needs of your students, especially those with IEPs and other support services. Here are some suggestions for differentiation:
-> 
+>
 >For Jamie, who struggles with writing fluency, consider allowing the use of a speech-to-text tool to help them articulate their ideas without the barrier of typing or handwriting.
 >
 > For Alex, who has difficulty organizing thoughts, provide a graphic organizer. This tool can help them structure their paragraph with a clear beginning, middle, and end.
 >
 > For Taylor, who may need more time to process and write, extend the assignment deadline and break down the task into smaller, manageable steps with individual mini-deadlines.
-> 
+>
 > For Jordan, who excels in creative thinking but struggles with grammar, focus less on penalizing grammatical errors and more on the content and organization of ideas. You can also pair Jordan with a peer for peer-review sessions where they can get feedback on their grammar in a supportive setting.
-> 
+>
 > For Casey, who has an IEP focusing on reading comprehension, provide a written example of a well-structured paragraph and review it together. Highlighting each part of the paragraph (topic sentence, supporting details, conclusion) can serve as a model for their own writing.
-> 
+>
 > Remember, the goal is to provide the right supports so each student can successfully express their ideas through writing. Encourage peer support, use technology as an aid, and offer personalized feedback to guide each student through the writing process.
 
 Teacher:
@@ -119,9 +128,9 @@ TeacherGPT:
 > Emilia González Montes is the primary contact and her number is 614-504-3445
 >
 > Here is the text:
-> 
+>
 > Hi Emilia,
-> 
+>
 > I hope you're well! Just wanted to share a quick update on Liliana. In the last 3 weeks, she's made great strides. In Math, her test scores have improved from a B- to a solid B+, and in Science, she's consistently maintaining an A-. She has earned 3 sets of behavior dollars for excellent participation in ELA, contributing to a rise in her grade to an A, and in History, she's engaging well, securing a B+.
 >
 > Let me know if you have any questions or thoughts!
@@ -154,7 +163,7 @@ Teacher:
 TeacherGPT:
 
 > Student: Jordan
-> 
+>
 > Homework 1: Algebraic Expressions
 > * Assigned: September 10th
 > * Turned In: September 15th
@@ -169,7 +178,7 @@ TeacherGPT:
 > * Assigned: October 1st
 > * Turned In: October 6th
 > * Score: 60%
-> 
+>
 > Student: Alex
 > * Homework 1: Geometry Basics
 > * Assigned: September 12th
@@ -185,7 +194,7 @@ TeacherGPT:
 > * Assigned: October 3rd
 > * Turned In: October 8th
 > * Score: 62%
-> 
+>
 > *(etc)*
 
 
@@ -206,7 +215,7 @@ In order to build this product, we have to combine two concepts:
 
  ### Economic hurdles
  AI RAG applications are very expensive to develop and operate, which is likely one of the largest barriers to its wider adoption. There are three drivers of cost:
- 
+
 #### Cloud computing costs:
 LLM inference engines are already quite expensive. A single chat prompt and response could cost over $1 each. If teachers spread the word to each other of the utility of this product, you could easily see costs ballooning. Schools tend to prefer flat annual pricing for Edtech products, but paying per use would be a harder sell.
 #### Developer costs:
