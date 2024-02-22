@@ -4,7 +4,7 @@ from openai import OpenAI
 
 def load_config():
     root_dir = pathlib.Path(__file__).parent.parent
-    config_path = root_dir / 'chatlogic/config.toml'
+    config_path = root_dir / 'config.toml'
     with config_path.open(mode="rb") as fp:
         config_data = tomllib.load(fp)
     return config_data
