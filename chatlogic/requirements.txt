@@ -4,3 +4,4 @@ langchain-openai==0.0.6
 gql[all]==3.5.0
 python-dotenv==1.0.1
 httpx==0.26.0
+openai==1.12.0
