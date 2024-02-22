@@ -23,6 +23,7 @@ The aim of this project is to build a mock-up of a future product where teachers
 
 ## Get started
 
+### Docker
 1. Install (Docker Desktop)[https://www.docker.com/products/docker-desktop/]
 
 1. Git clone the repo
@@ -32,17 +33,18 @@ The aim of this project is to build a mock-up of a future product where teachers
 docker compose up
 ```
 
-4. `cd` into `titanweb`
+### School Database Website
+1. `cd` into `titanweb`
 ```
 cd titanweb
 ```
-5. Start the web server
+2. Start the web server
 ```
 npm run dev
 ```
-6. Go to [http://localhost:5173](http://localhost:5173) to view the school database website.
+3. Go to [http://localhost:5173](http://localhost:5173) to view the school database website.
 
-7. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
+4. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
 
 Here is an example query to test it:
 ```
@@ -84,8 +86,35 @@ You should expect this response:
       (etc)
 ```
 
-Stay tuned for an outline of work that needs to be done.
+### Python
 
+- Install Python version >= 3.11
+- Rename the `.env.example` file to enable cloud LLMs.
+```
+mv .env.example .env
+```
+- Add your OpenAI/AnyScale/TogetherAI keys to the `.env` file
+- `cd` into `chatlogic` 
+```
+cd chatlogic
+```
+- Set up a virtual environment
+```
+python3 -m venv .venv
+```
+- Activate the virtual environment (macOS/Linux)
+```Bash
+source .venv/bin/activate
+```
+- Install the requirements
+```
+pip install -r requirements.txt
+```
+- Add your OpenAI/TogetherAI/Anyscale keys to your `.env` file
+- Execute the Python CLI entrypoint
+```
+python3 manual.py
+``` 
 
 ## How to contribute
 
