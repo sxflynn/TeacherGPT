@@ -55,7 +55,7 @@ class Template:
         section = cls._prompt_data.get(section_name, {})
         return section.get('text', '')
 
-class Client:
+class LLMClient:
     def __init__(self, config: Config):
         self.client = OpenAI(
         api_key=config.key,
