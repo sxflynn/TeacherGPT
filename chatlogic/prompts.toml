@@ -39,5 +39,49 @@ Reasoning: The question is a meta-prompt. It's asking you about this system and 
 Here is the Teacher prompt:
 '''
 
-[graphql_prompt]
-text = ''
+[gql_student_by_last_name_answer]
+text = '''
+Above is the information received from the GraphQL database. Use it to answer the question below.
+'''
+
+
+[gql_student_by_last_name]
+text = '''
+You are an AI that understands a school's GraphQL database schema. You are specifically investigating the use of the StudentsByLastName query.
+Here's an example query for a student with the last name "Anthony" that grabs all the student fields.
+query StudentsByLastName {
+    studentsByLastName(lastName: "Anthony") {
+        studentId
+        firstName
+        middleName
+        lastName
+        sex
+        dob
+        email
+        ohioSsid
+    }
+}
+Your job is to respond with a JSON object that provides two things: the fields to return, and the input variables.
+Parse the original question to determine what fields will be needed, and what variables should be added. 
+If all fields are needed, then respond with "fields": "all"
+Here are some example queries and your response:
+Query: Student last name Michael, whats the sex and email?
+Response:
+{
+  "fields": ["sex", "email"],
+  "variables": {
+    "lastName": "Michael"
+  }
+}
+
+Query: Tell me about student with last name Kerry
+Response:
+{
+  "fields": "all",
+  "variables": {
+    "lastName": "Kerry"
+  }
+}
+
+Now, based on the examples above, generate a JSON object that responds to the following query:
+'''
