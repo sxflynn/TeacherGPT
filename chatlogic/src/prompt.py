@@ -8,6 +8,7 @@ class Prompt:
         self.system_prompt = system_prompt
         self.verbose = verbose
         self.response = None
+        self.response_text = None
 
     def send(self):
         start_time = time.time()
@@ -19,6 +20,7 @@ class Prompt:
                     {"role": "user", "content": self.prompt},
                 ],
             )
+            self.response_text = self.response.choices[0].message.content
         except Exception as e:
             print(f"An error occurred while sending the prompt: {e}")
             self.response = None
