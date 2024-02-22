@@ -1,6 +1,11 @@
-from dotenv import load_dotenv
 import tomllib, pathlib, os
+from dotenv import load_dotenv
+from dotenv import load_dotenv
 from openai import OpenAI
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
 def load_config():
     root_dir = pathlib.Path(__file__).parent.parent
