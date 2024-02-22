@@ -2,35 +2,20 @@ import os
 from src.config import Config, Client, Template
 from src.prompt import Prompt
 
-config = Config("TogetherAi")
-client = Client(config)
+teacher_prompt_input = "What info is there about Monty?"
 
-# print(prompt(client, "What model are you?", global_system))
+def main(teacher_prompt=teacher_prompt_input):
+    client = Client(Config("TogetherAi"))
+    global_system_prompt = Template.get_prompt_text('global_system_prompt')
+    
+    # Related to education, teaching, or specific student data
+    gateway_prompt = Template.get_prompt_text('gateway_prompt')
+    prompt_engine = Prompt(client,(gateway_prompt+teacher_prompt),global_system_prompt,verbose=True)
+    gateway_answer = prompt_engine.send()
+    if gateway_answer.__contains__("Proceed"):
+        print("Let's keep going!")
+    else:
+        print("\033[93mJust use ChatGPT\033[0m")
+        exit()
 
-global_system_prompt = """You are a helpful AI assistant for teachers at Titan Academy, a middle school.
-Focus on education only. Do everything you can to provide useful information for the teacher.
-If you are uncertain about any facts, then make sure to tell the teacher that you aren't sure.
-"""
-
-teacher_prompt = "What is Monty's last name?"
-
-
-# Related to education, teaching, or specific student data
-gateway_prompt = Template.get_prompt_text('gateway_prompt')
-print(gateway_prompt)
-
-prompt_engine = Prompt(client,(gateway_prompt+teacher_prompt),global_system_prompt,verbose=True)
-gateway_answer = prompt_engine.send()
-
-prompt_engine.prompt="How's it going?"
-prompt_engine.send()
-
-if gateway_answer.__contains__("Proceed"):
-    print("Let's keep going!")
-else:
-    print("Just use ChatGPT")
-    exit()
-
-print("the next step!")
-
-
+main()
