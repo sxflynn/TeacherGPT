@@ -35,3 +35,13 @@ class Client:
         api_key=config.key,
         base_url=config.url
         )
+        self.model = config.selected_model
+        
+    def send_prompt(self, prompt, system_prompt):
+        return self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+        )
