@@ -9,6 +9,13 @@ def load_config():
         config_data = tomllib.load(fp)
     return config_data
 
+def load_prompts():
+    root_dir = pathlib.Path(__file__).parent.parent
+    prompt_path = root_dir / 'prompts.toml'
+    with prompt_path.open(mode="rb") as fp:
+        prompt_data = tomllib.load(fp)
+    return prompt_data
+
 class Config:
     def __init__(self, provider_name):
         self.config_data = load_config()
@@ -28,6 +35,20 @@ class Config:
             self.selected_model = model_name
         else:
             raise ValueError(f"Model {model_name} not found in configuration.")
+
+class Template:
+    _prompt_data = None
+    
+    @classmethod
+    def _load_prompts(cls):
+        if cls._prompt_data is None:
+            cls._prompt_data = load_prompts()
+    
+    @classmethod
+    def get_prompt_text(cls, section_name):
+        cls._load_prompts()
+        section = cls._prompt_data.get(section_name, {})
+        return section.get('text', '')
 
 class Client:
     def __init__(self, config: Config):
