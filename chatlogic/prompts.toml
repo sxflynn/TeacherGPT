@@ -20,6 +20,10 @@ Teacher: Help me compose a text to Alyssa's mom.
 AI Assistant: Proceed
 Reasoning: Specific student data is required to fulfill this request, so we will proceed with a database lookup.
 
+Teacher: Tell me about [name]
+AI Assistant: Proceed
+Reasoning: A name was given, so we will proceed with a database lookup.
+
 Teacher: What's a good lesson plan for teaching the Civil War?
 AI Assistant: Just use ChatGPT
 Reasoning: No specific student data or context was requested, so the teacher should just use ChatGPT to answer that question.
