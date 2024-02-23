@@ -14,6 +14,8 @@ import {
   gql,
 } from "@apollo/client";
 import { Homepage } from "./pages/Homepage.tsx";
+import { GPTPage } from "./pages/GPTPage.tsx";
+import { StaffPage } from "./pages/StaffPage.tsx";
 import PageNotFound from "./pages/PageNotFound.tsx";
 import { StudentPage } from "./pages/StudentPage.tsx";
 
@@ -27,6 +29,8 @@ const router = createBrowserRouter(
     <Route path="/" element={<App />}>
       <Route index element={<Homepage />} />{" "}
       <Route path="students" element={<StudentPage />} />
+      <Route path="staff" element={<StaffPage />} />
+      <Route path="gpt" element={<GPTPage />} />
       <Route path="*" element={<PageNotFound />} />
     </Route>
   )
