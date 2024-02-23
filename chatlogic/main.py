@@ -30,7 +30,8 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     graphql_url = os.getenv('GRAPHQL_URL')
     transport = AIOHTTPTransport(url=graphql_url)
     client = Client(transport=transport, fetch_schema_from_transport=True)
-    llmclient = LLMClient(Config("TogetherAi"))
+    default_service = os.getenv('DEFAULT_SERVICE', 'OpenAI')
+    llmclient = LLMClient(Config(default_service))
     global_system_prompt = Template.get_prompt_text('global_system_prompt')
     
     skip_gateway = False
