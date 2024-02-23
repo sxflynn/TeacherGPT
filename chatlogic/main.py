@@ -15,9 +15,12 @@ app = FastAPI()
 
 class PromptInput(BaseModel):
     prompt: str
+    
+class PromptResponse(BaseModel):
+    response: str
 
 @app.post("/prompt")
-def run_prompt(teacher_prompt:PromptInput) -> str:
+def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     # GraphQL client
     transport = AIOHTTPTransport(url="http://localhost:8080/graphql")
     client = Client(transport=transport, fetch_schema_from_transport=True)
@@ -31,7 +34,7 @@ def run_prompt(teacher_prompt:PromptInput) -> str:
         prompt_engine = Prompt(llmclient, (gateway_prompt + str(teacher_prompt)), global_system_prompt, verbose=False)
         gateway_answer = prompt_engine.send()
         if "Proceed" not in gateway_answer:
-            return "This is a generic question. Just use Google/ChatGPT"
+            return PromptResponse(response="This is a generic question. Just use Google/ChatGPT")
     else:
         # Skip the gateway logic and proceed directly
         print("\033[93mGateway prompt skipped (Development Mode)\033[0m")
@@ -42,7 +45,7 @@ def run_prompt(teacher_prompt:PromptInput) -> str:
     try:
         gql_data = json.loads(student_last_name_json)
     except:
-        return "There wasn't any student data in the query"
+        return PromptResponse(response="There wasn't any student data in the query")
     variables = gql_data['variables']
     all_student_fields = [
         'studentId',
@@ -71,8 +74,8 @@ def run_prompt(teacher_prompt:PromptInput) -> str:
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name_answer')
     student_last_name_engine.prompt = (str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + str(teacher_prompt))
     final_answer = student_last_name_engine.send()
-    print(final_answer)
-    return final_answer
+    final_response = PromptResponse(response=final_answer)
+    return final_response
 
 app.add_middleware(
         CORSMiddleware,

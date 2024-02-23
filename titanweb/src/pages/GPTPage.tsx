@@ -3,16 +3,18 @@ import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { Loading } from "../components/Loading/Loading";
 import { Error } from "../components/Error";
-import { ChatDisplay } from "../components/ChatDisplay";
+import { ChatDisplay, ChatResponse } from "../components/ChatDisplay";
 
 type FormInput = {
   prompt: string;
 };
 
+
+
 export function GPTPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [chatText, setChatText] = useState<null | string>(null);
+  const [chatText, setChatText] = useState<null | ChatResponse>(null);
 
   const form = useForm<FormInput>({
     initialValues: {
@@ -28,8 +30,6 @@ export function GPTPage() {
     setLoading(true);
 
     try {
-        console.log(import.meta.env.VITE_CHATLOGIC_BASE_URL)
-      console.log(values.prompt);
       setError(null);
       const response = await fetch(
         `http://${import.meta.env.VITE_CHATLOGIC_BASE_URL}/prompt`,
@@ -38,12 +38,12 @@ export function GPTPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ prompt: values.prompt }),
+          body: JSON.stringify(values),
         }
       );
 
       if (response.status === 200) {
-        const data = await response.text();
+        const data: ChatResponse = await response.json();
         setChatText(data);
       } else if (response.status === 429) {
         setError(
