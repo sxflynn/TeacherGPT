@@ -1,4 +1,4 @@
-import { Box, Button, Group, Textarea } from "@mantine/core";
+import { Box, Button, Group, TextInput, Textarea } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { Loading } from "../components/Loading/Loading";
@@ -63,16 +63,16 @@ export function GPTPage() {
   return (
     <>
       GPTPage
-      <Box>
+      <Box mb="md">
         <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Textarea
+          <TextInput
             label="Type your question"
             description="Type a question for TeacherGPT"
             placeholder="What do you know about the student with the last name Bell?"
             {...form.getInputProps('prompt')} 
           />
           <Group>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} mt="md">
               Submit Prompt
             </Button>
             {loading && <Loading />}
