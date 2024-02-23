@@ -15,8 +15,3 @@ models = ["meta-llama/Llama-2-7b-chat-hf", "mistralai/Mistral-7B-Instruct-v0.1"]
 url = "https://api.together.xyz/v1"
 models = ["mistralai/Mistral-7B-Instruct-v0.1", "codellama/CodeLlama-7b-Instruct-hf"]
 # more models at https://docs.together.ai/docs/inference-models
-
-# Not OpenAI compatible
-# [Ollama]
-# url = "http://localhost:11434/api/chat"
-# models = ["tinyllama", "phi"]
