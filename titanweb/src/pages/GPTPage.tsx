@@ -1,4 +1,4 @@
-import { Box, Button, Group, TextInput, Textarea } from "@mantine/core";
+import { Box, Button, Group, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { Loading } from "../components/Loading/Loading";
