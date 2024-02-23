@@ -7,6 +7,10 @@ A proposed GPT chatbot for teachers that uses retrieval-augmentation  to answer 
 ## Project Status
 > ⚠️ This project is in active development and is not yet a minimally viable product (MVP).
 
+## Demo video
+> ⚠️ At this time, functionality is limited to only basic student information.
+https://github.com/sxflynn/TeacherGPT/assets/2034081/5acc0b3a-b0c1-473d-98b2-3fe1feec2ffa
+
 ## Aim
 
 The aim of this project is to build a mock-up of a future product where teachers can use AI to save time on context-driven tasks. It uses a fictional school database to simulate a chatbot interacting with real school data.
