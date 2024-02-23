@@ -38,7 +38,8 @@ ls
 ```
  - You should see:
  ```
- LICENSE                 README.md               chatlogic               database                docker-compose.yml      schooldb                titanweb
+ LICENSE  README.md  chatlogic   database 
+ docker-compose.yml   schooldb  titanweb
  ```
 
 ### Prepare `.env` file
