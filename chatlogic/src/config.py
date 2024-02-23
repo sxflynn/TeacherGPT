@@ -1,6 +1,5 @@
 import tomllib, pathlib, os
 from dotenv import load_dotenv
-from dotenv import load_dotenv
 from openai import OpenAI
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')

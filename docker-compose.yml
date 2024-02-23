@@ -3,10 +3,8 @@ version: '3.8'
 services:
   db:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: schooldb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+    env_file:
+      - .env
     ports:
       - "5433:5432"
     volumes:
@@ -16,7 +14,7 @@ services:
       - network
     restart: unless-stopped
 
-  java-springboot:
+  java:
     build: ./schooldb
     depends_on:
       - db
@@ -25,17 +23,46 @@ services:
       - "35729:35729" # LiveReload server
     volumes:
       - ./schooldb:/app
-    environment:
-      - SPRING_BOOT_DEVTOOLS_RESTART_ENABLED=true
-      - SCHOOL_DB_NAME=schooldb
-      - SCHOOL_DB_HOST=db # Can run Java server in IntelliJ instead of Docker
-      - SCHOOL_DB_PORT=5432 # Can run Java server in IntelliJ instead of Docker
+    env_file:
+      - .env
     networks:
       - network
     restart: unless-stopped
 
+  titanweb:
+    build:
+      context: ./titanweb
+      dockerfile: Dockerfile
+    volumes:
+      - ./titanweb:/srv/app
+      - node_modules:/srv/app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    init: true
+    stop_grace_period: 1s
+    networks:
+      - network
+
+  chatlogic:
+    build:
+      context: ./chatlogic
+      dockerfile: ./Dockerfile
+    env_file:
+      - .env
+    environment:
+      - GRAPHQL_URL=http://java:8080/graphql
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chatlogic/:/app
+    networks:
+      - network
+
 volumes:
   postgres-data:
+  node_modules:
 
 networks:
   network:

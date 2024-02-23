@@ -1,5 +1,6 @@
 import json
-import sys
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -9,6 +10,10 @@ from src.config import Config, LLMClient, Template
 from src.prompt import Prompt
 
 app = FastAPI()
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
 
 # last_name_prompt = "Tell me everything about student with last name Bell"
 # print(last_name_prompt)
@@ -22,7 +27,8 @@ class PromptResponse(BaseModel):
 @app.post("/prompt")
 def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     # GraphQL client
-    transport = AIOHTTPTransport(url="http://localhost:8080/graphql")
+    graphql_url = os.getenv('GRAPHQL_URL')
+    transport = AIOHTTPTransport(url=graphql_url)
     client = Client(transport=transport, fetch_schema_from_transport=True)
     llmclient = LLMClient(Config("TogetherAi"))
     global_system_prompt = Template.get_prompt_text('global_system_prompt')

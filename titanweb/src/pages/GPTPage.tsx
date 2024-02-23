@@ -32,7 +32,7 @@ export function GPTPage() {
     try {
       setError(null);
       const response = await fetch(
-        `http://${import.meta.env.VITE_CHATLOGIC_BASE_URL}/prompt`,
+        `${import.meta.env.VITE_CHATLOGIC_BASE_URL}/prompt`,
         {
           method: "POST",
           headers: {
