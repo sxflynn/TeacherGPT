@@ -9,7 +9,7 @@ A proposed GPT chatbot for teachers that uses retrieval-augmentation  to answer 
 
 ## Demo video
 > ⚠️ At this time, functionality is limited to only basic student information.
-https://github.com/sxflynn/TeacherGPT/assets/2034081/5acc0b3a-b0c1-473d-98b2-3fe1feec2ffa
+https://github.com/sxflynn/TeacherGPT/assets/2034081/ef5a661c-662c-4941-ac83-871e823cf693
 
 ## Aim
 
