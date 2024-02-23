@@ -21,17 +21,61 @@ The aim of this project is to build a mock-up of a future product where teachers
 
 * 🗄️🐘 PostgreSQL database that consolidates data from multiple school data stores
 
-## Get started
+## How to use
 
-### Docker
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+### Download the project
+ - Git clone the repo
+```
+git clone https://github.com/sxflynn/TeacherGPT.git
+```
+ - `cd` into the repo
+ ```Bash
+ cd TeacherGPT
+```
+ - use `ls` to verify the working directory
+```
+ls
+```
+ - You should see:
+ ```
+ LICENSE                 README.md               chatlogic               database                docker-compose.yml      schooldb                titanweb
+ ```
 
-1. Git clone the repo
+### Prepare `.env` file
+- Rename the `.env.example` file to `.env`.
+```
+mv .env.example .env
+```
+ - Open `.env` in a text editor
+```
+OPENAI_API_KEY="..."
+ANYSCALE_API_KEY="..."
+TOGETHERAI_API_KEY="..."
+```
+ - Obtain a key from one of the services above and put it in that file surrounded by quotes.
+ ```
+ OPENAI_API_KEY="your-secret-key-in-quotes"
+ ```
+  - You can change from OpenAI to TogetherAI or AnyScale, just make sure to change the configuration.
+```
+DEFAULT_SERVICE=TogetherAi
+```
+or
+```
+DEFAULT_SERVICE=AnyScale
+```
 
-1. In your terminal `cd` into the repo and type:
+### Use Docker
+- Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+- In your terminal `cd` into the repo and type:
 ```
 docker compose up
 ```
+- After waiting several minutes, go to [http://localhost:5173/gpt](http://localhost:5173/gpt) to begin using the chat interface.
+
+
+## Development
 
 ### School Database Website
 1. `cd` into `titanweb`
@@ -89,10 +133,6 @@ You should expect this response:
 ### Python
 
 - Install Python version >= 3.11
-- Rename the `.env.example` file to enable cloud LLMs.
-```
-mv .env.example .env
-```
 - Add your OpenAI/AnyScale/TogetherAI keys to the `.env` file
 - `cd` into `chatlogic` 
 ```
