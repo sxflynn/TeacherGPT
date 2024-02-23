@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/client": "^3.9.4",
     "@mantine/core": "7.5.1",
+    "@mantine/form": "^7.5.3",
     "@mantine/hooks": "7.5.1",
     "@tabler/icons-react": "^2.47.0",
     "graphql": "^16.8.1",
