@@ -24,7 +24,7 @@ The aim of this project is to build a mock-up of a future product where teachers
 ## Get started
 
 ### Docker
-1. Install (Docker Desktop)[https://www.docker.com/products/docker-desktop/]
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 1. Git clone the repo
 
