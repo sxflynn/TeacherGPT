@@ -1,4 +1,4 @@
-import { Box, Button, Group, TextInput } from "@mantine/core";
+import { Box, Button, Group, TextInput, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { Loading } from "../components/Loading/Loading";
@@ -58,12 +58,11 @@ export function GPTStreaming() {
 
   return (
     <>
-      Streaming Page
+      <Title order={3}>Teacher GPT</Title>
       <Box mb="md">
         <form onSubmit={form.onSubmit(handleStreamingSubmit)}>
           <TextInput
             label="Type your question"
-            description="Type a question for TeacherGPT"
             placeholder="What do you know about the student with the last name Bell?"
             {...form.getInputProps("prompt")}
           />
