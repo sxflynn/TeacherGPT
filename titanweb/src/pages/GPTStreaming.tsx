@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { Loading } from "../components/Loading/Loading";
 import { Error } from "../components/Error";
-import { ChatDisplayStreaming, ChatResponse } from "../components/ChatDisplayStreaming";
+import { ChatDisplayStreaming } from "../components/ChatDisplayStreaming";
 
 type FormInput = {
   prompt: string;
@@ -12,7 +12,7 @@ type FormInput = {
 export function GPTStreaming() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [chatText, setChatText] = useState<null | ChatResponse>(null);
+  const [streamingResponses, setStreamingResponses] = useState<string[]>([]);
 
   const form = useForm<FormInput>({
     initialValues: {
@@ -24,45 +24,39 @@ export function GPTStreaming() {
     },
   });
 
-  const handleSubmit = async (values: FormInput) => {
+
+  const handleStreamingSubmit = (values: FormInput) => {
     setLoading(true);
+    setError(null);
+    setStreamingResponses([]);
 
-    try {
-      setError(null);
-      const response = await fetch(
-        `${import.meta.env.VITE_CHATLOGIC_BASE_URL}/promptstreaming`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+    const baseUrl = import.meta.env.VITE_CHATLOGIC_BASE_URL.replace(/^http(s?):\/\//, ''); // fixes ws:// prepend bug
+    const ws = new WebSocket(`ws://${baseUrl}/promptstreaming`); 
+    ws.onopen = () => {
+      ws.send(JSON.stringify(values));
+    };
 
-      if (response.status === 200) {
-        const data: ChatResponse = await response.json();
-        setChatText(data);
-      } else if (response.status === 429) {
-        setError(
-          "You've exceeded the rate limit. Please try again in a few minutes."
-        );
-      } else {
-        setError("There was an error connecting to the AI server.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
+    ws.onmessage = (event) => {
+      setStreamingResponses((currentResponses) => [...currentResponses, event.data]);
+      console.log("streamingResponses is ", streamingResponses)  
+    };
+
+    ws.onerror = (event) => {
+      setError("WebSocket error, check the console for more details");
+      console.error(event)
     }
-  };
+
+    ws.onclose = () => {
+      setLoading(false);
+    };
+
+  }
 
   return (
     <>
       Streaming Page
       <Box mb="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
+        <form onSubmit={form.onSubmit(handleStreamingSubmit)}>
           <TextInput
             label="Type your question"
             description="Type a question for TeacherGPT"
@@ -78,7 +72,7 @@ export function GPTStreaming() {
           {error && <Error error={error} onDismiss={() => setError(null)} />}
         </form>
       </Box>
-      {chatText && <ChatDisplayStreaming data={chatText} />}
+      {streamingResponses && <ChatDisplayStreaming data={streamingResponses} />}
     </>
   );
 }
