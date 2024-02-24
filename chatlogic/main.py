@@ -1,13 +1,16 @@
 import json
 import os
+import asyncio
+import openai
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import Config, LLMClient, Template
-from src.prompt import Prompt
+from src.prompt import LLMPrompt
 
 app = FastAPI()
 
@@ -38,7 +41,7 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     if not skip_gateway:
         # Related to education, teaching, or specific student data
         gateway_prompt = Template.get_prompt_text('gateway_prompt')
-        prompt_engine = Prompt(llmclient, (gateway_prompt + str(teacher_prompt)), global_system_prompt, verbose=False)
+        prompt_engine = LLMPrompt(llmclient, (gateway_prompt + teacher_prompt.prompt), global_system_prompt)
         gateway_answer = prompt_engine.send()
         if "Proceed" not in gateway_answer:
             return PromptResponse(response="This is a generic question. Just use Google/ChatGPT")
@@ -47,7 +50,7 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
         print("\033[93mGateway prompt skipped (Development Mode)\033[0m")
     
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
-    student_last_name_engine = Prompt(llmclient, (graphql_student_last_name_prompt + str(teacher_prompt)), global_system_prompt, verbose=False)
+    student_last_name_engine = LLMPrompt(llmclient, (graphql_student_last_name_prompt + teacher_prompt.prompt), global_system_prompt)
     student_last_name_json = student_last_name_engine.send()
     try:
         gql_data = json.loads(student_last_name_json)
@@ -83,6 +86,14 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     final_answer = student_last_name_engine.send()
     final_response = PromptResponse(response=final_answer)
     return final_response
+
+@app.post("/promptstreaming")
+def streamprompt(teacher_prompt:PromptInput):
+    default_service = os.getenv('DEFAULT_SERVICE', 'OpenAI')
+    llmclient = LLMClient(Config("TogetherAi"))
+    prompt = LLMPrompt(llmclient,teacher_prompt.prompt,"You are a helpful assistant.")
+    response = prompt.send(stream=False)
+    return prompt.extractContent(response=response)
 
 app.add_middleware(
         CORSMiddleware,

@@ -18,6 +18,7 @@ import { GPTPage } from "./pages/GPTPage.tsx";
 import { StaffPage } from "./pages/StaffPage.tsx";
 import PageNotFound from "./pages/PageNotFound.tsx";
 import { StudentPage } from "./pages/StudentPage.tsx";
+import { GPTStreaming } from "./pages/GPTStreaming.tsx";
 
 const client = new ApolloClient({
   uri: "http://localhost:8080/graphql",
@@ -31,6 +32,7 @@ const router = createBrowserRouter(
       <Route path="students" element={<StudentPage />} />
       <Route path="staff" element={<StaffPage />} />
       <Route path="gpt" element={<GPTPage />} />
+      <Route path="gptstreaming" element={<GPTStreaming />} />
       <Route path="*" element={<PageNotFound />} />
     </Route>
   )
