@@ -32,7 +32,8 @@ class LLMPrompt:
         self.prompt = prompt
         self.system_prompt = system_prompt
         self.response = None
-        self.response_text = None
+        self.chunks_list = []
+        self.response_text = ""
         self.messages = [
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": self.prompt},
@@ -41,8 +42,7 @@ class LLMPrompt:
     def extractContent(self, response):
         return response.choices[0].message.content if response.choices else "No response"
 
-    def send(self, json_mode=False, stream=False, max_tokens=1024, verbose=False):
-        start_time = time.time()
+    def send(self, json_mode=False, stream=False, max_tokens=1024):
         request_args = {
             "model": self.model,
             "messages": self.messages,
@@ -58,11 +58,9 @@ class LLMPrompt:
             status_code, detail_msg = exception_mappings.get(type(e), (500, "An unexpected error occurred."))
             detail = f"{detail_msg} {str(e)}"
             raise HTTPException(status_code=status_code, detail=detail) from e
-        end_time = time.time()
-        if verbose:
-            self._print_verbose_output(start_time, end_time)
         return self.response
 
+    # unused code below
     def _print_verbose_output(self, start_time, end_time):
         elapsed_time = end_time - start_time
         token_count = self._get_token_count()

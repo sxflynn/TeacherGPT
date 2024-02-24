@@ -3,7 +3,7 @@ import os
 import asyncio
 import openai
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, WebSocket
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -87,13 +87,21 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     final_response = PromptResponse(response=final_answer)
     return final_response
 
-@app.post("/promptstreaming")
-def streamprompt(teacher_prompt:PromptInput):
-    default_service = os.getenv('DEFAULT_SERVICE', 'OpenAI')
+
+@app.websocket("/promptstreaming")
+async def streamprompt(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive_text()
+    prompt_object = PromptInput.model_validate_json(data)
     llmclient = LLMClient(Config("TogetherAi"))
-    prompt = LLMPrompt(llmclient,teacher_prompt.prompt,"You are a helpful assistant.")
-    response = prompt.send(stream=False)
-    return prompt.extractContent(response=response)
+    prompt = LLMPrompt(llmclient,prompt_object.prompt,"You are a helpful assistant.")
+    response = prompt.send(stream=True)
+    for chunk in response:
+        content = chunk.choices[0].delta.content
+        await websocket.send_text(content)  
+        prompt.chunks_list.append(content)
+    prompt.response_text = ''.join(prompt.chunks_list)
+    await websocket.close()
 
 app.add_middleware(
         CORSMiddleware,
