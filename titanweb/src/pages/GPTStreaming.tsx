@@ -24,33 +24,37 @@ export function GPTStreaming() {
     },
   });
 
-
   const handleStreamingSubmit = (values: FormInput) => {
     setLoading(true);
     setError(null);
     setStreamingResponses([]);
 
-    const baseUrl = import.meta.env.VITE_CHATLOGIC_BASE_URL.replace(/^http(s?):\/\//, ''); // fixes ws:// prepend bug
-    const ws = new WebSocket(`ws://${baseUrl}/promptstreaming`); 
+    const baseUrl = import.meta.env.VITE_CHATLOGIC_BASE_URL.replace(
+      /^http(s?):\/\//,
+      ""
+    ); // fixes ws:// prepend bug
+    const ws = new WebSocket(`ws://${baseUrl}/promptstreaming`);
     ws.onopen = () => {
       ws.send(JSON.stringify(values));
     };
 
     ws.onmessage = (event) => {
-      setStreamingResponses((currentResponses) => [...currentResponses, event.data]);
-      console.log("streamingResponses is ", streamingResponses)  
+      setStreamingResponses((currentResponses) => [
+        ...currentResponses,
+        event.data,
+      ]);
+      console.log("streamingResponses is ", streamingResponses);
     };
 
     ws.onerror = (event) => {
       setError("WebSocket error, check the console for more details");
-      console.error(event)
-    }
+      console.error(event);
+    };
 
     ws.onclose = () => {
       setLoading(false);
     };
-
-  }
+  };
 
   return (
     <>
@@ -61,7 +65,7 @@ export function GPTStreaming() {
             label="Type your question"
             description="Type a question for TeacherGPT"
             placeholder="What do you know about the student with the last name Bell?"
-            {...form.getInputProps('prompt')} 
+            {...form.getInputProps("prompt")}
           />
           <Group>
             <Button type="submit" disabled={loading} mt="md">

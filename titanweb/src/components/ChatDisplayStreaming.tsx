@@ -11,17 +11,14 @@ const parseContent = (content: string) => {
   let codeLanguage = "txt";
 
   lines.forEach((line, index) => {
-    // Detect the start of a code block
     if (!isCodeBlock && line.startsWith("```")) {
       isCodeBlock = true;
-      // Extract the language if provided, otherwise default to plaintext
       const languageMatch = line.match(/^```(\w+)?/);
       codeLanguage =
         languageMatch && languageMatch[1] ? languageMatch[1] : "txt";
       return;
     }
 
-    // Detect the end of a code block
     if (isCodeBlock && line === "```") {
       isCodeBlock = false;
       contentElements.push(
@@ -36,22 +33,18 @@ const parseContent = (content: string) => {
         />
       );
       currentCodeLines = [];
-      codeLanguage = "txt"; // Reset to default 'plaintext'
+      codeLanguage = "txt";
       return;
     }
 
-    // If we're in a code block, add the line to the code lines array
     if (isCodeBlock) {
       currentCodeLines.push(line);
       return;
     }
 
-    // Handle ordered lists
     const orderedListMatch = line.match(/^(\d+)\./);
     if (orderedListMatch) {
-      // Finalize the current list if needed
       if (isOrderedList === false && currentListItems.length > 0) {
-        // Push the current unordered list to contentElements
         contentElements.push(
           <List withPadding type="unordered" key={`list-${index}`}>
             {currentListItems.map((item, key) => (
@@ -66,12 +59,9 @@ const parseContent = (content: string) => {
       return;
     }
 
-    // Handle bullet point lists
     const bulletListMatch = line.match(/^(?:[*-])\s/);
     if (bulletListMatch) {
-      // Finalize the current list if needed
       if (isOrderedList === true && currentListItems.length > 0) {
-        // Push the current ordered list to contentElements
         contentElements.push(
           <List withPadding type="ordered" key={`list-${index}`}>
             {currentListItems.map((item, key) => (
@@ -85,7 +75,7 @@ const parseContent = (content: string) => {
       currentListItems.push(line.substring(bulletListMatch[0].length).trim());
       return;
     }
-    // Finalize lists if we've reached the end of a list block
+
     if (!isCodeBlock && currentListItems.length > 0 && line.trim() === "") {
       contentElements.push(
         <List
@@ -102,7 +92,6 @@ const parseContent = (content: string) => {
       isOrderedList = false;
     }
 
-    // If the current line is not a list item or code, handle it as regular text
     if (
       !isCodeBlock &&
       !orderedListMatch &&
@@ -113,7 +102,6 @@ const parseContent = (content: string) => {
     }
   });
 
-  // Finalize any remaining lists
   if (currentListItems.length > 0) {
     contentElements.push(
       <List
@@ -128,7 +116,6 @@ const parseContent = (content: string) => {
     );
   }
 
-  // Finalize any remaining code blocks
   if (currentCodeLines.length > 0) {
     contentElements.push(
       <CodeHighlight
