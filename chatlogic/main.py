@@ -1,10 +1,7 @@
 import json
 import os
-import asyncio
-import openai
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response, WebSocket
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from gql import gql, Client
@@ -47,15 +44,19 @@ async def run_prompt(websocket: WebSocket):
             await websocket.close()
             return
     else:
-        await websocket.send_text("\033[93mGateway prompt skipped (Development Mode)\033[0m")
+        print("\033[93mGateway prompt skipped (Development Mode)\033[0m")
     
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
     student_last_name_engine = LLMPrompt(llmclient, (graphql_student_last_name_prompt + prompt_object.prompt), global_system_prompt)
     student_last_name_engine.send()
     try:
         gql_data = json.loads(extractContent(student_last_name_engine.response))
-    except:
-        await websocket.send_text("There wasn't any student data in the query")
+    except json.JSONDecodeError:
+        await websocket.send_text("Invalid JSON format in the response.")
+        await websocket.close()
+        return
+    except TypeError:
+        await websocket.send_text("Unexpected data type. Expected a string or bytes-like object.")
         await websocket.close()
         return
     variables = gql_data['variables']
@@ -89,8 +90,9 @@ async def run_prompt(websocket: WebSocket):
     final_answer_engine = LLMPrompt(llmclient,final_answer_prompt,global_system_prompt)
     final_answer = final_answer_engine.send(stream=True)
     for chunk in final_answer:
-        await websocket.send_text(chunk.choices[0].delta.content)
-        final_answer_engine.chunks_list.append(chunk.choices[0].delta.content)
+        content = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta.content else ""
+        await websocket.send_text(content)
+        final_answer_engine.chunks_list.append(content)
     final_answer_engine.response_text = ''.join(final_answer_engine.chunks_list)
     await websocket.close()
     return
