@@ -1,16 +1,17 @@
-import { List, ListItem, Text } from '@mantine/core';
+import { List, ListItem, Text } from "@mantine/core";
 
-const parseContent = (content) => {
-  const elements = [];
+const parseContent = (content: string) => {
+  const elements: React.ReactNode[] = [];
   const lines = content.split("\n");
-  let currentListItems = [];
+  let currentListItems: string[] = [];
   let isOrderedList = false;
 
-  // Function to render and reset the current list
   const renderList = () => {
     if (currentListItems.length > 0) {
       const listElements = currentListItems.map((item, listItemIndex) => (
-        <ListItem key={`list-item-${elements.length}-${listItemIndex}`}>{item}</ListItem>
+        <ListItem key={`list-item-${elements.length}-${listItemIndex}`}>
+          {item}
+        </ListItem>
       ));
       elements.push(
         <List
@@ -21,8 +22,8 @@ const parseContent = (content) => {
           {listElements}
         </List>
       );
-      currentListItems = []; 
-      isOrderedList = false; 
+      currentListItems = [];
+      isOrderedList = false;
     }
   };
 
@@ -30,16 +31,14 @@ const parseContent = (content) => {
     const bulletListMatch = line.match(/^(?:[*-])\s(.*)/);
     const orderedListMatch = line.match(/^(\d+)\.\s(.*)/);
 
-    if (bulletListMatch || orderedListMatch) {
-      if (orderedListMatch) {
-        isOrderedList = true;
-        currentListItems.push(orderedListMatch[2]);
-      } else {
-        isOrderedList = false;
-        currentListItems.push(bulletListMatch[1]);
-      }
+    if (bulletListMatch) {
+      isOrderedList = false;
+      currentListItems.push(bulletListMatch[1]); // Safe to access since we checked it's not null
+    } else if (orderedListMatch) {
+      isOrderedList = true;
+      currentListItems.push(orderedListMatch[2]); // Safe to access since we checked it's not null
     } else {
-      renderList(); 
+      renderList();
 
       if (line.trim() !== "") {
         elements.push(<Text key={`text-${elements.length}`}>{line}</Text>);
@@ -47,13 +46,17 @@ const parseContent = (content) => {
     }
   });
 
-  renderList(); 
+  renderList();
 
   return elements;
 };
 
-export function ChatDisplay({ data }) {
-  const combinedData = data.join(""); // Ensure each data element starts on a new line
+type ChatDisplayProps = {
+  data: string[];
+};
+
+export function ChatDisplay({ data }: ChatDisplayProps) {
+  const combinedData = data.join("");
   const contentElements = parseContent(combinedData);
 
   return <>{contentElements}</>;
