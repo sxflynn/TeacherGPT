@@ -1,20 +1,26 @@
-import { Box, Button, Group, TextInput } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Group,
+  TextInput,
+  Title,
+  Notification,
+  Paper,
+  Skeleton,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import { Loading } from "../components/Loading/Loading";
 import { Error } from "../components/Error";
-import { ChatDisplay, ChatResponse } from "../components/ChatDisplay";
+import { ChatDisplay } from "../components/ChatDisplay";
 
 type FormInput = {
   prompt: string;
 };
 
-
-
 export function GPTPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<null | string>(null);
-  const [chatText, setChatText] = useState<null | ChatResponse>(null);
+  const [streamingResponses, setStreamingResponses] = useState<string[]>([]);
 
   const form = useForm<FormInput>({
     initialValues: {
@@ -26,61 +32,79 @@ export function GPTPage() {
     },
   });
 
-  const handleSubmit = async (values: FormInput) => {
+  const handleStreamingSubmit = (values: FormInput) => {
     setLoading(true);
+    setError(null);
+    setStreamingResponses([]);
 
-    try {
-      setError(null);
-      const response = await fetch(
-        `${import.meta.env.VITE_CHATLOGIC_BASE_URL}/prompt`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+    const baseUrl = import.meta.env.VITE_CHATLOGIC_BASE_URL.replace(
+      /^http(s?):\/\//,
+      ""
+    ); // fixes ws:// prepend bug
+    const ws = new WebSocket(`ws://${baseUrl}/promptstreaming`);
+    ws.onopen = () => {
+      ws.send(JSON.stringify(values));
+    };
 
-      if (response.status === 200) {
-        const data: ChatResponse = await response.json();
-        setChatText(data);
-      } else if (response.status === 429) {
-        setError(
-          "You've exceeded the rate limit. Please try again in a few minutes."
-        );
-      } else {
-        setError("There was an error connecting to the AI server.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Network error. Please try again.");
-    } finally {
+    ws.onmessage = (event) => {
+      setStreamingResponses((currentResponses) => [
+        ...currentResponses,
+        event.data,
+      ]);
+    };
+
+    ws.onerror = (event) => {
+      setError("WebSocket error, check the console for more details");
+      console.error(event);
+    };
+
+    ws.onclose = () => {
       setLoading(false);
-    }
+    };
   };
 
   return (
     <>
-      GPTPage
+      <Title order={3}>Teacher GPT</Title>
       <Box mb="md">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
+        <form onSubmit={form.onSubmit(handleStreamingSubmit)}>
           <TextInput
             label="Type your question"
-            description="Type a question for TeacherGPT"
             placeholder="What do you know about the student with the last name Bell?"
-            {...form.getInputProps('prompt')} 
+            {...form.getInputProps("prompt")}
           />
           <Group>
-            <Button type="submit" disabled={loading} mt="md">
+            <Button type="submit" disabled={loading} mt="sm">
               Submit Prompt
             </Button>
-            {loading && <Loading />}
+
+            {loading && (
+              <Notification
+                style={{ boxShadow: "none" }}
+                mt="sm"
+                withCloseButton={false}
+                loading
+                title="Generating text"
+              />
+            )}
           </Group>
+
           {error && <Error error={error} onDismiss={() => setError(null)} />}
         </form>
       </Box>
-      {chatText && <ChatDisplay data={chatText} />}
+
+      {streamingResponses.length < 1 && loading && (
+        <Paper p="md" withBorder>
+          <Skeleton mt={6} height={12} radius="xl" />
+          <Skeleton mt={6} height={12} radius="xl" />
+        </Paper>
+      )}
+
+      {streamingResponses.length > 0 && (
+        <Paper p="md" withBorder>
+          <ChatDisplay data={streamingResponses} />
+        </Paper>
+      )}
     </>
   );
 }
