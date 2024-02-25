@@ -9,6 +9,9 @@ def handle_api_status_error(e):
 def handle_api_error(e):
     return 500, f"API Error: {e.message}"
 
+def extractContent(response) -> str:
+    return response.choices[0].message.content if response.choices else "No response"
+
 exception_mappings = {
     APITimeoutError: (408, "Request timed out."),
     APIConnectionError: (503, "Trouble connecting to the AI server."),
@@ -38,9 +41,9 @@ class LLMPrompt:
                     {"role": "system", "content": self.system_prompt},
                     {"role": "user", "content": self.prompt},
                 ]
-
-    def extractContent(self, response):
-        return response.choices[0].message.content if response.choices else "No response"
+    
+    def getContent(self):
+        return self.response.choices[0].message.content if self.response.choices else "No response"
 
     def send(self, json_mode=False, stream=False, max_tokens=1024):
         request_args = {

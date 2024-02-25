@@ -49,7 +49,7 @@ class Template:
             cls._prompt_data = load_prompts()
     
     @classmethod
-    def get_prompt_text(cls, section_name):
+    def get_prompt_text(cls, section_name) -> str:
         cls._load_prompts()
         section = cls._prompt_data.get(section_name, {})
         return section.get('text', '')

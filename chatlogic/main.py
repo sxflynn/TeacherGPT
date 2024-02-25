@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import Config, LLMClient, Template
-from src.prompt import LLMPrompt
+from src.prompt import LLMPrompt, extractContent
 
 app = FastAPI()
 
@@ -24,9 +24,6 @@ if os.path.exists(dotenv_path):
 class PromptInput(BaseModel):
     prompt: str
     
-class PromptResponse(BaseModel):
-    response: str
-
 @app.websocket("/promptstreaming")
 async def run_prompt(websocket: WebSocket):
     await websocket.accept()
@@ -42,23 +39,25 @@ async def run_prompt(websocket: WebSocket):
     
     skip_gateway = False
     if not skip_gateway:
-        # Related to education, teaching, or specific student data
         gateway_prompt = Template.get_prompt_text('gateway_prompt')
         prompt_engine = LLMPrompt(llmclient, (gateway_prompt + prompt_object.prompt), global_system_prompt)
-        gateway_answer = prompt_engine.send()
-        if "Proceed" not in gateway_answer:
-            return PromptResponse(response="This is a generic question. Just use Google/ChatGPT")
+        prompt_engine.send()
+        if "Proceed" not in extractContent(prompt_engine.response):
+            await websocket.send_text("This is a generic question. Just use Google/ChatGPT")
+            await websocket.close()
+            return
     else:
-        # Skip the gateway logic and proceed directly
-        print("\033[93mGateway prompt skipped (Development Mode)\033[0m")
+        await websocket.send_text("\033[93mGateway prompt skipped (Development Mode)\033[0m")
     
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
     student_last_name_engine = LLMPrompt(llmclient, (graphql_student_last_name_prompt + prompt_object.prompt), global_system_prompt)
-    student_last_name_json = student_last_name_engine.send()
+    student_last_name_engine.send()
     try:
-        gql_data = json.loads(student_last_name_json)
+        gql_data = json.loads(extractContent(student_last_name_engine.response))
     except:
         await websocket.send_text("There wasn't any student data in the query")
+        await websocket.close()
+        return
     variables = gql_data['variables']
     all_student_fields = [
         'studentId',
@@ -83,32 +82,18 @@ async def run_prompt(websocket: WebSocket):
         }}
     }}
     """)
-    student_by_last_name_gql_result = client.execute(get_by_last_name, variable_values=variables)
+    student_by_last_name_gql_result = await client.execute_async(get_by_last_name, variable_values=variables)
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name_answer')
-    student_last_name_engine.prompt = (str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + prompt_object.prompt)
-    final_answer = student_last_name_engine.send(stream=True)
+    final_answer_prompt = (str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + prompt_object.prompt)
+    
+    final_answer_engine = LLMPrompt(llmclient,final_answer_prompt,global_system_prompt)
+    final_answer = final_answer_engine.send(stream=True)
     for chunk in final_answer:
-        content = chunk.choices[0].delta.content
-        await websocket.send_text(content)  
-        student_last_name_engine.chunks_list.append(content)
-    student_last_name_engine.response_text = ''.join(student_last_name_engine.chunks_list)
+        await websocket.send_text(chunk.choices[0].delta.content)
+        final_answer_engine.chunks_list.append(chunk.choices[0].delta.content)
+    final_answer_engine.response_text = ''.join(final_answer_engine.chunks_list)
     await websocket.close()
-
-
-# @app.websocket("/promptstreaming")
-async def streamprompt(websocket: WebSocket):
-    await websocket.accept()
-    data = await websocket.receive_text()
-    prompt_object = PromptInput.model_validate_json(data)
-    llmclient = LLMClient(Config("TogetherAi"))
-    prompt = LLMPrompt(llmclient,prompt_object.prompt,"You are a helpful assistant.")
-    response = prompt.send(stream=True)
-    for chunk in response:
-        content = chunk.choices[0].delta.content
-        await websocket.send_text(content)  
-        prompt.chunks_list.append(content)
-    prompt.response_text = ''.join(prompt.chunks_list)
-    await websocket.close()
+    return
 
 app.add_middleware(
         CORSMiddleware,
