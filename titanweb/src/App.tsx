@@ -39,8 +39,8 @@ export default function App() {
         padding="md"
       >
         <AppShell.Header>
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <AppShellHeader setActive={setActive}/>
+          
+          <AppShellHeader toggle={toggle} opened={opened} setActive={setActive}/>
         </AppShell.Header>
 
         <AppShell.Navbar p="md">
