@@ -1,14 +1,15 @@
 import { NavLink } from "@mantine/core";
 import { IconFidgetSpinner, IconMessageCircle, IconUser } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { Link } from "react-router-dom";
 
-export function AppShellNavbar() {
-  const [active, setActive] = useState(location.pathname);
 
-  useEffect(() => {
-    setActive(location.pathname);
-  }, [location]);
+type NavbarProps = {
+  active: string
+  setActive: Dispatch<SetStateAction<string>>;
+};
+
+export function AppShellNavbar({active, setActive}:NavbarProps) {
 
   const links = [
     {link: "/gpt", label:"TeacherGPT", icon: IconMessageCircle},
@@ -23,7 +24,7 @@ export function AppShellNavbar() {
           to={link.link}
           key={link.label}
           label={link.label}
-          data-active={active === link.link || undefined}
+          data-active={active === link.link || null}
           onClick={() => setActive(link.link)}
           leftSection={link.icon ? <link.icon /> : null}
         />

@@ -6,14 +6,21 @@ import {
   localStorageColorSchemeManager,
 } from "@mantine/core";
 import { theme } from "./theme";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
 import { AppShellHeader } from "./components/AppShellHeader";
 import { AppShellNavbar } from "./components/AppShellNavbar";
+import { useEffect, useState } from "react";
 
 export default function App() {
+  const location = useLocation();
   const [opened, { toggle }] = useDisclosure();
-
+  const [active, setActive] = useState(location.pathname);
+  
+  useEffect(() => {
+    setActive(location.pathname);
+  }, [location.pathname]);
+  
   return (
     <MantineProvider
       theme={theme}
@@ -33,11 +40,11 @@ export default function App() {
       >
         <AppShell.Header>
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <AppShellHeader/>
+          <AppShellHeader setActive={setActive}/>
         </AppShell.Header>
 
         <AppShell.Navbar p="md">
-          <AppShellNavbar/>
+          <AppShellNavbar active={active} setActive={setActive}/>
           </AppShell.Navbar>
         
 

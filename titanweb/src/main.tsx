@@ -11,7 +11,6 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  gql,
 } from "@apollo/client";
 import { Homepage } from "./pages/Homepage.tsx";
 import { GPTPage } from "./pages/GPTPage.tsx";
