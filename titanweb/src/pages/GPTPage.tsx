@@ -51,7 +51,6 @@ export function GPTPage() {
         ...currentResponses,
         event.data,
       ]);
-      console.log("streamingResponses is ", streamingResponses);
     };
 
     ws.onerror = (event) => {
