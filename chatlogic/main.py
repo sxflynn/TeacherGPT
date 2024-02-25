@@ -27,8 +27,11 @@ class PromptInput(BaseModel):
 class PromptResponse(BaseModel):
     response: str
 
-@app.post("/prompt")
-def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
+@app.websocket("/promptstreaming")
+async def run_prompt(websocket: WebSocket):
+    await websocket.accept()
+    data = await websocket.receive_text()
+    prompt_object = PromptInput.model_validate_json(data)
     # GraphQL client
     graphql_url = os.getenv('GRAPHQL_URL')
     transport = AIOHTTPTransport(url=graphql_url)
@@ -41,7 +44,7 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     if not skip_gateway:
         # Related to education, teaching, or specific student data
         gateway_prompt = Template.get_prompt_text('gateway_prompt')
-        prompt_engine = LLMPrompt(llmclient, (gateway_prompt + teacher_prompt.prompt), global_system_prompt)
+        prompt_engine = LLMPrompt(llmclient, (gateway_prompt + prompt_object.prompt), global_system_prompt)
         gateway_answer = prompt_engine.send()
         if "Proceed" not in gateway_answer:
             return PromptResponse(response="This is a generic question. Just use Google/ChatGPT")
@@ -50,12 +53,12 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
         print("\033[93mGateway prompt skipped (Development Mode)\033[0m")
     
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
-    student_last_name_engine = LLMPrompt(llmclient, (graphql_student_last_name_prompt + teacher_prompt.prompt), global_system_prompt)
+    student_last_name_engine = LLMPrompt(llmclient, (graphql_student_last_name_prompt + prompt_object.prompt), global_system_prompt)
     student_last_name_json = student_last_name_engine.send()
     try:
         gql_data = json.loads(student_last_name_json)
     except:
-        return PromptResponse(response="There wasn't any student data in the query")
+        await websocket.send_text("There wasn't any student data in the query")
     variables = gql_data['variables']
     all_student_fields = [
         'studentId',
@@ -82,13 +85,17 @@ def run_prompt(teacher_prompt:PromptInput) -> PromptResponse:
     """)
     student_by_last_name_gql_result = client.execute(get_by_last_name, variable_values=variables)
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name_answer')
-    student_last_name_engine.prompt = (str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + str(teacher_prompt))
-    final_answer = student_last_name_engine.send()
-    final_response = PromptResponse(response=final_answer)
-    return final_response
+    student_last_name_engine.prompt = (str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + prompt_object.prompt)
+    final_answer = student_last_name_engine.send(stream=True)
+    for chunk in final_answer:
+        content = chunk.choices[0].delta.content
+        await websocket.send_text(content)  
+        student_last_name_engine.chunks_list.append(content)
+    student_last_name_engine.response_text = ''.join(student_last_name_engine.chunks_list)
+    await websocket.close()
 
 
-@app.websocket("/promptstreaming")
+# @app.websocket("/promptstreaming")
 async def streamprompt(websocket: WebSocket):
     await websocket.accept()
     data = await websocket.receive_text()
