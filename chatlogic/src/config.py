@@ -21,7 +21,7 @@ def load_prompts():
     return prompt_data
 
 class Config:
-    def __init__(self, provider_name):
+    def __init__(self, provider_name = os.getenv('DEFAULT_SERVICE', 'OpenAI')):
         self.config_data = load_config()
         if not self.config_data.get(provider_name):
             raise ValueError(f"{provider_name} is not located in the config.toml file.")
@@ -55,7 +55,8 @@ class Template:
         return section.get('text', '')
 
 class LLMClient:
-    def __init__(self, config: Config):
+    def __init__(self, config = Config()):
+        self.config = config
         self.client = OpenAI(
         api_key=config.key,
         base_url=config.url

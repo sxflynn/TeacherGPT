@@ -1,6 +1,7 @@
 import time
 from fastapi import HTTPException
 from openai import APIConnectionError, APIError, APIResponseValidationError, APIStatusError, APITimeoutError, BadRequestError, ConflictError, InternalServerError, NotFoundError, PermissionDeniedError, RateLimitError, AuthenticationError, UnprocessableEntityError
+from src.config import LLMClient, Template
 
 
 def handle_api_status_error(e):
@@ -29,7 +30,7 @@ exception_mappings = {
 }
 
 class LLMPrompt:
-    def __init__(self, client, prompt, system_prompt):
+    def __init__(self, prompt, system_prompt = Template.get_prompt_text('global_system_prompt'), client=LLMClient()):
         self.client = client
         self.model = client.model
         self.prompt = prompt
