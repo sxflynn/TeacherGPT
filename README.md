@@ -160,15 +160,18 @@ python3 -m venv .venv
 ```Bash
 source .venv/bin/activate
 ```
-- Install the requirements
+- Install the dependencies
 ```
 pip install -r requirements.txt
 ```
-- Add your OpenAI/TogetherAI/Anyscale keys to your `.env` file
 - Start the FastAPI server
 ```
 uvicorn main:app --reload
 ```
+ - When finished, deactivate the virtual environment
+ ```
+deactivate
+ ```
 
 ## How to contribute
 
