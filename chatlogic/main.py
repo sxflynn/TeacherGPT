@@ -1,19 +1,20 @@
 import json
-from fastapi import FastAPI, WebSocket
+from typing import Annotated
+from fastapi import Depends, FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import Template, settings
-from src.prompt import LLMPrompt, extractContent
+from src.prompt import LLMPrompt, PromptInput, extractContent
 
 app = FastAPI()
 
-# last_name_prompt = "Tell me everything about student with last name Bell"
-# print(last_name_prompt)
+def get_graphql_client():
+    transport = AIOHTTPTransport(url=settings.graphql_url)
+    gqlclient = Client(transport=transport, fetch_schema_from_transport=True)
+    return gqlclient
 
-class PromptInput(BaseModel):
-    prompt: str
+GraphQlClient = Annotated[Client, Depends(get_graphql_client)]
 
 def relevancy_check(userprompt:str) -> bool:
     gateway_prompt = Template.get_prompt_text('gateway_prompt')
@@ -31,13 +32,11 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     return None
 
 @app.websocket("/promptstreaming")
-async def run_prompt(websocket: WebSocket):
+async def run_prompt(websocket: WebSocket, gqlclient: GraphQlClient):
     await websocket.accept()
     user_prompt = await get_relevant_prompt(websocket)
     if user_prompt is None:
         return
-    transport = AIOHTTPTransport(url=settings.graphql_url)
-    gqlclient = Client(transport=transport, fetch_schema_from_transport=True)
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
     student_last_name_engine = LLMPrompt(prompt=(graphql_student_last_name_prompt + user_prompt))
     student_last_name_engine.send()

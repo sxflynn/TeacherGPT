@@ -1,7 +1,10 @@
 from fastapi import HTTPException
 from openai import APIConnectionError, APIError, APIResponseValidationError, APIStatusError, APITimeoutError, BadRequestError, ConflictError, InternalServerError, NotFoundError, PermissionDeniedError, RateLimitError, AuthenticationError, UnprocessableEntityError
+from pydantic import BaseModel
 from src.config import LLMClient, Template
 
+class PromptInput(BaseModel):
+    prompt: str
 
 def handle_api_status_error(e):
     return e.status_code, f"API Status Error: {e.message}"
