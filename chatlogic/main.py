@@ -32,7 +32,7 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     prompt_object = PromptInput.model_validate_json(data)
     if relevancy_check(prompt_object.prompt):
         return prompt_object.prompt
-    await websocket.send_text("To best answer that question, please try using Google or ChatGPT.")
+    await websocket.send_text("That question doesn't require retrieving student data, please try using Google or ChatGPT.")
     await websocket.close()
     return None
 
