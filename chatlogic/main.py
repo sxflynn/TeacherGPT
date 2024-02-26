@@ -1,12 +1,13 @@
 import json
 import os
+import sys
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, WebSocket
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from src.config import Config, LLMClient, Template
+from src.config import LLMClient, Template
 from src.prompt import LLMPrompt, extractContent
 
 app = FastAPI()
@@ -20,34 +21,33 @@ if os.path.exists(dotenv_path):
 
 class PromptInput(BaseModel):
     prompt: str
-    
+
+def relevancy_check(userprompt:str) -> bool:
+    gateway_prompt = Template.get_prompt_text('gateway_prompt')
+    prompt_engine = LLMPrompt(prompt=(gateway_prompt + userprompt))
+    prompt_engine.send()
+    return "Proceed" in extractContent(prompt_engine.response)
+
+async def get_relevant_prompt(websocket: WebSocket) -> str:
+    data = await websocket.receive_text()
+    prompt_object = PromptInput.model_validate_json(data)
+    if relevancy_check(prompt_object.prompt):
+        return prompt_object.prompt
+    await websocket.send_text("To best answer that question, please try using Google or ChatGPT.")
+    await websocket.close()
+    return None
+
 @app.websocket("/promptstreaming")
 async def run_prompt(websocket: WebSocket):
     await websocket.accept()
-    data = await websocket.receive_text()
-    prompt_object = PromptInput.model_validate_json(data)
-    # GraphQL client
+    user_prompt = await get_relevant_prompt(websocket)
+    if user_prompt is None:
+        return
     graphql_url = os.getenv('GRAPHQL_URL')
     transport = AIOHTTPTransport(url=graphql_url)
-    client = Client(transport=transport, fetch_schema_from_transport=True)
-    default_service = os.getenv('DEFAULT_SERVICE', 'OpenAI')
-    llmclient = LLMClient(Config(default_service))
-    global_system_prompt = Template.get_prompt_text('global_system_prompt')
-    
-    skip_gateway = False
-    if not skip_gateway:
-        gateway_prompt = Template.get_prompt_text('gateway_prompt')
-        prompt_engine = LLMPrompt(llmclient, (gateway_prompt + prompt_object.prompt), global_system_prompt)
-        prompt_engine.send()
-        if "Proceed" not in extractContent(prompt_engine.response):
-            await websocket.send_text("This is a generic question. Just use Google/ChatGPT")
-            await websocket.close()
-            return
-    else:
-        print("\033[93mGateway prompt skipped (Development Mode)\033[0m")
-    
+    gqlclient = Client(transport=transport, fetch_schema_from_transport=True)
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
-    student_last_name_engine = LLMPrompt(llmclient, (graphql_student_last_name_prompt + prompt_object.prompt), global_system_prompt)
+    student_last_name_engine = LLMPrompt(prompt=(graphql_student_last_name_prompt + user_prompt))
     student_last_name_engine.send()
     try:
         gql_data = json.loads(extractContent(student_last_name_engine.response))
@@ -83,11 +83,9 @@ async def run_prompt(websocket: WebSocket):
         }}
     }}
     """)
-    student_by_last_name_gql_result = await client.execute_async(get_by_last_name, variable_values=variables)
-    graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name_answer')
-    final_answer_prompt = (str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + prompt_object.prompt)
-    
-    final_answer_engine = LLMPrompt(llmclient,final_answer_prompt,global_system_prompt)
+    student_by_last_name_gql_result = await gqlclient.execute_async(get_by_last_name, variable_values=variables)
+    graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name_answer')    
+    final_answer_engine = LLMPrompt(prompt=(str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + user_prompt))
     final_answer = final_answer_engine.send(stream=True)
     for chunk in final_answer:
         content = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta.content else ""
