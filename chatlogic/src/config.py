@@ -1,8 +1,18 @@
 import tomllib, pathlib, os
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic_settings import BaseSettings
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+class Settings(BaseSettings):
+    openai_api_key: str
+    anyscale_api_key: str
+    togetherai_api_key: str
+    default_service: str
+    graphql_url: str
+
+settings = Settings()
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env') # Unnecesary when using Docker/cloud
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
 
@@ -21,14 +31,14 @@ def load_prompts():
     return prompt_data
 
 class Config:
-    def __init__(self, provider_name = os.getenv('DEFAULT_SERVICE', 'OpenAI')):
+    def __init__(self, provider_name = settings.default_service):
         self.config_data = load_config()
         if not self.config_data.get(provider_name):
             raise ValueError(f"{provider_name} is not located in the config.toml file.")
         load_dotenv()
         provider = self.config_data.get(provider_name,{})
         self.url = provider.get('url','')
-        self.key = os.getenv(f'{provider_name.upper()}_API_KEY', 'none') #OpenAI library requires key string
+        self.key = os.getenv(f'{provider_name.upper()}_API_KEY', 'none') # OpenAI library requires key string
         self.models = provider.get('models', [])
         if not self.models:
             raise ValueError(f"No model selected for {provider_name}")

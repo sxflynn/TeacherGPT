@@ -1,19 +1,13 @@
 import json
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from src.config import Template
+from src.config import Template, settings
 from src.prompt import LLMPrompt, extractContent
 
 app = FastAPI()
-
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
 
 # last_name_prompt = "Tell me everything about student with last name Bell"
 # print(last_name_prompt)
@@ -42,8 +36,7 @@ async def run_prompt(websocket: WebSocket):
     user_prompt = await get_relevant_prompt(websocket)
     if user_prompt is None:
         return
-    graphql_url = os.getenv('GRAPHQL_URL')
-    transport = AIOHTTPTransport(url=graphql_url)
+    transport = AIOHTTPTransport(url=settings.graphql_url)
     gqlclient = Client(transport=transport, fetch_schema_from_transport=True)
     graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
     student_last_name_engine = LLMPrompt(prompt=(graphql_student_last_name_prompt + user_prompt))
