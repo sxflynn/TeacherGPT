@@ -87,18 +87,22 @@ docker compose up
 
 ## Development
 
-### School Database Website
-1. `cd` into `titanweb`
+### React Website
+ - `cd` into `titanweb`
 ```
 cd titanweb
 ```
-2. Start the web server
+ - Install dependencies
+```
+npm install
+```
+ - Start the web server
 ```
 npm run dev
 ```
-3. Go to [http://localhost:5173](http://localhost:5173) to view the school database website.
+ - Go to [http://localhost:5173](http://localhost:5173) to view the school database website.
 
-4. Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
+ - Go to [http://localhost:8080/graphiql](http://localhost:8080/graphiql) to test the GraphQL endpoints.
 
 Here is an example query to test it:
 ```
@@ -140,7 +144,7 @@ You should expect this response:
       (etc)
 ```
 
-### Python
+### Python FastAPI server
 
 - Install Python version >= 3.11
 - Add your OpenAI/AnyScale/TogetherAI keys to the `.env` file
@@ -161,10 +165,10 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 - Add your OpenAI/TogetherAI/Anyscale keys to your `.env` file
-- Execute the Python CLI entrypoint
+- Start the FastAPI server
 ```
-python3 manual.py
-``` 
+uvicorn main:app --reload
+```
 
 ## How to contribute
 
