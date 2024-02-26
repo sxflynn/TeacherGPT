@@ -1,7 +1,6 @@
 import "@mantine/core/styles.css";
 import {
   AppShell,
-  Burger,
   MantineProvider,
   localStorageColorSchemeManager,
 } from "@mantine/core";
@@ -39,7 +38,6 @@ export default function App() {
         padding="md"
       >
         <AppShell.Header>
-          
           <AppShellHeader toggle={toggle} opened={opened} setActive={setActive}/>
         </AppShell.Header>
 
