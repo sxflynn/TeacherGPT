@@ -1,13 +1,12 @@
 import json
 import os
-import sys
 from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from src.config import LLMClient, Template
+from src.config import Template
 from src.prompt import LLMPrompt, extractContent
 
 app = FastAPI()
