@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from gql import gql, Client
+from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
