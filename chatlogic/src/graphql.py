@@ -1,6 +1,6 @@
 from typing import Union
 from gql import gql, Client
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from src.prompt import LLMPrompt, extractContent
 
 class GQLForm(BaseModel):
@@ -8,8 +8,7 @@ class GQLForm(BaseModel):
     variables: dict[str, str]
 
 class GraphQLWorker:
-    def __init__(self, websocket, client: Client, prompts, task, user_prompt,system_prompt):
-        self.websocket = websocket
+    def __init__(self, client: Client, prompts, task, user_prompt,system_prompt):
         self.client = client
         self.prompts = prompts
         self.task = task
@@ -23,10 +22,8 @@ class GraphQLWorker:
         gql_data = self.fetch_fields(task_prompt=self.get_task_prompt(),user_prompt=self.user_prompt)
         try:
             gql_data = GQLForm.model_validate_json(gql_data)
-        except ValueError:
-            await self.websocket.send_text("The AI failed to give a JSON object with fields and variables.")
-            await self.websocket.close()
-            return
+        except ValidationError as e:
+            raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         variables = gql_data.variables
         all_student_fields = [
             'studentId',
