@@ -1,4 +1,4 @@
-import json
+# import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +6,7 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
+from src.graphql import GraphQLWorker
 
 
 def create_graphql_client() -> Client:
@@ -54,58 +55,13 @@ async def run_prompt(websocket: WebSocket):
     user_prompt = await get_relevant_prompt(websocket)
     if user_prompt is None:
         return
-    gqlclient = websocket.app.state.graphql_client
-
-    # orchestrator = Orchestrator()
-    # collected_data = await Orchestrator.receive(user_prompt)
-    # final_answer = await Orchestrator.answer(collected_data)
-    # for chunk in final_answer:
-    #     content = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta.content else ""
-    #     await websocket.send_text(content)
-    graphql_student_last_name_prompt = get_prompt_text('gql_student_by_last_name')
-    student_last_name_engine = LLMPrompt(
-        prompt=(graphql_student_last_name_prompt + user_prompt),
-        system_prompt=get_prompt_text('global_system_prompt')
-        )
-    student_last_name_engine.send()
-    try:
-        gql_data = json.loads(extractContent(student_last_name_engine.response))
-    except json.JSONDecodeError:
-        await websocket.send_text("Invalid JSON format in the response.")
-        await websocket.close()
-        return
-    except TypeError:
-        await websocket.send_text("Unexpected data type. Expected a string or bytes-like object.")
-        await websocket.close()
-        return
-    variables = gql_data['variables']
-    all_student_fields = [
-        'studentId',
-        'firstName',
-        'middleName',
-        'lastName',
-        'sex',
-        'dob',
-        'email',
-        'ohioSsid'
-    ]
-    
-    if gql_data['fields'] == 'all':
-        fields = all_student_fields
-    else:
-        fields = gql_data['fields']
-    fields_query_part = ' '.join(fields)
-    get_by_last_name = gql(f"""
-        query StudentsByLastName($lastName: String!) {{
-        studentsByLastName(lastName: $lastName) {{
-            {fields_query_part}
-        }}
-    }}
-    """)
-    student_by_last_name_gql_result = await gqlclient.execute_async(get_by_last_name, variable_values=variables)
+    system_prompt=get_prompt_text('global_system_prompt')
+    gqlclient = websocket.app.state.graphql_client    
+    gqlworker = GraphQLWorker(websocket, gqlclient, prompts=websocket.app.state.prompts, task='gql_student_by_last_name', user_prompt=user_prompt, system_prompt=system_prompt)
+    gqlworker_data = await gqlworker.get_data()
     graphql_student_last_name_prompt = get_prompt_text('gql_student_by_last_name_answer')    
     final_answer_engine = LLMPrompt(
-        prompt=(str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + user_prompt),
+        prompt=(str(gqlworker_data) + graphql_student_last_name_prompt + user_prompt),
         system_prompt=get_prompt_text('global_system_prompt')
         )
     final_answer = final_answer_engine.send(stream=True)
@@ -124,3 +80,6 @@ app.add_middleware(
         allow_methods=["*"],
         allow_headers=["*"],
 )
+# Debugging mode
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
