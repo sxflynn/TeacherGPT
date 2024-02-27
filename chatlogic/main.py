@@ -1,24 +1,41 @@
 import json
-from typing import Annotated
-from fastapi import Depends, FastAPI, WebSocket
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
-from src.config import Template, settings
+from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
 
-app = FastAPI()
 
-def get_graphql_client():
+def create_graphql_client() -> Client:
     transport = AIOHTTPTransport(url=settings.graphql_url)
     gqlclient = Client(transport=transport, fetch_schema_from_transport=True)
     return gqlclient
 
-GraphQlClient = Annotated[Client, Depends(get_graphql_client)]
+@asynccontextmanager
+async def lifespan(fastapiapp: FastAPI):
+    fastapiapp.state.graphql_client = create_graphql_client()
+    fastapiapp.state.prompts = load_prompts()
+    yield
+    # Cleanup below
+
+app = FastAPI(lifespan=lifespan)
+
+def get_prompt_text(section_name: str) -> str:
+    prompts = app.state.prompts
+    return prompts.get(section_name, {}).get('text', '')
+
+
+async def get_graphql_client(request: Request) -> Client:
+    return request.app.state.graphql_client
 
 def relevancy_check(userprompt:str) -> bool:
-    gateway_prompt = Template.get_prompt_text('gateway_prompt')
-    prompt_engine = LLMPrompt(prompt=(gateway_prompt + userprompt))
+    gateway_prompt = get_prompt_text('gateway_prompt')
+    prompt_engine = LLMPrompt(
+        prompt=(gateway_prompt + userprompt),
+        system_prompt=get_prompt_text('global_system_prompt')
+        )
     prompt_engine.send()
     return "Proceed" in extractContent(prompt_engine.response)
 
@@ -32,13 +49,24 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     return None
 
 @app.websocket("/promptstreaming")
-async def run_prompt(websocket: WebSocket, gqlclient: GraphQlClient):
+async def run_prompt(websocket: WebSocket):
     await websocket.accept()
     user_prompt = await get_relevant_prompt(websocket)
     if user_prompt is None:
         return
-    graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name')
-    student_last_name_engine = LLMPrompt(prompt=(graphql_student_last_name_prompt + user_prompt))
+    gqlclient = websocket.app.state.graphql_client
+
+    # orchestrator = Orchestrator()
+    # collected_data = await Orchestrator.receive(user_prompt)
+    # final_answer = await Orchestrator.answer(collected_data)
+    # for chunk in final_answer:
+    #     content = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta.content else ""
+    #     await websocket.send_text(content)
+    graphql_student_last_name_prompt = get_prompt_text('gql_student_by_last_name')
+    student_last_name_engine = LLMPrompt(
+        prompt=(graphql_student_last_name_prompt + user_prompt),
+        system_prompt=get_prompt_text('global_system_prompt')
+        )
     student_last_name_engine.send()
     try:
         gql_data = json.loads(extractContent(student_last_name_engine.response))
@@ -75,8 +103,11 @@ async def run_prompt(websocket: WebSocket, gqlclient: GraphQlClient):
     }}
     """)
     student_by_last_name_gql_result = await gqlclient.execute_async(get_by_last_name, variable_values=variables)
-    graphql_student_last_name_prompt = Template.get_prompt_text('gql_student_by_last_name_answer')    
-    final_answer_engine = LLMPrompt(prompt=(str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + user_prompt))
+    graphql_student_last_name_prompt = get_prompt_text('gql_student_by_last_name_answer')    
+    final_answer_engine = LLMPrompt(
+        prompt=(str(student_by_last_name_gql_result) + graphql_student_last_name_prompt + user_prompt),
+        system_prompt=get_prompt_text('global_system_prompt')
+        )
     final_answer = final_answer_engine.send(stream=True)
     for chunk in final_answer:
         content = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta.content else ""
