@@ -50,20 +50,6 @@ class Config:
         else:
             raise ValueError(f"Model {model_name} not found in configuration.")
 
-class Template:
-    _prompt_data = None
-    
-    @classmethod
-    def _load_prompts(cls):
-        if cls._prompt_data is None:
-            cls._prompt_data = load_prompts()
-    
-    @classmethod
-    def get_prompt_text(cls, section_name) -> str:
-        cls._load_prompts()
-        section = cls._prompt_data.get(section_name, {})
-        return section.get('text', '')
-
 class LLMClient:
     def __init__(self, config = Config()):
         self.config = config
