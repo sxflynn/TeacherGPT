@@ -1,6 +1,6 @@
 BEGIN TRANSACTION;
 
-INSERT INTO "daily_attendance" ("student_id", "date", "attendance_type", "arrival", "departure", "excuse_note") VALUES
+INSERT INTO "daily_attendance" ("student_id", "date", "attendance_type_id", "arrival", "departure", "excuse_note") VALUES
 ((SELECT student_id FROM student WHERE email = 'moanthony28@titanacademy.edu'), '2023-09-01', (SELECT attendance_type_id FROM attendance_types WHERE attendance_type = 'Full Attendance'), NULL, NULL, NULL),
 ((SELECT student_id FROM student WHERE email = 'moanthony28@titanacademy.edu'), '2023-09-04', (SELECT attendance_type_id FROM attendance_types WHERE attendance_type = 'Full Attendance'), NULL, NULL, NULL),
 ((SELECT student_id FROM student WHERE email = 'moanthony28@titanacademy.edu'), '2023-09-05', (SELECT attendance_type_id FROM attendance_types WHERE attendance_type = 'Partial Unexcused Absence'), '2023-09-05 10:26:00-05:00', '2023-09-05 15:00:00-05:00', NULL),
