@@ -44,7 +44,7 @@ def generate_attendance_data(email, attendance_rates):
             arrival = 'NULL'
             departure = 'NULL'
 
-        sql_line = f"((SELECT student_id FROM student WHERE email = '{email}'), '{day_str}', (SELECT attendance_type_id FROM attendance_types WHERE attendance_type = '{attendance_type}'), {arrival}, {departure}, NULL)"
+        sql_line = f"((SELECT student_id FROM student WHERE email = '{email}'), '{day_str}', (SELECT attendance_type_id FROM attendance_type WHERE attendance_type = '{attendance_type}'), {arrival}, {departure}, NULL)"
         sql_lines.append(sql_line)
     return sql_lines
 
