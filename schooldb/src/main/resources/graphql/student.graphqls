@@ -10,7 +10,7 @@ type Student {
     dailyAttendance: [DailyAttendance]
 }
 
-type Query {
+extend type Query {
     allStudents: [Student]
     studentById(studentId: ID!): Student
     studentsByLastName(lastName: String!): [Student]
