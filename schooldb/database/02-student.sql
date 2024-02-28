@@ -118,7 +118,7 @@ VALUES
 ((SELECT "student_id" FROM "student" WHERE "email" = 'hestout28@titanacademy.edu'), '2024-01-26', NULL),
 ((SELECT "student_id" FROM "student" WHERE "email" = 'tathomas28@titanacademy.edu'), '2024-08-23', NULL);
 
-INSERT INTO "attendance_types" ("attendance_type") VALUES
+INSERT INTO "attendance_type" ("attendance_type") VALUES
 ('Full Attendance'),
 ('Partial Excused Absence'),
 ('Partial Unexcused Absence'),
