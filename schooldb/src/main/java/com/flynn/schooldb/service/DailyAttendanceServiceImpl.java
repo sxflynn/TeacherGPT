@@ -21,7 +21,6 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
         this.dailyAttendanceRepository = dailyAttendanceRepository;
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public List<DailyAttendance> findByStudentId(Long studentId) {

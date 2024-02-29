@@ -1,4 +1,8 @@
 type Query {
+    #AttendanceType
+    listAllAttendanceTypes: [AttendanceType]
+
+    #DailyAttendance
     dailyAttendanceFindByStudentId(studentId: ID!): [DailyAttendance]
     dailyAttendanceFindByDate(date: String!): [DailyAttendance]
     dailyAttendanceFindByStudentIdAndDate(studentId: ID!, date: String!): [DailyAttendance]
@@ -6,9 +10,23 @@ type Query {
     dailyAttendanceFindByAttendanceTypeName(attendanceTypeName: String!): [DailyAttendance]
     dailyAttendanceFindByStudentIdAndDateAndAttendanceTypeName(studentId: ID!, date: String!, attendanceTypeName: String!): [DailyAttendance]
 
-    allStudents: [Student]
-    studentById(studentId: ID!): Student
-    studentsByLastName(lastName: String!): [Student]
-
-    attendanceTypefindAll: [AttendanceType]
+    #Student
+    studentFindById(id: ID!): Student
+    studentsFindByOhioSsid(ohioSsid: String!): Student
+    studentsFindByFirstNameIgnoreCase(firstName: String!): [Student]
+    studentsFindByLastNameIgnoreCase(lastName: String!): [Student]
+    studentsFindByMiddleNameIgnoreCase(middleName: String!): [Student]
+    studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName: String!, lastName: String!): [Student]
+    studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(firstName: String!, middleName: String!, lastName: String!): [Student]
+    studentsSearchByKeyword(keyword: String!): [Student]
+    studentsFindByEmail(email: String!): Student
+    studentsFindByDob(dob: String!): [Student]
+    studentsFindByDobBefore(date: String!): [Student]
+    studentsFindByDobAfter(date: String!): [Student]
+    studentsFindBySex(sex: String!): [Student]
+    studentsFindByDobBetween(startDate: String!, endDate: String!): [Student]
+    studentsFindByLastNameOrderByFirstNameAsc(lastName: String!): [Student]
+    studentsCountBySex(sex: String!): Int
+    studentsFindBySexOrderByLastNameAsc(sex: String!): [Student]
+    studentsFindByEmailContainingIgnoreCase(emailFragment: String!): [Student]
 }

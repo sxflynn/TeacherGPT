@@ -1,0 +1,27 @@
+type AttendanceType {
+    attendanceTypeId: ID!
+    attendanceType: String!
+    dailyAttendances: [DailyAttendance]
+}
+
+type DailyAttendance {
+    dailyAttendanceId: ID!
+    student: Student
+    date: String
+    attendanceType: AttendanceType
+    arrival: String
+    departure: String
+    excuseNote: String
+}
+
+type Student {
+    studentId: ID!
+    firstName: String!
+    middleName: String
+    lastName: String!
+    sex: String
+    dob: String!
+    email: String!
+    ohioSsid: String!
+    dailyAttendance: [DailyAttendance]
+}

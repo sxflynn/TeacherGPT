@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface AttendanceTypeService{
 
-    List<AttendanceType> findAll();
+    List<AttendanceType> listAllAttendanceTypes();
 
 }

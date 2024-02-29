@@ -1,9 +1,0 @@
-type DailyAttendance {
-    dailyAttendanceId: ID!
-    student: Student
-    date: String
-    attendanceType: AttendanceType
-    arrival: String
-    departure: String
-    excuseNote: String
-}
