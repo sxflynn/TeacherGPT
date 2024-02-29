@@ -2,7 +2,7 @@
 
 # TeacherGPT
 
-A proposed GPT chatbot for teachers that uses retrieval-augmentation  to answer questions about their students.
+A GPT chatbot for teachers that uses retrieval-augmentation  to answer questions about their students.
 
 ## Project Status
 > ⚠️ This project is in active development and is not yet a minimally viable product (MVP).
@@ -18,17 +18,17 @@ https://github.com/sxflynn/TeacherGPT/assets/2034081/5eae04c7-bffd-498a-8b76-eb3
 
 ## Aim
 
-The aim of this project is to build a mock-up of a future product where teachers can use AI to save time on context-driven tasks. It uses a fictional school database to simulate a chatbot interacting with real school data.
+The aim of this project is to build a technical demonstration where teachers can use AI to save time on context-driven tasks. It uses a fictional school database to simulate a chatbot interacting with real school data.
 
-## Proposed tech stack
+## Tech stack
 
 * 💻 A web frontend, built in React, with a GPT-like chat interface that interacts with the LLM inference engine
 
-* 🐍 Python-based LLM server running FastAPI and a custom implementation of the OpenAI package with provider-agnostic dependency injection. Potentially would use Langchain (or custom build it) to implement retrieval augmented generation (RAG) logic, such as orchestration, agents and tool prompting. Uses GraphQL to retrieve data from Java server.
+* 🐍 Python-based server running FastAPI which implements retrieval augmented generation (RAG) logic, such as orchestration, agents and tool prompting. Uses GraphQL to retrieve data from Java server and the OpenAI library to connect to an LLM inference endpoint.
 
-* ☕ Java server running Spring Data JPA that interfaces with the PostgreSQL data store. Responds to GraphQL requests.
+* ☕ Java server running Spring Data JPA that interfaces with the PostgreSQL data store. Uses `spring-boot-starter-graphql` dependency to create GraphQL resolvers and schemas.
 
-* 🗄️🐘 PostgreSQL database that consolidates data from multiple school data stores
+* 🗄️🐘 PostgreSQL database that contains data for fictional students including attendance, grades, behavior, enrollment and special education.
 
 ## How to use
 
