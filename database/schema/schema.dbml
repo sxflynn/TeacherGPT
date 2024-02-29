@@ -47,13 +47,13 @@ Table daily_attendance {
   attendance_type_id int [pk]
   student_id int [ref : > student.student_id]
   date date
-  attendance_type int [ref:> attendance_types.attendance_type_id]
+  attendance_type int [ref:> attendance_type.attendance_type_id]
   arrival datetime
   departure datetime
   excuse_note varchar
 }
 
-Table attendance_types {
+Table attendance_type {
   attendance_type_id int [pk]
   attendance_type varchar // full, partial, absent
 }
