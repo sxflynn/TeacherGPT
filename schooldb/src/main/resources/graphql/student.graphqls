@@ -10,12 +10,6 @@ type Student {
     dailyAttendance: [DailyAttendance]
 }
 
-type Query {
-    allStudents: [Student]
-    studentById(studentId: ID!): Student
-    studentsByLastName(lastName: String!): [Student]
-}
-
 #type Mutation {
 #    createStudent(firstName: String!, middleName: String, lastName: String!, sex: String, dob: String!, email: String!, ohioSsid: String!): Student
 #    updateStudent(studentId: ID!, firstName: String, middleName: String, lastName: String, sex: String, dob: String, email: String, ohioSsid: String): Student

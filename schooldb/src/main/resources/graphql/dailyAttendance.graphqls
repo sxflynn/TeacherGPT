@@ -1,8 +1,8 @@
 type DailyAttendance {
     dailyAttendanceId: ID!
-    student: [Student]
+    student: Student
     date: String
-    attendanceType: [AttendanceType]
+    attendanceType: AttendanceType
     arrival: String
     departure: String
     excuseNote: String

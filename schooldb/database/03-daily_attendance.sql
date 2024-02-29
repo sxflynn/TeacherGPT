@@ -1,5 +1,8 @@
 BEGIN TRANSACTION;
 
+CREATE INDEX ON student(email);
+CREATE INDEX ON attendance_type(attendance_type);
+
 INSERT INTO "daily_attendance" ("student_id", "date", "attendance_type_id", "arrival", "departure", "excuse_note") VALUES
 ((SELECT student_id FROM student WHERE email = 'moanthony28@titanacademy.edu'), '2023-09-01', (SELECT attendance_type_id FROM attendance_type WHERE attendance_type = 'Full Attendance'), NULL, NULL, NULL),
 ((SELECT student_id FROM student WHERE email = 'moanthony28@titanacademy.edu'), '2023-09-04', (SELECT attendance_type_id FROM attendance_type WHERE attendance_type = 'Full Attendance'), NULL, NULL, NULL),

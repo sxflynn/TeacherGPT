@@ -67,7 +67,7 @@ CREATE TABLE "daily_attendance" (
   "excuse_note" varchar
 );
 
-CREATE TABLE "attendance_types" (
+CREATE TABLE "attendance_type" (
   "attendance_type_id" SERIAL PRIMARY KEY,
   "attendance_type" varchar
 );
@@ -237,7 +237,7 @@ ALTER TABLE "school_enrollment" ADD FOREIGN KEY ("student_id") REFERENCES "stude
 
 ALTER TABLE "daily_attendance" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
-ALTER TABLE "daily_attendance" ADD FOREIGN KEY ("attendance_type") REFERENCES "attendance_types" ("attendance_type_id");
+ALTER TABLE "daily_attendance" ADD FOREIGN KEY ("attendance_type") REFERENCES "attendance_type" ("attendance_type_id");
 
 ALTER TABLE "staff_department" ADD FOREIGN KEY ("department_id") REFERENCES "department" ("department_id");
 
