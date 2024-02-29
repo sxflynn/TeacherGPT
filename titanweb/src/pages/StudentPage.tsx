@@ -1,6 +1,6 @@
 import { Title } from "@mantine/core";
 import { DataTable } from '../components/DataTable'
-import { GET_ALL_STUDENTS } from "../dataServices/students/studentQuery";
+import { GET_ALL_STUDENTS } from "../dataServices/students/queries";
 
 
 const tableHeaders = {
