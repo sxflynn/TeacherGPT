@@ -1,11 +1,8 @@
 package com.flynn.schooldb.graphql.resolver;
 
-import com.flynn.schooldb.entity.AttendanceType;
 import com.flynn.schooldb.entity.DailyAttendance;
-import com.flynn.schooldb.entity.Student;
 import com.flynn.schooldb.service.DailyAttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -19,32 +16,32 @@ public class DailyAttendanceQueryResolver {
     private DailyAttendanceService dailyAttendanceService;
 
     @QueryMapping
-    public List<DailyAttendance> findByStudentId(@Argument Long studentId) {
+    public List<DailyAttendance> dailyAttendanceFindByStudentId(@Argument Long studentId) {
         return dailyAttendanceService.findByStudentId(studentId);
     }
 
     @QueryMapping
-    public List<DailyAttendance> findByDate(@Argument LocalDate date) {
+    public List<DailyAttendance> dailyAttendanceFindByDate(@Argument LocalDate date) {
         return dailyAttendanceService.findByDate(date);
     }
 
     @QueryMapping
-    public List<DailyAttendance> findByStudentIdAndDate(@Argument Long studentId, LocalDate date) {
+    public List<DailyAttendance> dailyAttendanceFindByStudentIdAndDate(@Argument Long studentId, LocalDate date) {
         return dailyAttendanceService.findByStudentIdAndDate(studentId, date);
     }
 
     @QueryMapping
-    public List<DailyAttendance> findByExcuseNoteNotNull() {
+    public List<DailyAttendance> dailyAttendanceFindByExcuseNoteNotNull() {
         return dailyAttendanceService.findByExcuseNoteNotNull();
     }
 
     @QueryMapping
-    public List<DailyAttendance> findByAttendanceTypeName(@Argument String attendanceTypeName){
+    public List<DailyAttendance> dailyAttendanceFindByAttendanceTypeName(@Argument String attendanceTypeName){
         return dailyAttendanceService.findByAttendanceTypeName(attendanceTypeName);
     }
 
     @QueryMapping
-    public List<DailyAttendance> findByStudentIdAndDateAndAttendanceTypeName(@Argument Long studentId, LocalDate date, String attendanceTypeName){
+    public List<DailyAttendance> dailyAttendanceFindByStudentIdAndDateAndAttendanceTypeName(@Argument Long studentId, LocalDate date, String attendanceTypeName){
         return dailyAttendanceService.findByStudentIdAndDateAndAttendanceTypeName(studentId,date,attendanceTypeName);
     }
 

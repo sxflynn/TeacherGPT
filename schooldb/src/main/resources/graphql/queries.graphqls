@@ -1,0 +1,14 @@
+type Query {
+    dailyAttendanceFindByStudentId(studentId: ID!): [DailyAttendance]
+    dailyAttendanceFindByDate(date: String!): [DailyAttendance]
+    dailyAttendanceFindByStudentIdAndDate(studentId: ID!, date: String!): [DailyAttendance]
+    dailyAttendanceFindByExcuseNoteNotNull: [DailyAttendance]
+    dailyAttendanceFindByAttendanceTypeName(attendanceTypeName: String!): [DailyAttendance]
+    dailyAttendanceFindByStudentIdAndDateAndAttendanceTypeName(studentId: ID!, date: String!, attendanceTypeName: String!): [DailyAttendance]
+
+    allStudents: [Student]
+    studentById(studentId: ID!): Student
+    studentsByLastName(lastName: String!): [Student]
+
+    attendanceTypefindAll: [AttendanceType]
+}

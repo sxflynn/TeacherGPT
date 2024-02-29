@@ -7,12 +7,3 @@ type DailyAttendance {
     departure: String
     excuseNote: String
 }
-
-type Query {
-    findByStudentId(studentId: ID!): [DailyAttendance]
-    findByDate(date: String!): [DailyAttendance]
-    findByStudentIdAndDate(studentId: ID!, date: String!): [DailyAttendance]
-    findByExcuseNoteNotNull: [DailyAttendance]
-    findByAttendanceTypeName(attendanceTypeName: String!): [DailyAttendance]
-    findByStudentIdAndDateAndAttendanceTypeName(studentId: ID!, date: String!, attendanceTypeName: String!): [DailyAttendance]
-}

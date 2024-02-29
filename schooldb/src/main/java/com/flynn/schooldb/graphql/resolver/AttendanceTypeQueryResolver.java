@@ -14,7 +14,7 @@ public class AttendanceTypeQueryResolver {
     private AttendanceTypeService attendanceTypeService;
 
     @QueryMapping
-    public List<AttendanceType> findAll() {
+    public List<AttendanceType> attendanceTypefindAll() {
         return attendanceTypeService.findAll();
     }
 
