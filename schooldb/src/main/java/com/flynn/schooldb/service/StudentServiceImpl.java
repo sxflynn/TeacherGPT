@@ -2,6 +2,7 @@ package com.flynn.schooldb.service;
 
 import com.flynn.schooldb.entity.Student;
 import com.flynn.schooldb.repository.StudentRepository;
+import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,11 @@ public class StudentServiceImpl implements StudentService{
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Student> studentsListAll(){
+        return studentRepository.findAll();
+    }
     @Override
     @Transactional(readOnly = true)
     public List<Student> studentsFindByFirstNameIgnoreCase(String firstName) {

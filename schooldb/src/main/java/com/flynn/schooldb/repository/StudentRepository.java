@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
-
+    List<Student> findAll();
     Optional<Student> findByOhioSsid(String ohioSsid);
     List<Student> findByFirstNameIgnoreCase(String firstName);
     List<Student> findByLastNameIgnoreCase(String lastName);

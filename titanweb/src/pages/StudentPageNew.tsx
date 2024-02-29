@@ -6,7 +6,7 @@ import { useQuery } from "@apollo/client";
 export function StudentPageNew() {
   const { loading, error, data } = useQuery(GET_ALL_STUDENTS);
 
-  const records = data?.allStudents ? data.allStudents : [];
+  const records = data?.studentsListAll ? data.studentsListAll : [];
 
   return (
     <>

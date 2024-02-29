@@ -16,7 +16,11 @@ public class StudentQueryResolver {
     private StudentService studentService;
 
     @QueryMapping
-    Optional<Student> studentFindById(@Argument Long id){
+    List<Student> studentsListAll(){
+        return studentService.studentsListAll();
+    }
+    @QueryMapping
+    Optional<Student> studentsFindById(@Argument Long id){
         return studentService.studentFindById(id);
     }
     @QueryMapping

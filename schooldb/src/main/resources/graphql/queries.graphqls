@@ -11,7 +11,8 @@ type Query {
     dailyAttendanceFindByStudentIdAndDateAndAttendanceTypeName(studentId: ID!, date: String!, attendanceTypeName: String!): [DailyAttendance]
 
     #Student
-    studentFindById(id: ID!): Student
+    studentsListAll: [Student]
+    studentsFindById(id: ID!): Student
     studentsFindByOhioSsid(ohioSsid: String!): Student
     studentsFindByFirstNameIgnoreCase(firstName: String!): [Student]
     studentsFindByLastNameIgnoreCase(lastName: String!): [Student]

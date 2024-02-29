@@ -19,7 +19,7 @@ export function StudentPage() {
   return (
     <>
       <Title>Student Data</Title>
-      <CustomDataTable query={GET_ALL_STUDENTS} dataKey="allStudents" tableHeaders={tableHeaders} />
+      <CustomDataTable query={GET_ALL_STUDENTS} dataKey="studentsListAll" tableHeaders={tableHeaders} />
     </>
   );
 }

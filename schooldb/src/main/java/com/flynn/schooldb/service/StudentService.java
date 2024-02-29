@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StudentService {
+    List<Student> studentsListAll();
     Optional<Student> studentFindById(Long id);
     Optional<Student> studentsFindByOhioSsid(String ohioSsid);
     List<Student> studentsFindByFirstNameIgnoreCase(String firstName);
