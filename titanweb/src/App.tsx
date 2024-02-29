@@ -11,6 +11,9 @@ import { AppShellHeader } from "./components/AppShellHeader";
 import { AppShellNavbar } from "./components/AppShellNavbar";
 import { useEffect, useState } from "react";
 
+import 'mantine-datatable/styles.layer.css';
+import './layout.css';
+
 export default function App() {
   const location = useLocation();
   const [opened, { toggle }] = useDisclosure();

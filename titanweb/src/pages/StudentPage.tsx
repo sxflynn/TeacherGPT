@@ -1,5 +1,5 @@
 import { Title } from "@mantine/core";
-import { DataTable } from '../components/DataTable'
+import { CustomDataTable } from '../components/CustomDataTable'
 import { GET_ALL_STUDENTS } from "../dataServices/students/queries";
 
 
@@ -19,7 +19,7 @@ export function StudentPage() {
   return (
     <>
       <Title>Student Data</Title>
-      <DataTable query={GET_ALL_STUDENTS} dataKey="allStudents" tableHeaders={tableHeaders} />
+      <CustomDataTable query={GET_ALL_STUDENTS} dataKey="allStudents" tableHeaders={tableHeaders} />
     </>
   );
 }
