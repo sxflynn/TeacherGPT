@@ -6,7 +6,7 @@ from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
-from src.graphql import GraphQLWorker
+from src.graphql import GQLStudentAgent
 
 
 def create_graphql_client() -> Client:
@@ -57,7 +57,7 @@ async def run_prompt(websocket: WebSocket):
         return
     system_prompt=get_prompt_text('global_system_prompt')
     gqlclient = websocket.app.state.graphql_client    
-    gqlworker = GraphQLWorker(
+    gqlworker = GQLStudentAgent(
         gqlclient, 
         prompts=websocket.app.state.prompts, 
         task='gql_student_by_last_name', 

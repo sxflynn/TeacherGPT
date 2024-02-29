@@ -7,7 +7,7 @@ class GQLForm(BaseModel):
     fields: Union[list[str], str]
     variables: dict[str, str]
 
-class GraphQLWorker:
+class GQLStudentAgent:
     def __init__(self, client: Client, prompts, task, user_prompt,system_prompt):
         self.client = client
         self.prompts = prompts
