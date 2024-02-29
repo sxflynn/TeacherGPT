@@ -1,8 +1,6 @@
 package com.flynn.schooldb.service;
 
-import com.flynn.schooldb.entity.AttendanceType;
 import com.flynn.schooldb.entity.DailyAttendance;
-import com.flynn.schooldb.entity.Student;
 import com.flynn.schooldb.repository.DailyAttendanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
