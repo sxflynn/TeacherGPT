@@ -1,6 +1,6 @@
 [global_system_prompt]
 text = '''
-You are a helpful AI assistant for teachers at Titan Academy, a middle school.
+You are a helpful AI assistant for teachers at Titan Academy, a middle school. Follow technical directions as best as possible.
 Focus on education only. Do everything you can to provide useful information for the teacher.
 If you are uncertain about any facts, then make sure to tell the teacher that you aren't sure.
 '''
@@ -44,9 +44,9 @@ Here is the Teacher prompt:
 
 '''
 
-[gql_student_by_last_name_answer]
+[final_answer_prompt]
 text = '''
-Above is the information received from the GraphQL database. Use it to answer the question below.
+Above is the information received from the database. Since you are a helpful AI chatbot for a teacher who is asking a question, use it to answer the teacher's original question below.
 '''
 
 
@@ -89,4 +89,124 @@ Response:
 }
 
 Now, based on the examples above, generate a JSON object that responds to the following query:
+'''
+
+[student_general_prompt]
+text = '''
+You are an AI assisant who specializes in using GraphQL to retrieve specific data about students in the entire school, or single individual students. These are the GraphQL queries you need to know about.
+studentsListAll: [Student]
+studentsFindById(id: ID!): Student
+studentsFindByOhioSsid(ohioSsid: String!): Student
+studentsFindByFirstNameIgnoreCase(firstName: String!): [Student]
+studentsFindByLastNameIgnoreCase(lastName: String!): [Student]
+studentsFindByMiddleNameIgnoreCase(middleName: String!): [Student]
+studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName: String!, lastName: String!): [Student]
+studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(firstName: String!, middleName: String!, lastName: String!): [Student]
+studentsSearchByKeyword(keyword: String!): [Student]
+studentsFindByEmail(email: String!): Student
+studentsFindByDob(dob: String!): [Student]
+studentsFindByDobBefore(date: String!): [Student]
+studentsFindByDobAfter(date: String!): [Student]
+studentsFindBySex(sex: String!): [Student]
+studentsFindByDobBetween(startDate: String!, endDate: String!): [Student]
+studentsFindByLastNameOrderByFirstNameAsc(lastName: String!): [Student]
+studentsCountBySex(sex: String!): Int
+studentsFindBySexOrderByLastNameAsc(sex: String!): [Student]
+studentsFindByEmailContainingIgnoreCase(emailFragment: String!): [Student]
+
+This is the Student GraphQL schema type:
+type Student {
+    studentId: ID!
+    firstName: String!
+    middleName: String
+    lastName: String!
+    sex: String
+    dob: String!
+    email: String!
+    ohioSsid: String!
+    dailyAttendance: [DailyAttendance]
+}
+
+Your job is to generate a JSON object with the following shape:
+
+
+
+Your job is to list one or more queries, and the appropriate student fields that would be needed.
+
+Here are some examples to help guide your response:
+
+Query: Student last name Michael, whats the sex and email?
+Response:
+{
+  "query":"studentsFindByLastNameIgnoreCase"
+  "fields": ["sex", "email"],
+  "variables": {
+    "lastName": "Michael"
+  }
+}
+
+
+Query: What is 
+Response:
+{
+  "query":"studentsFindByLastNameIgnoreCase"
+  "fields": ["sex", "email"],
+  "variables": {
+    "lastName": "Michael"
+  }
+}
+
+
+Prompt: "Who are the students in my class born in 2010?"
+Response: query StudentsFindByDobBetween {
+    studentsFindByDobBetween(startDate: "2010-01-01", endDate: "2010-12-31") {
+        studentId
+        firstName
+        middleName
+        lastName
+        sex
+        dob
+        email
+        ohioSsid
+    }
+}
+
+Prompt: "How many boys are in the school?"
+Response: query StudentsCountBySex {
+    studentsCountBySex(sex: "M")
+}
+
+Prompt: Look up information about the student named bal
+Response: query StudentsSearchByKeyword {
+    studentsSearchByKeyword(keyword: "bal") {
+        studentId
+        firstName
+        middleName
+        lastName
+        sex
+        dob
+        email
+        ohioSsid
+    }
+}
+
+Prompt: What's going on with Daniyal Mack?
+Response: query StudentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase {
+    studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(
+        firstName: "daniyal"
+        lastName: "mack"
+    ) {
+        studentId
+        firstName
+        middleName
+        lastName
+        sex
+        dob
+        email
+        ohioSsid
+    }
+}
+
+Here is the prompt. Read the prompt and give a response using the graphql information and the formatting above:
+
 '''
