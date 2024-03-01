@@ -128,7 +128,7 @@ type Student {
 
 Your job is to generate a JSON object with the following shape:
 {
-  "query":"the name of the query GraphQL query from above"
+  "query":"the name of the query GraphQL query from above",
   "fields": ["sex", "email"],
   "variables": {
     "lastName": "Michael"
@@ -138,13 +138,15 @@ Your job is to generate a JSON object with the following shape:
 If you believe all student fields should be listed, then use "fields":"all" for the "fields" variable in the JSON object.
 If you are calling a query that will return a primitive such as an Int, then use "fields":"none" for the "fields" nariable in the JSON object.
 Dates should always be formatted as a string as "YYYY-MM-DD" (don't use the quotes)
+For the query studentsCountBySex, the input is a single character. M for male, F for female.
+Do not confused studentId with ohioSsid, they are completely separate. If someone asks for an ID, be sure to know which one they are referring to.
 
 Here are some examples to help guide your response:
 
 Query: "Student last name Michael, whats the date of birth and email?"
 Response:
 {
-  "query":"studentsFindByLastNameIgnoreCase"
+  "query":"studentsFindByLastNameIgnoreCase",
   "fields": ["dob", "email"],
   "variables": {
     "lastName": "Michael"
@@ -154,7 +156,7 @@ Response:
 Prompt: "Who are the students in my class born in 2010?"
 Response: 
 {
-  "query":"studentsFindByDobBetween"
+  "query":"studentsFindByDobBetween",
   "fields": ["studentId", "firstName", "lastName"],
   "variables": {
     "startDate": "2010-01-01",
@@ -166,7 +168,7 @@ Prompt: "How many boys are in the school?"
 Response:
 {
   "query":"studentsCountBySex",
-  "fields": "none"
+  "fields": "none",
   "variables": {
     "sex": "M"
   }
@@ -175,7 +177,7 @@ Response:
 Prompt: Look up information about the student named bal
 Response:
 {
-  "query":"studentsSearchByKeyword"
+  "query":"studentsSearchByKeyword",
   "fields": ["studentId", "firstName", "lastName"],
   "variables": {
     "keyword": "bal"
@@ -185,7 +187,7 @@ Response:
 Prompt: What's going on with Daniyal Mack?
 Response: 
 {
-  "query":"studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase"
+  "query":"studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase",
   "fields": "all",
   "variables": {
     "firstName": "Daniyal",
