@@ -21,6 +21,7 @@ type Query {
     studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(firstName: String!, middleName: String!, lastName: String!): [Student]
     studentsSearchByKeyword(keyword: String!): [Student]
     studentsFindByEmail(email: String!): Student
+    studentsFindByBirthMonth(month: Int!): [Student]
     studentsFindByDob(dob: String!): [Student]
     studentsFindByDobBefore(date: String!): [Student]
     studentsFindByDobAfter(date: String!): [Student]

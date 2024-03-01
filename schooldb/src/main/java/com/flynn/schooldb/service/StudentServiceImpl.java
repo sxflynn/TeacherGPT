@@ -72,6 +72,12 @@ public class StudentServiceImpl implements StudentService{
 
     @Override
     @Transactional(readOnly = true)
+    public List<Student> studentsFindByBirthMonth(int month) {
+        return studentRepository.findByBirthMonth(month);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Student> studentsFindByDob(LocalDate dob) {
         return studentRepository.findByDob(dob);
     }

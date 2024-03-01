@@ -55,6 +55,12 @@ public class StudentQueryResolver {
     public Optional<Student> studentsFindByEmail(@Argument String email){
         return studentService.studentsFindByEmail(email);
     }
+
+    @QueryMapping
+    public List<Student> studentsFindByBirthMonth(@Argument int month){
+        return studentService.studentsFindByBirthMonth(month);
+    }
+
     @QueryMapping
     public List<Student> studentsFindByDob(@Argument LocalDate dob){
         return studentService.studentsFindByDob(dob);

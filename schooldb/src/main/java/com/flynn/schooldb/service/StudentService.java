@@ -16,6 +16,7 @@ public interface StudentService {
     List<Student> studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(String firstName, String middleName, String lastName);
     List<Student> studentsSearchByKeyword(String keyword);
     Optional<Student> studentsFindByEmail(String email);
+    List<Student> studentsFindByBirthMonth(int month);
     List<Student> studentsFindByDob(LocalDate dob);
     List<Student> studentsFindByDobBefore(LocalDate date);
     List<Student> studentsFindByDobAfter(LocalDate date);
