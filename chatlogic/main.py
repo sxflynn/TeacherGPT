@@ -1,4 +1,5 @@
 import uvicorn # For debugging
+from datetime import datetime
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +28,12 @@ def get_prompt_text(section_name: str) -> str:
     prompts = app.state.prompts
     return prompts.get(section_name, {}).get('text', '')
 
+def get_system_prompt() -> str:
+    today = datetime.now()
+    formatted_date = today.strftime("%B %d, %Y")
+    prompts = app.state.prompts
+    system_prompt = (f"Today is {formatted_date}. " + prompts.get('global_system_prompt', {}).get('text', ''))
+    return system_prompt
 
 async def get_graphql_client(request: Request) -> Client:
     return request.app.state.graphql_client
@@ -35,7 +42,7 @@ def relevancy_check(userprompt:str) -> bool:
     gateway_prompt = get_prompt_text('gateway_prompt')
     prompt_engine = LLMPrompt(
         prompt=(gateway_prompt + userprompt),
-        system_prompt=get_prompt_text('global_system_prompt')
+        system_prompt=get_system_prompt()
         )
     prompt_engine.send()
     return "Proceed" in extractContent(prompt_engine.response)
@@ -55,7 +62,7 @@ async def run_prompt(websocket: WebSocket):
     user_prompt = await get_relevant_prompt(websocket)
     if user_prompt is None:
         return
-    system_prompt=get_prompt_text('global_system_prompt')
+    system_prompt=get_system_prompt()
     gqlclient = websocket.app.state.graphql_client    
     gqlworker = GQLStudentAgent(
         gqlclient, 
@@ -68,7 +75,7 @@ async def run_prompt(websocket: WebSocket):
     final_answer_prompt = get_prompt_text('final_answer_prompt')    
     final_answer_engine = LLMPrompt(
         prompt=(str(gqlworker_data) + final_answer_prompt + user_prompt),
-        system_prompt=get_prompt_text('global_system_prompt')
+        system_prompt=get_system_prompt()
         )
     final_answer = final_answer_engine.send(stream=True)
     for chunk in final_answer:
