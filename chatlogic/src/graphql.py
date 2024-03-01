@@ -7,10 +7,6 @@ from src.prompt import LLMPrompt, extractContent
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-class GQLForm(BaseModel):
-    fields: Union[list[str], str]
-    variables: dict[str, str]
-
 class GQLQueryModel(BaseModel):
     query: str
     fields: Union[list[str], str]
