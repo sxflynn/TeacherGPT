@@ -13,12 +13,13 @@ class GQLQueryModel(BaseModel):
     variables: Optional[dict[str, Any]] = None
 
 class GQLStudentAgent:
-    def __init__(self, client: GQLClient, prompts_file, task, user_prompt:str,system_prompt:str):
+    def __init__(self, client: GQLClient, prompts_file, task, user_prompt:str,system_prompt:str, all_fields = ['studentId', 'firstName', 'middleName', 'lastName', 'sex', 'dob', 'email', 'ohioSsid']):
         self.gqlclient = client
         self.prompts_file = prompts_file
         self.task = task
         self.user_prompt = user_prompt
         self.system_prompt=system_prompt
+        self.all_fields = all_fields
     
     def _fetch_fields(self, task_prompt, user_prompt) -> str:
         task_engine = LLMPrompt(
@@ -48,9 +49,8 @@ class GQLStudentAgent:
         return self._generate_final_response(gql_query_response)
     
     def _generate_raw_gql_query(self, gql_data: GQLQueryModel) -> str:
-        all_fields = ['studentId', 'firstName', 'middleName', 'lastName', 'sex', 'dob', 'email', 'ohioSsid']
         fields_query_part = '' if gql_data.fields == 'none' else \
-                            ' '.join(all_fields) if gql_data.fields == 'all' else \
+                            ' '.join(self.all_fields) if gql_data.fields == 'all' else \
                             ' '.join(gql_data.fields)
         # Construct the variables part of the query if variables are provided
         if gql_data.variables:
