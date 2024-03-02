@@ -35,9 +35,6 @@ def get_system_prompt() -> str:
     system_prompt = (f"Today is {formatted_date}. " + prompts.get('global_system_prompt', {}).get('text', ''))
     return system_prompt
 
-async def get_graphql_client(request: Request) -> Client:
-    return request.app.state.graphql_client
-
 def relevancy_check(userprompt:str) -> bool:
     gateway_prompt = get_prompt_text('gateway_prompt')
     prompt_engine = LLMPrompt(
