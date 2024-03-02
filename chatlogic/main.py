@@ -60,16 +60,16 @@ async def run_prompt(websocket: WebSocket):
     if user_prompt is None:
         return
     system_prompt=get_system_prompt()
-    gqlclient = websocket.app.state.graphql_client    
+    gqlclient = websocket.app.state.graphql_client
     gqlworker = GQLStudentAgent(
-        gqlclient, 
-        prompts_file=websocket.app.state.prompts, 
-        task='student_general_prompt', 
-        user_prompt=user_prompt, 
+        gqlclient,
+        prompts_file=websocket.app.state.prompts,
+        task='student_general_prompt',
+        user_prompt=user_prompt,
         system_prompt=system_prompt
         )
     gqlworker_data = await gqlworker.get_data_single_prompt()
-    final_answer_prompt = get_prompt_text('final_answer_prompt')    
+    final_answer_prompt = get_prompt_text('final_answer_prompt')
     final_answer_engine = LLMPrompt(
         prompt=(str(gqlworker_data) + final_answer_prompt + user_prompt),
         system_prompt=get_system_prompt()
