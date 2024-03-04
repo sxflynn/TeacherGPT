@@ -33,7 +33,7 @@ class Orchestrator:
             )
         return extractContent(api_decision_engine.send(json_mode=True))  
         
-    def prompt_for_apis(self) -> List[ApiDecision]:
+    def _prompt_for_apis(self) -> List[ApiDecision]:
         raw_decision_list = self._fetch_api_decision()
         print("raw decision list is: " + str(raw_decision_list))
         try:
@@ -45,7 +45,7 @@ class Orchestrator:
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         return validated_decision_list
                
-    async def handle_call(self, api_call):
+    async def _handle_call(self, api_call):
         if api_call.api in ["none", "inaccessible"]:
             self.collected_data.append(api_call.reason)
         else:
@@ -60,3 +60,8 @@ class Orchestrator:
                 )
             gqlworker_data = await gqlworker.get_data_single_prompt()
             self.collected_data.append(gqlworker_data)
+            
+    async def run_orchestration(self):
+        api_task_list = self._prompt_for_apis()
+        for api_call in api_task_list:
+            await self._handle_call(api_call)
