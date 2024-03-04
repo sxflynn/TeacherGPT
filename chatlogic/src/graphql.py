@@ -12,14 +12,14 @@ class GQLQueryModel(BaseModel):
     fields: Union[list[str], str]
     variables: Optional[dict[str, Any]] = None
 
-class GQLStudentAgent:
-    def __init__(self, client: GQLClient, prompts_file, task, user_prompt:str,system_prompt:str, all_fields = ['studentId', 'firstName', 'middleName', 'lastName', 'sex', 'dob', 'email', 'ohioSsid']):
+class GQLAgent:
+    def __init__(self, client: GQLClient, prompts_file, task, user_prompt:str,system_prompt:str):
         self.gqlclient = client
         self.prompts_file = prompts_file
         self.task = task
         self.user_prompt = user_prompt
         self.system_prompt=system_prompt
-        self.all_fields = all_fields
+        self.all_fields = ['studentId', 'firstName', 'middleName', 'lastName', 'sex', 'dob', 'email', 'ohioSsid']
     
     def _fetch_fields(self, task_prompt, user_prompt) -> str:
         task_engine = LLMPrompt(
