@@ -1,3 +1,4 @@
+from typing import List
 import uvicorn # For debugging
 from datetime import datetime
 from contextlib import asynccontextmanager
@@ -7,7 +8,8 @@ from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
-from src.graphql import GQLStudentAgent
+from src.graphql import GQLAgent
+from src.orchestrator import Orchestrator, ApiDecision, prompt_mapping
 
 
 def create_graphql_client() -> Client:
@@ -56,22 +58,39 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
 @app.websocket("/promptstreaming")
 async def run_prompt(websocket: WebSocket):    
     await websocket.accept()
-    user_prompt = await get_relevant_prompt(websocket)
-    if user_prompt is None:
+    input_user_prompt = await get_relevant_prompt(websocket)
+    if input_user_prompt is None:
         return
     system_prompt=get_system_prompt()
     gqlclient = websocket.app.state.graphql_client
-    gqlworker = GQLStudentAgent(
+    orchestrator = Orchestrator(
         gqlclient,
-        prompts_file=websocket.app.state.prompts,
-        task='student_general_prompt',
-        user_prompt=user_prompt,
-        system_prompt=system_prompt
+        user_prompt=input_user_prompt,
+        system_prompt=get_system_prompt(),
+        prompts_file=websocket.app.state.prompts
         )
-    gqlworker_data = await gqlworker.get_data_single_prompt()
+    api_task_list:List[ApiDecision] = orchestrator.prompt_for_apis()
+    
+    for api_call in api_task_list:
+        if api_call.api in ["none", "inaccessible"]:
+            orchestrator.collected_data.append(api_call.reason)
+        else:
+            task = prompt_mapping.get(api_call.api, None) # student_general_prompt
+        # await asyncio.gather(*(self.handle_jobs(job) for job in validated_decision_list))
+            gqlworker = GQLAgent(
+                gqlclient,
+                prompts_file=websocket.app.state.prompts,
+                task=task,
+                user_prompt=api_call.query,
+                system_prompt=system_prompt
+                )
+            gqlworker_data = await gqlworker.get_data_single_prompt()
+            orchestrator.collected_data.append(gqlworker_data)
+
+    print("Collected data: " + str(orchestrator.collected_data))
     final_answer_prompt = get_prompt_text('final_answer_prompt')
     final_answer_engine = LLMPrompt(
-        prompt=(str(gqlworker_data) + final_answer_prompt + user_prompt),
+        prompt=(str(orchestrator.collected_data) + final_answer_prompt + input_user_prompt),
         system_prompt=get_system_prompt()
         )
     final_answer = final_answer_engine.send(stream=True)
