@@ -30,12 +30,13 @@ class Orchestrator:
             prompt=(self._get_orchestrator_prompt() + self.user_prompt),
             system_prompt=self.system_prompt
             )
-        return extractContent(api_decision_engine.send())  
+        return extractContent(api_decision_engine.send(json_mode=True))  
         
     def prompt_for_apis(self) -> List[ApiDecision]:
         raw_decision_list = self._fetch_api_decision()
+        print("raw decision list is: " + str(raw_decision_list))
         try:
-            decision_data = json.loads(raw_decision_list)  # Make sure to import json at the top
+            decision_data = json.loads(raw_decision_list)["data"]
             validated_decision_list = [ApiDecision(**item) for item in decision_data]
             print("validated_decision_list is: ", validated_decision_list)
         except ValidationError as e:

@@ -26,7 +26,7 @@ class GQLAgent:
             prompt=(task_prompt + user_prompt),
             system_prompt=self.system_prompt
             )
-        return extractContent(task_engine.send())
+        return extractContent(task_engine.send(json_mode=True))
     
     def _generate_final_response(self, gql_query_response: Dict[str,Any]) -> str:
         final_response = ("The teacher asked the question " 
