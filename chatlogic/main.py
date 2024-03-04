@@ -8,8 +8,7 @@ from gql import Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
-from src.graphql import GQLAgent
-from src.orchestrator import Orchestrator, ApiDecision, prompt_mapping
+from src.orchestrator import Orchestrator
 
 
 def create_graphql_client() -> Client:
@@ -84,10 +83,7 @@ async def run_prompt(websocket: WebSocket):
         system_prompt=get_system_prompt(),
         prompts_file=websocket.app.state.prompts
         )
-    api_task_list = orchestrator.prompt_for_apis()
-    
-    for api_call in api_task_list:
-        await orchestrator.handle_call(api_call)
+    await orchestrator.run_orchestration()
     await output_final_response(websocket,input_user_prompt, orchestrator.collected_data)
     return
 
