@@ -63,6 +63,7 @@ Here are the available APIs that you can call:
 
 API Name: Student API
 What information is available: Primarily used to lookup basic facts about a student's name, student ID number, email, sex, date of birth. Special queries exist to find students by birth month, and to count the number of students by sex.
+The Students API does not have direct access to related data about grades, behavior. It only has access to personal information listed above.
 
 API Name: Attendance API
 What information is available: Primarily used to lookup attendance information such as individual student attendance records for specific dates, listing days by attendance type such as absences and tardies
