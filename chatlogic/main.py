@@ -55,42 +55,11 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     await websocket.close()
     return None
 
-@app.websocket("/promptstreaming")
-async def run_prompt(websocket: WebSocket):    
-    await websocket.accept()
-    input_user_prompt = await get_relevant_prompt(websocket)
-    if input_user_prompt is None:
-        return
-    system_prompt=get_system_prompt()
-    gqlclient = websocket.app.state.graphql_client
-    orchestrator = Orchestrator(
-        gqlclient,
-        user_prompt=input_user_prompt,
-        system_prompt=get_system_prompt(),
-        prompts_file=websocket.app.state.prompts
-        )
-    api_task_list:List[ApiDecision] = orchestrator.prompt_for_apis()
-    
-    for api_call in api_task_list:
-        if api_call.api in ["none", "inaccessible"]:
-            orchestrator.collected_data.append(api_call.reason)
-        else:
-            task = prompt_mapping.get(api_call.api, None) # student_general_prompt
-        # await asyncio.gather(*(self.handle_jobs(job) for job in validated_decision_list))
-            gqlworker = GQLAgent(
-                gqlclient,
-                prompts_file=websocket.app.state.prompts,
-                task=task,
-                user_prompt=api_call.query,
-                system_prompt=system_prompt
-                )
-            gqlworker_data = await gqlworker.get_data_single_prompt()
-            orchestrator.collected_data.append(gqlworker_data)
-
-    print("Collected data: " + str(orchestrator.collected_data))
+async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data) -> str:
+    print("Collected data: " + str(collected_data))
     final_answer_prompt = get_prompt_text('final_answer_prompt')
     final_answer_engine = LLMPrompt(
-        prompt=(str(orchestrator.collected_data) + final_answer_prompt + input_user_prompt),
+        prompt=(str(collected_data) + final_answer_prompt + input_user_prompt),
         system_prompt=get_system_prompt()
         )
     final_answer = final_answer_engine.send(stream=True)
@@ -100,6 +69,26 @@ async def run_prompt(websocket: WebSocket):
         final_answer_engine.chunks_list.append(content)
     final_answer_engine.response_text = ''.join(final_answer_engine.chunks_list)
     await websocket.close()
+    return None
+
+@app.websocket("/promptstreaming")
+async def run_prompt(websocket: WebSocket):    
+    await websocket.accept()
+    input_user_prompt = await get_relevant_prompt(websocket)
+    if input_user_prompt is None:
+        return
+    gqlclient = websocket.app.state.graphql_client
+    orchestrator = Orchestrator(
+        gqlclient,
+        user_prompt=input_user_prompt,
+        system_prompt=get_system_prompt(),
+        prompts_file=websocket.app.state.prompts
+        )
+    api_task_list = orchestrator.prompt_for_apis()
+    
+    for api_call in api_task_list:
+        await orchestrator.handle_call(api_call)
+    await output_final_response(websocket,input_user_prompt, orchestrator.collected_data)
     return
 
 app.add_middleware(

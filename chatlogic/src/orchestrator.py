@@ -2,6 +2,7 @@ import json
 from typing import List, Optional
 from gql import gql, Client as GQLClient
 from pydantic import BaseModel, ValidationError
+from src.graphql import GQLAgent
 from src.prompt import LLMPrompt, extractContent
 
 prompt_mapping = {
@@ -43,6 +44,19 @@ class Orchestrator:
             print("raw_decision_list couldn't validate: ", raw_decision_list)
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         return validated_decision_list
-            
-            
-        
+               
+    async def handle_call(self, api_call):
+        if api_call.api in ["none", "inaccessible"]:
+            self.collected_data.append(api_call.reason)
+        else:
+            task = prompt_mapping.get(api_call.api, None) # student_general_prompt
+        # await asyncio.gather(*(self.handle_jobs(job) for job in validated_decision_list))
+            gqlworker = GQLAgent(
+                self.gqlclient,
+                prompts_file=self.prompts_file,
+                task=task,
+                user_prompt=api_call.query,
+                system_prompt=self.system_prompt
+                )
+            gqlworker_data = await gqlworker.get_data_single_prompt()
+            self.collected_data.append(gqlworker_data)
