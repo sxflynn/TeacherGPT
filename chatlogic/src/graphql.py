@@ -44,14 +44,14 @@ class GQLAgent:
         return final_response
     
     async def get_data_single_prompt(self):
-        gql_raw_data = self._fetch_fields(task_prompt=self._get_task_prompt(),user_prompt=self.user_prompt) ## stores query json object with shape of GQLQueryModel
+        gql_raw_query_builder = self._fetch_fields(task_prompt=self._get_task_prompt(),user_prompt=self.user_prompt) ## stores query json object with shape of GQLQueryModel
         try:
-            validated_gql_query = GQLQueryModel.model_validate_json(gql_raw_data) #now the json is a pydantic object
-            print("validated_gql_query is: " + str(validated_gql_query))
+            validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder) #now the json is a pydantic object
+            print("validated_gql_query is: " + str(validated_gql_query_args))
         except ValidationError as e:
-            print ("gql_raw_data couldn't validate: ", str(gql_raw_data))
+            print ("gql_raw_data couldn't validate: ", str(gql_raw_query_builder))
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
-        stringquery = self._generate_raw_gql_query(validated_gql_query)
+        stringquery = self._generate_complete_gql_query(validated_gql_query_args)
         query_phrase = gql(stringquery)
         try:
             gql_query_response = await self.gqlclient.execute_async(query_phrase)
@@ -59,7 +59,7 @@ class GQLAgent:
             raise GraphQLError(f"GraphQL Error needs fixing: {e.message}") from e
         return self._generate_final_response(gql_query_response)
     
-    def _generate_raw_gql_query(self, gql_data: GQLQueryModel) -> str:
+    def _generate_complete_gql_query(self, gql_data: GQLQueryModel) -> str:
         int_fields = ["count", "average", "sum"]
         if not any(keyword in gql_data.query.lower() for keyword in int_fields) and gql_data.fields == 'none':
             gql_data.fields = self.all_fields
