@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Optional, Union, Any
 from gql import gql, Client as GQLClient
+from gql.transport.exceptions import TransportQueryError
 from graphql import GraphQLError
 from pydantic import BaseModel, ValidationError
 from src.prompt import LLMPrompt, extractContent
@@ -21,13 +22,16 @@ class GQLAgent:
         self.task_key = task_key
         self.user_prompt = user_prompt
         self.system_prompt=system_prompt
-        self.all_fields = self._get_all_fields()
         self.all_fields_mapping = {
             "student": ["studentId", "firstName", "middleName", "lastName", "sex", "dob", "email", "ohioSsid"]
             }
+        self.all_fields = self._get_all_fields(task_key)
+
     
-    def _get_all_fields(self):
-        return self.all_fields_mapping.get(self.task_key)
+    def _get_all_fields(self, task_key):
+        if task_key not in self.all_fields_mapping:
+            raise ValueError(f"Task key '{task_key}' is not defined in all_fields_mapping.")
+        return self.all_fields_mapping.get(task_key)
     
     def _fetch_fields(self, task_prompt, user_prompt) -> str:
         task_engine = LLMPrompt(
@@ -44,20 +48,42 @@ class GQLAgent:
         return final_response
     
     async def get_data_single_prompt(self):
-        gql_raw_query_builder = self._fetch_fields(task_prompt=self._get_task_prompt(),user_prompt=self.user_prompt) ## stores query json object with shape of GQLQueryModel
-        try:
-            validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder) #now the json is a pydantic object
-            print("validated_gql_query is: " + str(validated_gql_query_args))
-        except ValidationError as e:
-            print ("gql_raw_data couldn't validate: ", str(gql_raw_query_builder))
-            raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
-        stringquery = self._generate_complete_gql_query(validated_gql_query_args)
-        query_phrase = gql(stringquery)
-        try:
-            gql_query_response = await self.gqlclient.execute_async(query_phrase)
-        except GraphQLError as e:
-            raise GraphQLError(f"GraphQL Error needs fixing: {e.message}") from e
-        return self._generate_final_response(gql_query_response)
+        max_retries = 2
+        attempts = 0
+        while attempts <= max_retries:
+            try:
+                gql_raw_query_builder = self._fetch_fields(task_prompt=self._get_task_prompt(), user_prompt=self.user_prompt)
+                validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder)
+                print("validated_gql_query is: " + str(validated_gql_query_args))
+                
+                stringquery = self._generate_complete_gql_query(validated_gql_query_args)
+                query_phrase = gql(stringquery)
+                
+                gql_query_response = await self.gqlclient.execute_async(query_phrase)
+                return self._generate_final_response(gql_query_response)
+            except (GraphQLError, ValidationError, TransportQueryError) as e:
+                if isinstance(e, GraphQLError):
+                    error_message = e.message
+                elif isinstance(e, ValidationError):
+                    error_messages = [err["msg"] for err in e.errors()]
+                    error_message = "; ".join(error_messages)
+                elif isinstance(e, TransportQueryError):
+                    if e.errors and isinstance(e.errors[0], dict):
+                        error_message = e.errors[0].get('message', 'An error occurred')
+                    else:
+                        error_message = "An error occurred in TransportQueryError without detailed messages."
+                else:
+                    error_message = str(e)
+                print(f"Error needs fixing: {error_message}")
+                if attempts < max_retries:
+                    print(f"Attempt {attempts + 1} failed, retrying...")
+                    self.user_prompt += f"\n UPDATE: There was an error generating a valid GraphQL query:  {error_message}. Regenerate the GraphQL query object with the goal of avoiding this error."
+                    attempts += 1
+                else:
+                    raise e from e
+            except Exception as e:
+                raise e
+        print("Maximum retry attempts reached, unable to complete the operation.")
     
     def _generate_complete_gql_query(self, gql_data: GQLQueryModel) -> str:
         int_fields = ["count", "average", "sum"]
