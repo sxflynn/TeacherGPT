@@ -43,7 +43,7 @@ public class StudentServiceImpl implements StudentService{
     @Override
     @Transactional(readOnly = true)
     public List<Student> studentsFindByFirstNameStartingWith(String firstLetter){
-        return studentRepository.findByFirstNameIgnoreCase(firstLetter);
+        return studentRepository.findByFirstNameStartingWith(firstLetter);
     }
     @Override
     @Transactional(readOnly = true)
