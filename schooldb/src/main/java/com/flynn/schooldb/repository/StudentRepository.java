@@ -18,6 +18,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Optional<Student> findByOhioSsid(String ohioSsid);
 
     List<Student> findByFirstNameIgnoreCase(String firstName);
+    List<Student> findByFirstNameStartingWith(String firstLetter);
+    List<Student> findByLastNameStartingWith(String firstLetter);
 
     List<Student> findByLastNameIgnoreCase(String lastName);
 

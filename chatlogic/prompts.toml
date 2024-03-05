@@ -249,6 +249,8 @@ studentsFindById(id: ID!): Student
 studentsFindByOhioSsid(ohioSsid: String!): Student
 studentsFindByFirstNameIgnoreCase(firstName: String!): [Student]
 studentsFindByLastNameIgnoreCase(lastName: String!): [Student]
+studentsFindByLastNameStartingWith(firstLetter: String!): [Student]
+studentsFindByFirstNameStartingWith(firstLetter: String!): [Student]
 studentsFindByMiddleNameIgnoreCase(middleName: String!): [Student]
 studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName: String!, lastName: String!): [Student]
 studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(firstName: String!, middleName: String!, lastName: String!): [Student]

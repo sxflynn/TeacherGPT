@@ -11,6 +11,8 @@ public interface StudentService {
     Optional<Student> studentsFindByOhioSsid(String ohioSsid);
     List<Student> studentsFindByFirstNameIgnoreCase(String firstName);
     List<Student> studentsFindByLastNameIgnoreCase(String lastName);
+    List<Student> studentsFindByFirstNameStartingWith(String firstLetter);
+    List<Student> studentsFindByLastNameStartingWith(String firstLetter);
     List<Student> studentsFindByMiddleNameIgnoreCase(String middleName);
     List<Student> studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(String firstName, String lastName);
     List<Student> studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(String firstName, String middleName, String lastName);

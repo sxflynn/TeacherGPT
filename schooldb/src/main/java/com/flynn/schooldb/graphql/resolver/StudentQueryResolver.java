@@ -36,6 +36,15 @@ public class StudentQueryResolver {
         return studentService.studentsFindByLastNameIgnoreCase(lastName);
     }
     @QueryMapping
+    public List<Student> studentsFindByLastNameStartingWith(@Argument String firstLetter){
+        return studentService.studentsFindByLastNameStartingWith(firstLetter);
+    }
+
+    @QueryMapping
+    public List<Student> studentsFindByFirstNameStartingWith(@Argument String firstLetter){
+        return studentService.studentsFindByFirstNameStartingWith(firstLetter);
+    }
+    @QueryMapping
     public List<Student> studentsFindByMiddleNameIgnoreCase(@Argument String middleName){
         return studentService.studentsFindByMiddleNameIgnoreCase(middleName);
     }

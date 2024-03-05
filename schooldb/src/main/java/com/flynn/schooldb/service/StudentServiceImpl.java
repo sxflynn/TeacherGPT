@@ -42,6 +42,17 @@ public class StudentServiceImpl implements StudentService{
 
     @Override
     @Transactional(readOnly = true)
+    public List<Student> studentsFindByFirstNameStartingWith(String firstLetter){
+        return studentRepository.findByFirstNameIgnoreCase(firstLetter);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<Student> studentsFindByLastNameStartingWith(String firstLetter){
+        return studentRepository.findByLastNameStartingWith(firstLetter);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<Student> studentsFindByMiddleNameIgnoreCase(String middleName) {
         return studentRepository.findByMiddleNameIgnoreCase(middleName);
     }
