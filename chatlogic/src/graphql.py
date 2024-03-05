@@ -53,10 +53,12 @@ class GQLAgent:
         return self._generate_final_response(gql_query_response)
     
     def _generate_raw_gql_query(self, gql_data: GQLQueryModel) -> str:
+        int_fields = ["count", "average", "sum"]
+        if not any(keyword in gql_data.query.lower() for keyword in int_fields) and gql_data.fields == 'none':
+            gql_data.fields = self.all_fields
         fields_query_part = '' if gql_data.fields == 'none' else \
                             ' '.join(self.all_fields) if gql_data.fields == 'all' else \
                             ' '.join(gql_data.fields)
-        # Construct the variables part of the query if variables are provided
         if gql_data.variables:
             variables_part = ', '.join([f'{k}: "{v}"' if isinstance(v, str) else f'{k}: {v}' for k, v in gql_data.variables.items()])
             if fields_query_part:
@@ -70,7 +72,6 @@ class GQLAgent:
                     {gql_data.query}({variables_part})
                 }}"""
         else:
-            # Construct the query without variables, assuming fields might still be none
             if fields_query_part:
                 query = f"""query {gql_data.query} {{
                     {gql_data.query} {{
@@ -81,8 +82,9 @@ class GQLAgent:
                 query = f"""query {gql_data.query} {{
                     {gql_data.query}
                 }}"""
-        print ("raw generated gql query is " + str(query))
+        print("raw generated gql query is " + str(query))
         return query
+
     
     def _get_task_prompt(self):
         return self.prompts_file.get(self.task).get('text')
