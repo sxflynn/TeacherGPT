@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Optional, Union, Any
 from gql import gql, Client as GQLClient
+from graphql import GraphQLError
 from pydantic import BaseModel, ValidationError
 from src.prompt import LLMPrompt, extractContent
 
@@ -45,7 +46,10 @@ class GQLAgent:
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         stringquery = self._generate_raw_gql_query(validated_gql_query)
         query_phrase = gql(stringquery)
-        gql_query_response = await self.gqlclient.execute_async(query_phrase)
+        try:
+            gql_query_response = await self.gqlclient.execute_async(query_phrase)
+        except GraphQLError as e:
+            raise GraphQLError(f"GraphQL Error encountered: {e.message}") from e
         return self._generate_final_response(gql_query_response)
     
     def _generate_raw_gql_query(self, gql_data: GQLQueryModel) -> str:
