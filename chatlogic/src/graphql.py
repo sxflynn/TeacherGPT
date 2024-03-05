@@ -14,13 +14,20 @@ class GQLQueryModel(BaseModel):
     variables: Optional[dict[str, Any]] = None
 
 class GQLAgent:
-    def __init__(self, client: GQLClient, prompts_file, task, user_prompt:str,system_prompt:str):
+    def __init__(self, client: GQLClient, prompts_file, task:str, user_prompt:str,system_prompt:str, task_key:str):
         self.gqlclient = client
         self.prompts_file = prompts_file
         self.task = task
+        self.task_key = task_key
         self.user_prompt = user_prompt
         self.system_prompt=system_prompt
-        self.all_fields = ['studentId', 'firstName', 'middleName', 'lastName', 'sex', 'dob', 'email', 'ohioSsid']
+        self.all_fields = self._get_all_fields()
+        self.all_fields_mapping = {
+            "student": ["studentId", "firstName", "middleName", "lastName", "sex", "dob", "email", "ohioSsid"]
+            }
+    
+    def _get_all_fields(self):
+        return self.all_fields_mapping.get(self.task_key)
     
     def _fetch_fields(self, task_prompt, user_prompt) -> str:
         task_engine = LLMPrompt(
@@ -49,7 +56,7 @@ class GQLAgent:
         try:
             gql_query_response = await self.gqlclient.execute_async(query_phrase)
         except GraphQLError as e:
-            raise GraphQLError(f"GraphQL Error encountered: {e.message}") from e
+            raise GraphQLError(f"GraphQL Error needs fixing: {e.message}") from e
         return self._generate_final_response(gql_query_response)
     
     def _generate_raw_gql_query(self, gql_data: GQLQueryModel) -> str:

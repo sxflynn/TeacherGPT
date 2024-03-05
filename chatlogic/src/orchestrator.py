@@ -26,6 +26,10 @@ class Orchestrator:
         self.prompts_file = prompts_file
         self.system_prompt = system_prompt
         self.collected_data = []
+        self.prompt_mapping = {
+            "student": "student_general_prompt",
+            "attendance": "attendance_general_prompt",
+        }
         
     def _get_orchestrator_prompt(self) -> str:
         return self.prompts_file.get('orchestrator_prompt').get('text')
@@ -78,23 +82,24 @@ class Orchestrator:
         if api_call.api in ["none", "inaccessible"]:
             self.collected_data.append(api_call.reason)
         else:
-            gqlworker_data = await self._gql_retriever(api_call.api, api_call.query)
+            gqlworker_data = await self._gql_retriever(task_key=api_call.api, query=api_call.query)
             if gqlworker_data:
                 self.collected_data.append(gqlworker_data)
             
     async def _handle_person(self, person):
         if person.person_type in ["none"]:
             return
-        gqlworker_data = await self._gql_retriever(person.person_type, person.query)
+        gqlworker_data = await self._gql_retriever(task_key=person.person_type, query=person.query)
         if gqlworker_data:
             id_summary = self._fetch_id_summary(gqlworker_data)
             self.user_prompt += "\n Additional ID context: \n" + id_summary
             
     async def _gql_retriever(self, task_key, query):
-        task = prompt_mapping.get(task_key, None)
+        task = self.prompt_mapping.get(task_key, None)
         gqlworker = GQLAgent(
             self.gqlclient,
             prompts_file=self.prompts_file,
+            task_key=task_key,
             task=task,
             user_prompt=query,
             system_prompt=self.system_prompt
