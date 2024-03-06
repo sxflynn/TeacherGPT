@@ -11,15 +11,12 @@ import java.util.List;
 
 @Repository
 public interface DailyAttendanceRepository extends JpaRepository<DailyAttendance, Long> {
-    @Query("SELECT da FROM DailyAttendance da WHERE da.student.studentId = :studentId")
-    List<DailyAttendance> findByStudentId(Long studentId);
-    List<DailyAttendance> findByDate(LocalDate date);
-    @Query("SELECT da FROM DailyAttendance da WHERE da.student.id = :studentId AND da.date = :date")
-    List<DailyAttendance> findByStudentIdAndDate(Long studentId, LocalDate date);
-    List<DailyAttendance> findByExcuseNoteNotNull();
-    @Query("SELECT da FROM DailyAttendance da JOIN da.attendanceType at WHERE at.attendanceType = :attendanceTypeName")
-    List<DailyAttendance> findByAttendanceTypeName(@Param("attendanceTypeName") String attendanceTypeName);
-    @Query("SELECT da FROM DailyAttendance da JOIN da.attendanceType at WHERE da.student.studentId = :studentId AND da.date = :date AND at.attendanceType = :attendanceTypeName")
-    List<DailyAttendance> findByStudentIdAndDateAndAttendanceTypeName(@Param("studentId") Long studentId, @Param("date") LocalDate date, @Param("attendanceTypeName") String attendanceTypeName);
 
+    List<DailyAttendance> findByStudentStudentId(Long studentId);
+    List<DailyAttendance> findByDate(LocalDate date);
+    List<DailyAttendance> findByStudentStudentIdAndDate(Long studentId, LocalDate date);
+    List<DailyAttendance> findByExcuseNoteNotNull();
+    List<DailyAttendance> findByStudentStudentIdAndAttendanceTypeAttendanceType(Long studentId, String attendanceTypeName);
+    List<DailyAttendance> findByStudentStudentIdAndAttendanceTypeAttendanceTypeNot(Long studentId, String attendanceTypeName);
+    List<DailyAttendance> findByAttendanceTypeAttendanceTypeAndDate(String attendanceTypeName, LocalDate date);
 }

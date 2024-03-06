@@ -5,11 +5,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface DailyAttendanceService {
-    List<DailyAttendance> findByStudentId(Long studentId);
+    List<DailyAttendance> findByStudentStudentId(Long studentId);
     List<DailyAttendance> findByDate(LocalDate date);
-    List<DailyAttendance> findByStudentIdAndDate(Long studentId, LocalDate date);
+    List<DailyAttendance> findByStudentStudentIdAndDate(Long studentId, LocalDate date);
     List<DailyAttendance> findByExcuseNoteNotNull();
-    List<DailyAttendance> findByAttendanceTypeName(String attendanceTypeName);
-    List<DailyAttendance> findByStudentIdAndDateAndAttendanceTypeName(Long studentId, LocalDate date, String attendanceTypeName);
-
+    List<DailyAttendance> findByStudentStudentIdAndAttendanceTypeAttendanceType(Long studentId, String attendanceTypeName);
+    List<DailyAttendance> findByStudentStudentIdAndNotFullAttendance(Long studentId);
+    List<DailyAttendance> findByAttendanceTypeAttendanceTypeAndDate(String attendanceTypeName, LocalDate date);
 }

@@ -21,8 +21,8 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyAttendance> findByStudentId(Long studentId) {
-        return dailyAttendanceRepository.findByStudentId(studentId);
+    public List<DailyAttendance> findByStudentStudentId(Long studentId) {
+        return dailyAttendanceRepository.findByStudentStudentId(studentId);
     }
 
     @Override
@@ -33,8 +33,8 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyAttendance> findByStudentIdAndDate(Long studentId, LocalDate date) {
-        return dailyAttendanceRepository.findByStudentIdAndDate(studentId,date);
+    public List<DailyAttendance> findByStudentStudentIdAndDate(Long studentId, LocalDate date) {
+        return dailyAttendanceRepository.findByStudentStudentIdAndDate(studentId,date);
     }
 
     @Override
@@ -45,13 +45,19 @@ public class DailyAttendanceServiceImpl implements DailyAttendanceService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyAttendance> findByAttendanceTypeName(String attendanceTypeName) {
-        return dailyAttendanceRepository.findByAttendanceTypeName(attendanceTypeName);
+    public List<DailyAttendance> findByStudentStudentIdAndAttendanceTypeAttendanceType(Long studentId, String attendanceTypeName) {
+        return dailyAttendanceRepository.findByStudentStudentIdAndAttendanceTypeAttendanceType(studentId,attendanceTypeName);
+    }
+
+    @Override
+    public List<DailyAttendance> findByStudentStudentIdAndNotFullAttendance(Long studentId) {
+        String attendanceTypeName = "Full Attendance";
+        return dailyAttendanceRepository.findByStudentStudentIdAndAttendanceTypeAttendanceTypeNot(studentId,attendanceTypeName);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<DailyAttendance> findByStudentIdAndDateAndAttendanceTypeName(Long studentId, LocalDate date, String attendanceTypeName) {
-        return dailyAttendanceRepository.findByStudentIdAndDateAndAttendanceTypeName(studentId,date,attendanceTypeName);
+    public List<DailyAttendance> findByAttendanceTypeAttendanceTypeAndDate(String attendanceTypeName, LocalDate date) {
+        return dailyAttendanceRepository.findByAttendanceTypeAttendanceTypeAndDate(attendanceTypeName,date);
     }
 }
