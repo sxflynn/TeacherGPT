@@ -61,6 +61,7 @@ async def output_final_response(websocket: WebSocket, input_user_prompt, collect
         prompt=(str(collected_data) + final_answer_prompt + input_user_prompt),
         system_prompt=get_system_prompt()
         )
+    print("## FINAL PROMPT: " + final_answer_engine.prompt)
     final_answer = final_answer_engine.send(stream=True)
     for chunk in final_answer:
         content = chunk.choices[0].delta.content if chunk.choices and chunk.choices[0].delta.content else ""
