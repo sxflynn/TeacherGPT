@@ -1,6 +1,6 @@
 import tomllib, pathlib, os
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -51,19 +51,44 @@ class Config:
             raise ValueError(f"Model {model_name} not found in configuration.")
 
 class LLMClient:
-    def __init__(self, config = Config()):
+    def __init__(self, async_client = False, config = Config()):
         self.config = config
-        self.client = OpenAI(
-        api_key=config.key,
-        base_url=config.url
-        )
+        self.client = self._get_client(type_async=async_client,config=config)
         self.model = config.selected_model
-        
-    def send_prompt(self, prompt, system_prompt):
-        return self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-        )
+    
+    def _get_client(self, config, type_async):
+        if type_async:
+            client = AsyncOpenAI(
+                api_key=config.key,
+                base_url=config.url
+            )
+        else: 
+            client = OpenAI(
+                api_key=config.key,
+                base_url=config.url
+            )
+        return client
+    
+    async def send_prompt_async(self, prompt, system_prompt):
+        if self.client:
+            return await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+        else:
+            raise NotImplementedError("Async client not initialized. Please initialize with async_client=True.")
+
+    def send_prompt_sync(self, prompt, system_prompt):
+        if not self.client:
+            return self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+        else:
+            raise NotImplementedError("Synchronous method called on an async client. Use send_prompt_async instead.")

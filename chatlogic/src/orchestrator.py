@@ -78,6 +78,7 @@ class Orchestrator:
             )
         return extractContent(id_summary_engine.send())
     
+    ## I WANT THIS TO BE ASYNC BECAUSE I WANT THE self.collected_data.append TO BE HAPPENING SIMULTANEOUSLY FOR EACH api_call
     async def _handle_call(self, api_call:ApiDecision):
         if api_call.api in ["none", "inaccessible"]:
             self.collected_data.append(api_call.reason)
@@ -117,6 +118,7 @@ class Orchestrator:
         
         print("##PROMPTING FOR APIS##")
         api_task_list = self._prompt_for_apis()
+        ## IT IS CRITICAL THAT EACH OF THE API_CALL things happens async. There is no required order of operations. 
         for api_call in api_task_list:
             print(f"## NOW CALLING {api_call.api} API")
             print(f"## QUERY: {api_call.query} API")
