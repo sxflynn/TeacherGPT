@@ -25,6 +25,7 @@ class Orchestrator:
         self.user_prompt = user_prompt
         self.prompts_file = prompts_file
         self.system_prompt = system_prompt
+        self.id_context = ""
         self.collected_data = []
         self.prompt_mapping = {
             "student": "student_general_prompt",
@@ -54,7 +55,6 @@ class Orchestrator:
         try:
             decision_data = json.loads(raw_decision_list)["data"]
             validated_decision_list = [ApiDecision(**item) for item in decision_data]
-            print("validated_decision_list is: ", validated_decision_list)
         except ValidationError as e:
             print("raw_decision_list couldn't validate: ", raw_decision_list)
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
@@ -78,7 +78,7 @@ class Orchestrator:
             )
         return extractContent(id_summary_engine.send())
     
-    async def _handle_call(self, api_call):
+    async def _handle_call(self, api_call:ApiDecision):
         if api_call.api in ["none", "inaccessible"]:
             self.collected_data.append(api_call.reason)
         else:
@@ -92,26 +92,32 @@ class Orchestrator:
         gqlworker_data = await self._gql_retriever(task_key=person.person_type, query=person.query)
         if gqlworker_data:
             id_summary = self._fetch_id_summary(gqlworker_data)
-            self.user_prompt += "\n Additional ID context: \n" + id_summary
+            self.id_context += "\n Additional ID context: \n" + id_summary
             
-    async def _gql_retriever(self, task_key, query):
+    async def _gql_retriever(self, task_key:str, query:str):
         task = self.prompt_mapping.get(task_key, None)
         gqlworker = GQLAgent(
             self.gqlclient,
             prompts_file=self.prompts_file,
             task_key=task_key,
             task=task,
-            user_prompt=query,
+            user_prompt=query + (self.id_context if self.id_context is not None else ""),
             system_prompt=self.system_prompt
             )
         gqlworker_data = await gqlworker.get_data_single_prompt()
         return gqlworker_data
             
     async def run_orchestration(self):
+        print("##PROMPTING FOR PEOPLE##")
         people = self._prompt_for_people()
         for person in people:
-           await self._handle_person(person)
-            
+            print(f"## NOW CALLING {person.person_type} API AS PART OF ID PROCESS")
+            print(f"## QUERY: {person.query}")
+            await self._handle_person(person)
+        
+        print("##PROMPTING FOR APIS##")
         api_task_list = self._prompt_for_apis()
         for api_call in api_task_list:
+            print(f"## NOW CALLING {api_call.api} API")
+            print(f"## QUERY: {api_call.query} API")
             await self._handle_call(api_call)
