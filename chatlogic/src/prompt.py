@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 from openai import APIConnectionError, APIError, APIResponseValidationError, APIStatusError, APITimeoutError, BadRequestError, ConflictError, InternalServerError, NotFoundError, PermissionDeniedError, RateLimitError, AuthenticationError, UnprocessableEntityError
 from pydantic import BaseModel
-from src.config import Config
 from src.client import LLMClient
 
 class PromptInput(BaseModel):
