@@ -82,6 +82,7 @@ class GQLAgent:
                 gql_raw_query_builder = await self._fetch_fields(task_prompt=self._get_task_prompt(), user_prompt=self.user_prompt)
                 validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder)                
                 stringquery = self._generate_complete_gql_query(validated_gql_query_args)
+                
                 # Performance issues with this code
                 # is_logical_query = await self._llm_check_query_logic(stringquery)
                 # if is_logical_query.startswith("No"):
