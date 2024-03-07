@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import Dict, Optional, Union, Any
 from gql import gql, Client as GQLClient
 from gql.transport.exceptions import TransportQueryError
@@ -30,6 +31,11 @@ class GQLAgent:
             'attendance': ["attendanceType { attendanceType }"],
             }
         self.all_fields = self._get_all_fields(task_key)
+        self.lock = asyncio.Lock()
+    
+    async def execute_query(self, query):
+        async with self.lock:  # Ensure only one coroutine accesses this block at a time
+            return await self.gqlclient.session.execute(query)
     
     def _get_all_fields(self, task_key):
         if task_key not in self.all_fields_mapping:
@@ -39,12 +45,14 @@ class GQLAgent:
         combined_fields = list(set(standard_fields + mandatory_fields))
         return combined_fields
     
-    def _fetch_fields(self, task_prompt, user_prompt) -> str:
+    async def _fetch_fields(self, task_prompt, user_prompt) -> str:
         task_engine = LLMPrompt(
             prompt=(task_prompt + user_prompt),
-            system_prompt=self.system_prompt
+            system_prompt=self.system_prompt,
+            async_client=True
             )
-        return extractContent(task_engine.send(json_mode=True))
+        response = await task_engine.send_async(json_mode=True)
+        return extractContent(response)
     
     def _generate_final_response(self, gql_query_response: Dict[str,Any]) -> str:
         final_response = ("The teacher asked the question " 
@@ -53,11 +61,14 @@ class GQLAgent:
         + str(gql_query_response))
         return final_response
     
-    def _llm_check_query_logic(self, stringquery):
+    async def _llm_check_query_logic(self, stringquery):
+        check_query_prompt = self.prompts_file.get('check_query_prompt').get('text')
+        combined_prompt = check_query_prompt + self.user_prompt + '\n' + stringquery
         check_query_engine = LLMPrompt(system_prompt=self.system_prompt,
-                  prompt=self.prompts_file.get('check_query_prompt').get('text'),
+                  prompt=combined_prompt,
+                  async_client=True
                   )
-        response = check_query_engine.send()
+        response = await check_query_engine.send_async()
         response_return = extractContent(response)
         print(f"## IS THE GRAPHQL QUERY {stringquery} LOGICALLY SOUND?")
         print(f"## RESPONSE: {response_return}")
@@ -68,18 +79,20 @@ class GQLAgent:
         attempts = 0
         while attempts <= max_retries:
             try:
-                gql_raw_query_builder = self._fetch_fields(task_prompt=self._get_task_prompt(), user_prompt=self.user_prompt)
+                gql_raw_query_builder = await self._fetch_fields(task_prompt=self._get_task_prompt(), user_prompt=self.user_prompt)
                 validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder)                
                 stringquery = self._generate_complete_gql_query(validated_gql_query_args)
-                # is_logical_query = self._llm_check_query_logic(stringquery)
-                # if is_logical_query == "No":
+                
+                # Performance issues with this code
+                # is_logical_query = await self._llm_check_query_logic(stringquery)
+                # if is_logical_query.startswith("No"):
                 #     print(f"## GQL checker did not like the stringquery {stringquery}! Making it redo.")
                 #     self.user_prompt += "\n GraphQL query did not accurately transcribe the data from the context. Please adjust the query."
                 #     attempts += 1
                 #     continue
                 
                 query_phrase = gql(stringquery)
-                gql_query_response = await self.gqlclient.execute_async(query_phrase)
+                gql_query_response = await self.execute_query(query_phrase)
                 return self._generate_final_response(gql_query_response)
             except (GraphQLError, ValidationError, TransportQueryError) as e:
                 error_message = self._handle_graphql_errors(e)
@@ -147,6 +160,5 @@ class GQLAgent:
         print("raw generated gql query is " + str(query))
         return query
 
-    
     def _get_task_prompt(self):
         return self.prompts_file.get(self.task).get('text')

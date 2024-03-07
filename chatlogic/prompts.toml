@@ -57,13 +57,13 @@ answer the teacher's original question below.
 text = '''
 You are part of a larger process of taking a teacher question and using an AI chatbot to look up relevant data in a school database and answer the question.
 The issue is that for the AI chatbot to look up data, it has to know who or what the teacher is referring to, and parse that into something that the chatbot can use to look up relevant data.
-Your job right now is to input the teacher prompt and build a structured query for the next AI chatbot to take and actually look up the data.
+Your job right now is to input the teacher prompt and build a structured object that contains identifiable student or staff data for the next AI chatbot to take and actually look up the data.
 The JSON object for each person or thing looks like this:
 "person_type":"student"
 or
 "person_type":"staff"
-or
-"person_type":"staff"
+
+If a name is given and you're unsure if it's a student or staff member, default to "person_type":"student"
 
 If the question is not really specifying anyone or anything specific, then you can respond with "none" as shown below.
 
@@ -453,7 +453,7 @@ text = '''
 Your job is to check the output of an AI Chatbot for number/data accuracy. 
 You will receive both a user prompt and an AI chatbot output which may comprise a GraphQL query.
 If the AI chatbot output accurately reflects the ID number or other user data that the user prompt gave, then respond with "Yes" (without quotes)
-If the AI chatbot output does not accurately reflect the ID number that the user prompt gave, then respond by redoing the query with the correct number or information.
+If the AI chatbot output does not accurately reflect the ID number that the user prompt gave, then respond with No.
 Your highest priority should be fixing an incorrect query that blatantly mis-copied basic information from the original user prompt.
 If the query accurately transcribes key data from the original prompt, then respond with "Yes".
 
@@ -493,6 +493,6 @@ query dailyAttendanceFindByDate {
                 }
 Response: No
 
-Here is the actual user prompt:
+Here is the actual user prompt and the AI-generated query:
 
 '''

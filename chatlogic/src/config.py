@@ -1,6 +1,5 @@
 import tomllib, pathlib, os
 from dotenv import load_dotenv
-from openai import OpenAI
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -49,21 +48,3 @@ class Config:
             self.selected_model = model_name
         else:
             raise ValueError(f"Model {model_name} not found in configuration.")
-
-class LLMClient:
-    def __init__(self, config = Config()):
-        self.config = config
-        self.client = OpenAI(
-        api_key=config.key,
-        base_url=config.url
-        )
-        self.model = config.selected_model
-        
-    def send_prompt(self, prompt, system_prompt):
-        return self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
-            ],
-        )

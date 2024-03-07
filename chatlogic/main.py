@@ -20,9 +20,11 @@ def create_graphql_client() -> Client:
 @asynccontextmanager
 async def lifespan(fastapiapp: FastAPI):
     fastapiapp.state.graphql_client = create_graphql_client()
+    await fastapiapp.state.graphql_client.connect_async(reconnecting=True)
     fastapiapp.state.prompts = load_prompts()
     yield
     # Cleanup below
+    await fastapiapp.state.graphql_client.close_async()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -37,26 +39,26 @@ def get_system_prompt() -> str:
     system_prompt = (f"Today is {formatted_date}. " + prompts.get('global_system_prompt', {}).get('text', ''))
     return system_prompt
 
-def relevancy_check(userprompt:str) -> bool:
+async def relevancy_check(userprompt:str) -> bool:
     gateway_prompt = get_prompt_text('gateway_prompt')
     prompt_engine = LLMPrompt(
         prompt=(gateway_prompt + userprompt),
-        system_prompt=get_system_prompt()
+        system_prompt=get_system_prompt(),
+        async_client=True
         )
-    prompt_engine.send()
-    return "Proceed" in extractContent(prompt_engine.response)
+    response = await prompt_engine.send_async()
+    return "Proceed" in extractContent(response)
 
 async def get_relevant_prompt(websocket: WebSocket) -> str:
     data = await websocket.receive_text()
     prompt_object = PromptInput.model_validate_json(data)
-    if relevancy_check(prompt_object.prompt):
+    if await relevancy_check(prompt_object.prompt):
         return prompt_object.prompt
     await websocket.send_text("That question doesn't require retrieving student data, please try using Google or ChatGPT.")
     await websocket.close()
     return None
 
 async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data) -> str:
-    print("Collected data: " + str(collected_data))
     final_answer_prompt = get_prompt_text('final_answer_prompt')
     final_answer_engine = LLMPrompt(
         prompt=(str(collected_data) + final_answer_prompt + input_user_prompt),
