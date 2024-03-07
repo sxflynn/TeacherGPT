@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from typing import Dict, Optional, Union, Any
 from gql import gql, Client as GQLClient
 from gql.transport.exceptions import TransportQueryError
@@ -30,6 +31,11 @@ class GQLAgent:
             'attendance': ["attendanceType { attendanceType }"],
             }
         self.all_fields = self._get_all_fields(task_key)
+        self.lock = asyncio.Lock()
+    
+    async def execute_query(self, query):
+        async with self.lock:  # Ensure only one coroutine accesses this block at a time
+            return await self.gqlclient.session.execute(query)
     
     def _get_all_fields(self, task_key):
         if task_key not in self.all_fields_mapping:
@@ -85,7 +91,7 @@ class GQLAgent:
                 #     continue
                 
                 query_phrase = gql(stringquery)
-                gql_query_response = await self.gqlclient.execute_async(query_phrase)
+                gql_query_response = await self.execute_query(query_phrase)
                 return self._generate_final_response(gql_query_response)
             except (GraphQLError, ValidationError, TransportQueryError) as e:
                 error_message = self._handle_graphql_errors(e)

@@ -20,9 +20,11 @@ def create_graphql_client() -> Client:
 @asynccontextmanager
 async def lifespan(fastapiapp: FastAPI):
     fastapiapp.state.graphql_client = create_graphql_client()
+    await fastapiapp.state.graphql_client.connect_async(reconnecting=True)
     fastapiapp.state.prompts = load_prompts()
     yield
     # Cleanup below
+    await fastapiapp.state.graphql_client.close_async()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -57,7 +59,6 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     return None
 
 async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data) -> str:
-    print("Collected data: " + str(collected_data))
     final_answer_prompt = get_prompt_text('final_answer_prompt')
     final_answer_engine = LLMPrompt(
         prompt=(str(collected_data) + final_answer_prompt + input_user_prompt),
