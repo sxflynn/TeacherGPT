@@ -1,3 +1,4 @@
+import time
 from typing import List
 import uvicorn # For debugging
 from datetime import datetime
@@ -73,6 +74,7 @@ async def output_final_response(websocket: WebSocket, input_user_prompt, collect
 
 @app.websocket("/promptstreaming")
 async def run_prompt(websocket: WebSocket):    
+    start = time.time()
     await websocket.accept()
     input_user_prompt = await get_relevant_prompt(websocket)
     if input_user_prompt is None:
@@ -85,6 +87,9 @@ async def run_prompt(websocket: WebSocket):
         prompts_file=websocket.app.state.prompts
         )
     await orchestrator.run_orchestration()
+    end = time.time()
+    elapsed_time = (end - start)
+    print(f"Time elapsed: {elapsed_time:.2f} seconds")
     await output_final_response(websocket,input_user_prompt, orchestrator.collected_data)
     return
 
