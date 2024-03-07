@@ -72,7 +72,7 @@ async def output_final_response(websocket: WebSocket, input_user_prompt, collect
     return None
 
 @app.websocket("/promptstreaming")
-async def run_prompt(websocket: WebSocket):    
+async def run_prompt(websocket: WebSocket):
     await websocket.accept()
     input_user_prompt = await get_relevant_prompt(websocket)
     if input_user_prompt is None:
