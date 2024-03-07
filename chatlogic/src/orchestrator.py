@@ -1,4 +1,5 @@
 import json
+import asyncio
 from typing import List, Optional
 from gql import gql, Client as GQLClient
 from pydantic import BaseModel, ValidationError
@@ -35,22 +36,26 @@ class Orchestrator:
     def _get_orchestrator_prompt(self) -> str:
         return self.prompts_file.get('orchestrator_prompt').get('text')
       
-    def _fetch_api_decision(self) -> str:
+    async def _fetch_api_decision(self) -> str:
         api_decision_engine = LLMPrompt(
             prompt=(self._get_orchestrator_prompt() + self.user_prompt),
-            system_prompt=self.system_prompt
+            system_prompt=self.system_prompt,
+            async_client=True
             )
-        return extractContent(api_decision_engine.send(json_mode=True))  
+        response = await api_decision_engine.send_async(json_mode=True)
+        return extractContent(response)
     
-    def _fetch_people_list(self) -> str:
+    async def _fetch_people_list(self) -> str:
         people_list_engine = LLMPrompt(
             prompt=(self.prompts_file.get('identification_prompt').get('text') + self.user_prompt),
-            system_prompt=self.system_prompt
+            system_prompt=self.system_prompt,
+            async_client=True
             )
-        return extractContent(people_list_engine.send(json_mode=True))
+        response = await people_list_engine.send_async(json_mode=True)
+        return extractContent(response)
     
-    def _prompt_for_apis(self) -> List[ApiDecision]:
-        raw_decision_list = self._fetch_api_decision()
+    async def _prompt_for_apis(self) -> List[ApiDecision]:
+        raw_decision_list = await self._fetch_api_decision()
         print("raw decision list is: " + str(raw_decision_list))
         try:
             decision_data = json.loads(raw_decision_list)["data"]
@@ -60,8 +65,8 @@ class Orchestrator:
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         return validated_decision_list
                
-    def _prompt_for_people(self) -> List[Identification]:
-        raw_people_list = self._fetch_people_list()
+    async def _prompt_for_people(self) -> List[Identification]:
+        raw_people_list = await self._fetch_people_list()
         print("raw people list is: " + str(raw_people_list))
         try:
             people_data = json.loads(raw_people_list)["data"]
@@ -71,15 +76,19 @@ class Orchestrator:
             raise ValidationError(f"The AI failed to give a JSON object with people type and query.: {e}") from e
         return validated_people_list
     
-    def _fetch_id_summary(self, gqlworker_data:str) -> str:
+    async def _fetch_id_summary(self, gqlworker_data:str) -> str:
         id_summary_engine = LLMPrompt(
             prompt=(gqlworker_data + self.prompts_file.get('identification_summary').get('text')),
-            system_prompt=self.system_prompt
+            system_prompt=self.system_prompt,
+            async_client=True
             )
-        return extractContent(id_summary_engine.send())
+        response = await id_summary_engine.send_async()
+        return extractContent(response)
     
-    ## I WANT THIS TO BE ASYNC BECAUSE I WANT THE self.collected_data.append TO BE HAPPENING SIMULTANEOUSLY FOR EACH api_call
     async def _handle_call(self, api_call:ApiDecision):
+        print(f"## HANDLE CALL OF {api_call.api} JUST CALLED")
+        print(f"## NOW CALLING {api_call.api} API")
+        print(f"## QUERY: {api_call.query} API")
         if api_call.api in ["none", "inaccessible"]:
             self.collected_data.append(api_call.reason)
         else:
@@ -92,7 +101,7 @@ class Orchestrator:
             return
         gqlworker_data = await self._gql_retriever(task_key=person.person_type, query=person.query)
         if gqlworker_data:
-            id_summary = self._fetch_id_summary(gqlworker_data)
+            id_summary = await self._fetch_id_summary(gqlworker_data)
             self.id_context += "\n Additional ID context: \n" + id_summary
             
     async def _gql_retriever(self, task_key:str, query:str):
@@ -110,16 +119,12 @@ class Orchestrator:
             
     async def run_orchestration(self):
         print("##PROMPTING FOR PEOPLE##")
-        people = self._prompt_for_people()
+        people = await self._prompt_for_people()
         for person in people:
             print(f"## NOW CALLING {person.person_type} API AS PART OF ID PROCESS")
             print(f"## QUERY: {person.query}")
             await self._handle_person(person)
         
         print("##PROMPTING FOR APIS##")
-        api_task_list = self._prompt_for_apis()
-        ## IT IS CRITICAL THAT EACH OF THE API_CALL things happens async. There is no required order of operations. 
-        for api_call in api_task_list:
-            print(f"## NOW CALLING {api_call.api} API")
-            print(f"## QUERY: {api_call.query} API")
-            await self._handle_call(api_call)
+        api_task_list = await self._prompt_for_apis()
+        await asyncio.gather(*(self._handle_call(api_call) for api_call in api_task_list))
