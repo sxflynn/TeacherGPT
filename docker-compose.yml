@@ -40,8 +40,6 @@ services:
       - "5173:5173"
     env_file:
       - .env
-    environment:
-      - VITE_CHATLOGIC_BASE_URL=http://chatlogic:8000
     init: true
     stop_grace_period: 1s
     networks:
