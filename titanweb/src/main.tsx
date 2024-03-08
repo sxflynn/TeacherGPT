@@ -31,7 +31,6 @@ if (devMode) {
   gqlBaseUrl = `${protocol}://${import.meta.env.VITE_GRAPHQL_BASE_URL}`;
 }
 
-console.log(gqlBaseUrl)
 const client = new ApolloClient({
   uri: `${gqlBaseUrl}/graphql`,
   cache: new InMemoryCache(),
