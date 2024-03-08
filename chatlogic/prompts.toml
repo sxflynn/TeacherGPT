@@ -59,9 +59,9 @@ You are part of a larger process of taking a teacher question and using an AI ch
 The issue is that for the AI chatbot to look up data, it has to know who or what the teacher is referring to, and parse that into something that the chatbot can use to look up relevant data.
 Your job right now is to input the teacher prompt and build a structured object that contains identifiable student or staff data for the next AI chatbot to take and actually look up the data.
 The JSON object for each person or thing looks like this:
-"person_type":"student"
+"person_type":"student" if its a student or if you are unsure whether or not its a student
 or
-"person_type":"staff"
+"person_type":"staff" if its a staff only if you are certain its a staff like they use Mr. or Mrs. or Ms. in the name.
 
 If a name is given and you're unsure if it's a student or staff member, default to "person_type":"student"
 
