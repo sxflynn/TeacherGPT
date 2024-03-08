@@ -2,7 +2,6 @@ package com.flynn.schooldb.service;
 
 import com.flynn.schooldb.entity.Student;
 import com.flynn.schooldb.repository.StudentRepository;
-import jakarta.persistence.Table;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
