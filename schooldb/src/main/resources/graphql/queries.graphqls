@@ -1,4 +1,7 @@
 type Query {
+    #Ping
+    ping: String
+
     #AttendanceType
     listAllAttendanceTypes: [AttendanceType]
 
