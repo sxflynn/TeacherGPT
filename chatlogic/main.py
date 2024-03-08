@@ -1,26 +1,38 @@
 import time
+import backoff
 from typing import List
 import uvicorn # For debugging
 from datetime import datetime
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from gql import Client
+from gql import Client as GQLClient
 from gql.transport.aiohttp import AIOHTTPTransport
+from aiohttp.client_exceptions import ClientConnectorError
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
 from src.orchestrator import Orchestrator
 
+async def connect_with_retry(client: GQLClient):
+    await client.connect_async(reconnecting=True)
+    
+@backoff.on_exception(backoff.expo,
+                      ClientConnectorError,
+                      max_tries=5,  # Maximum number of retries
+                      max_time=30,  # Maximum time to retry for in seconds
+                      jitter=backoff.full_jitter)  # Apply jitter to wait times
+async def safe_connect(client: GQLClient):
+    await connect_with_retry(client)
 
-def create_graphql_client() -> Client:
+def create_graphql_client() -> GQLClient:
     transport = AIOHTTPTransport(url=settings.graphql_url)
-    gqlclient = Client(transport=transport, fetch_schema_from_transport=True)
+    gqlclient = GQLClient(transport=transport, fetch_schema_from_transport=True)
     return gqlclient
 
 @asynccontextmanager
 async def lifespan(fastapiapp: FastAPI):
     fastapiapp.state.graphql_client = create_graphql_client()
-    await fastapiapp.state.graphql_client.connect_async(reconnecting=True)
+    await safe_connect(fastapiapp.state.graphql_client)
     fastapiapp.state.prompts = load_prompts()
     yield
     # Cleanup below
