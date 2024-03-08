@@ -51,8 +51,6 @@ services:
       dockerfile: ./Dockerfile
     env_file:
       - .env
-    environment:
-      - GRAPHQL_URL=http://java:8080/graphql
     ports:
       - "8000:8000"
     volumes:
