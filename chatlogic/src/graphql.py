@@ -10,6 +10,30 @@ from src.prompt import LLMPrompt, extractContent
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
+async def ping_graphql_server(client: GQLClient):
+    ping_query = gql("""
+        query Ping {
+            ping
+        }
+    """)
+    try:
+        response = await client.execute_async(ping_query)
+        return response.get("ping") == "Healthy"
+    except Exception as e:
+        print(f"Failed to ping GraphQL server: {e}")
+        return False
+
+async def ensure_graphql_server_is_healthy(client: GQLClient, max_retries: int = 5, wait_seconds: int = 5):
+    for _ in range(max_retries):
+        if await ping_graphql_server(client):
+            print("GraphQL server is healthy.")
+            return
+        else:
+            print(f"Waiting for {wait_seconds} seconds before retrying...")
+            await asyncio.sleep(wait_seconds)
+    raise Exception("Failed to confirm GraphQL server health after multiple retries.")
+
+
 class GQLQueryModel(BaseModel):
     query: str
     fields: Union[list[str], str]
