@@ -20,8 +20,20 @@ import { StudentPage } from "./pages/StudentPage.tsx";
 import { AttendancePage } from "./pages/AttendancePage.tsx";
 import { StudentPageNew } from "./pages/StudentPageNew.tsx";
 
+const devMode:boolean = import.meta.env.VITE_DEV_MODE === 'true';
+const gqlPort = import.meta.env.VITE_GRAPHQL_PORT_DEVMODE;
+let gqlBaseUrl:string;
+const protocol = window.location.protocol.includes('https') ? 'https' : 'http';
+
+if (devMode) {
+  gqlBaseUrl = `${protocol}://${window.location.hostname}:${gqlPort}`;
+} else {
+  gqlBaseUrl = `${protocol}://${import.meta.env.VITE_GRAPHQL_BASE_URL}`;
+}
+
+console.log(gqlBaseUrl)
 const client = new ApolloClient({
-  uri: "http://localhost:8080/graphql",
+  uri: `${gqlBaseUrl}/graphql`,
   cache: new InMemoryCache(),
 });
 

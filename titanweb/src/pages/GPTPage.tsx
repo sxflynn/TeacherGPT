@@ -37,11 +37,22 @@ export function GPTPage() {
     setError(null);
     setStreamingResponses([]);
 
-    const baseUrl = import.meta.env.VITE_CHATLOGIC_BASE_URL.replace(
-      /^http(s?):\/\//,
-      ""
-    ); // fixes ws:// prepend bug
-    const ws = new WebSocket(`ws://${baseUrl}/promptstreaming`);
+    const devMode: boolean = import.meta.env.VITE_DEV_MODE === "true";
+    const chatLogicPort: string = import.meta.env.VITE_CHATLOGIC_PORT_DEVMODE;
+    let baseUrl: string;
+    const protocol: string =
+      window.location.protocol === "https:" ? "wss" : "ws";
+
+    if (devMode) {
+      baseUrl = `${protocol}://${window.location.hostname}:${chatLogicPort}`;
+    } else {
+      const chatLogicBaseUrl: string =
+        import.meta.env.VITE_CHATLOGIC_BASE_URL.replace(/^http(s?):\/\//, "");
+      baseUrl = `${protocol}://${chatLogicBaseUrl}`;
+    }
+
+    const ws = new WebSocket(`${baseUrl}/promptstreaming`);
+
     ws.onopen = () => {
       ws.send(JSON.stringify(values));
     };
