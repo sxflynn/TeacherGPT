@@ -54,8 +54,12 @@ export function GPTPage() {
     };
 
     ws.onerror = (event) => {
-      setError("WebSocket error, check the console for more details");
-      console.error(event);
+      const url = event?.target?.url;
+      const errorMessage = url
+        ? `Unable to connect to ${url}`
+        : "Unable to connect to the WebSocket server.";
+      setError(errorMessage);
+      console.error("WebSocket error observed:", event, `URL: ${url}`);
     };
 
     ws.onclose = () => {

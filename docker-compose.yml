@@ -49,14 +49,19 @@ services:
     build:
       context: ./chatlogic
       dockerfile: ./Dockerfile
+    depends_on:
+      - java
     env_file:
       - .env
+    environment:
+      - GRAPHQL_URL=http://java:8080/graphql
     ports:
       - "8000:8000"
     volumes:
       - ./chatlogic/:/app
     networks:
       - network
+    restart: unless-stopped
 
 volumes:
   postgres-data:

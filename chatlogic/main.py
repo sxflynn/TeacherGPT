@@ -1,14 +1,14 @@
 import time
-import backoff
-from typing import List
-import uvicorn # For debugging
 from datetime import datetime
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, WebSocket
+import uvicorn # For debugging
+import backoff
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from gql import Client as GQLClient
 from gql.transport.aiohttp import AIOHTTPTransport
 from aiohttp.client_exceptions import ClientConnectorError
+from aiohttp import ClientOSError
 from src.config import settings, load_prompts
 from src.prompt import LLMPrompt, PromptInput, extractContent
 from src.orchestrator import Orchestrator
@@ -17,8 +17,9 @@ async def connect_with_retry(client: GQLClient):
     await client.connect_async(reconnecting=True)
     
 @backoff.on_exception(backoff.expo,
-                      ClientConnectorError,
-                      max_tries=5,  # Maximum number of retries
+                      (ClientConnectorError,
+                      ClientOSError),
+                      max_tries=15,  # Maximum number of retries
                       max_time=30,  # Maximum time to retry for in seconds
                       jitter=backoff.full_jitter)  # Apply jitter to wait times
 async def safe_connect(client: GQLClient):
