@@ -21,6 +21,7 @@ def create_graphql_client() -> GQLClient:
 async def lifespan(fastapiapp: FastAPI):
     fastapiapp.state.graphql_client = create_graphql_client()
     await ensure_graphql_server_is_healthy(fastapiapp.state.graphql_client)
+    await fastapiapp.state.graphql_client.connect_async(reconnecting=True)
     fastapiapp.state.prompts = load_prompts()
     yield
     # Cleanup below
