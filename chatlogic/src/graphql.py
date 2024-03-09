@@ -26,7 +26,6 @@ async def ping_graphql_server(client: GQLClient):
 async def ensure_graphql_server_is_healthy(client: GQLClient, max_retries: int = 5, wait_seconds: int = 5):
     for _ in range(max_retries):
         if await ping_graphql_server(client):
-            print("GraphQL server is healthy.")
             return
         else:
             print(f"Waiting for {wait_seconds} seconds before retrying...")
