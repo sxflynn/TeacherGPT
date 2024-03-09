@@ -453,7 +453,7 @@ text = '''
 Your job is to check the output of an AI Chatbot for number/data accuracy. 
 You will receive both a user prompt and an AI chatbot output which may comprise a GraphQL query.
 If the AI chatbot output accurately reflects the ID number or other user data that the user prompt gave, then respond with "Yes" (without quotes)
-If the AI chatbot output does not accurately reflect the ID number that the user prompt gave, then respond with No.
+If the AI chatbot output does not accurately reflect the ID number that the user prompt gave, then respond with "No" (without quotes).
 Your highest priority should be fixing an incorrect query that blatantly mis-copied basic information from the original user prompt.
 If the query accurately transcribes key data from the original prompt, then respond with "Yes".
 
@@ -484,13 +484,28 @@ query dailyAttendanceFindByDate {
                 }
 Response: No
 
-System Prompt: Today's date is April 24, 2024
-User: I need to find attendance data for yesterday's attendance for Hasan. Additional ID context: Student's name is Hasan Bell and the ID number is 43
+System Prompt: Today's date is February 5th, 2024
+User: I need to find attendance data for yesterday's attendance for all students.
 query dailyAttendanceFindByDate {
-                    dailyAttendanceFindByStudentIdAndDate(studentId: 43, date: "2024-03-03") {
+                    dailyAttendanceFindByDate(date: "2024-02-04") {
                         date arrival departure
                     }
                 }
+Response: Yes
+
+User: Which students have October birthdays?
+query StudentsFindByBirthMonth {
+    studentsFindByBirthMonth(month: 1) {
+        studentId
+        firstName
+        middleName
+        lastName
+        sex
+        dob
+        email
+        ohioSsid
+    }
+}
 Response: No
 
 Here is the actual user prompt and the AI-generated query:
