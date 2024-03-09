@@ -5,11 +5,12 @@ import { Link } from "react-router-dom";
 
 
 type NavbarProps = {
-  active: string
+  active: string;
   setActive: Dispatch<SetStateAction<string>>;
+  toggle: () => void;
 };
 
-export function AppShellNavbar({active, setActive}:NavbarProps) {
+export function AppShellNavbar({active, setActive, toggle }:NavbarProps) {
 
   const links = [
     {link: "/gpt", label:"TeacherGPT", icon: IconMessageCircle},
@@ -26,7 +27,7 @@ export function AppShellNavbar({active, setActive}:NavbarProps) {
           key={link.label}
           label={link.label}
           data-active={active === link.link || null}
-          onClick={() => setActive(link.link)}
+          onClick={() => { setActive(link.link); toggle(); }}
           leftSection={link.icon ? <link.icon /> : null}
         />
     );

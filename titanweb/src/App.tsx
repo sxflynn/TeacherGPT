@@ -45,7 +45,7 @@ export default function App() {
         </AppShell.Header>
 
         <AppShell.Navbar p="md">
-          <AppShellNavbar active={active} setActive={setActive}/>
+          <AppShellNavbar active={active} setActive={setActive} toggle={toggle} />
           </AppShell.Navbar>
         
 
