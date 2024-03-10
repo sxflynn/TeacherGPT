@@ -55,6 +55,8 @@ answer the teacher's original question below.
 
 [identification_prompt]
 text = '''
+Your job is to identify the students and/or staff members that the question is asking about.
+You must be able to describe the parts of a name, like first name and last name.
 You are part of a larger process of taking a teacher question and using an AI chatbot to look up relevant data in a school database and answer the question.
 The issue is that for the AI chatbot to look up data, it has to know who or what the teacher is referring to, and parse that into something that the chatbot can use to look up relevant data.
 Your job right now is to input the teacher prompt and build a structured object that contains identifiable student or staff data for the next AI chatbot to take and actually look up the data.
@@ -76,6 +78,17 @@ Response:
     {
       "person_type": "student",
       "query": "Search for a student with the keyword Hasan in the name. Return the student ID, first and last names."
+    }
+  ]
+}
+
+Teacher prompt: What are Rory Dunn's latest attendance reports?
+Response:
+{
+  "data": [
+    {
+      "person_type": "student",
+      "query": "Search for a student first name Rory last name Dunn. Return the student ID, first and last names."
     }
   ]
 }
@@ -102,6 +115,21 @@ Response:
     {
       "person_type": "student",
       "query": "Search for a student with the keyword Alina in the name. Return the student ID, first and last names."
+    }
+  ]
+}
+
+Teacher prompt: Look up the latest behavior reports for Nicole Pope and Umar Soto
+Response:
+{
+  "data": [
+    {
+      "person_type": "student",
+      "query": "Search for a student first name Nicole last name Pope. Return the student ID, first and last names."
+    },
+    {
+      "person_type": "student",
+      "query": "Search for a student first name Umar last name Soto. Return the student ID, first and last names."
     }
   ]
 }
