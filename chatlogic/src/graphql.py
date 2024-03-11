@@ -97,7 +97,7 @@ class GQLAgent:
         print(f"## RESPONSE: {response_return}")
         return response_return
         
-    async def get_data_single_prompt(self):
+    async def get_data_single_prompt(self,data_only=False):
         max_retries = 2
         attempts = 0
         while attempts <= max_retries:
@@ -116,6 +116,8 @@ class GQLAgent:
                 
                 query_phrase = gql(stringquery)
                 gql_query_response = await self.execute_query(query_phrase)
+                if data_only:
+                    return gql_query_response
                 return self._generate_final_response(gql_query_response)
             except (GraphQLError, ValidationError, TransportQueryError) as e:
                 error_message = self._handle_graphql_errors(e)

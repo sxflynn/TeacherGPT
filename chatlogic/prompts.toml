@@ -46,6 +46,39 @@ Here is the Teacher prompt:
 
 '''
 
+[id_gateway_prompt]
+text='''
+Read the prompt and answer yes or no on whether or not it is dealing with individual names.
+Here are some example prompts to help you respond correctly:
+
+Prompt: Which students have March birthdays?
+Response: None
+
+Prompt: What are Samuel's grades this past quarter?
+Response: Yes
+
+Prompt: Are field trips planned for all grades this year?
+Response: None
+
+Prompt: Is Sophia part of the school debate team?
+Response: Yes
+
+Prompt: Do all students need to wear uniforms?
+Response: None
+
+Prompt: Was Ethan's science project selected for the school fair?
+Response: Yes
+
+Prompt: Can parents volunteer for library duty?
+Response: None
+
+Here is the prompt from the user. Give a response according to the instructions above.
+
+Prompt:
+
+'''
+
+
 [final_answer_prompt]
 text = '''
 An intelligent AI agent took the original user question and retrieved relevant information.
@@ -77,7 +110,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Hasan in the name. Return the student ID, first and last names."
+      "query": "Search for a student with the keyword Hasan in the name. Return all available fields."
     }
   ]
 }
@@ -88,7 +121,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Rory last name Dunn. Return the student ID, first and last names."
+      "query": "Search for a student first name Rory last name Dunn. Return all available fields."
     }
   ]
 }
@@ -99,7 +132,7 @@ Response:
   "data": [
     {
       "person_type": "staff",
-      "query": "Search for a staff member with the keyword Rosada in the name. Return the staff ID, first and last names."
+      "query": "Search for a staff member with the keyword Rosada in the name. Return all available fields."
     }
   ]
 }
@@ -110,11 +143,11 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Michael in the name. Return the student ID, first and last names."
+      "query": "Search for a student with the keyword Michael in the name. Return all available fields."
     },
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Alina in the name. Return the student ID, first and last names."
+      "query": "Search for a student with the keyword Alina in the name. Return all available fields."
     }
   ]
 }
@@ -125,11 +158,11 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Nicole last name Pope. Return the student ID, first and last names."
+      "query": "Search for a student first name Nicole last name Pope. Return all available fields."
     },
     {
       "person_type": "student",
-      "query": "Search for a student first name Umar last name Soto. Return the student ID, first and last names."
+      "query": "Search for a student first name Umar last name Soto. Return all available fields."
     }
   ]
 }
@@ -169,22 +202,16 @@ and to describe what should be queried from those sources/APIs so that the origi
 
 Here are the available APIs that you can call:
 
-API Name: Student API
-What information is available: Primarily used to lookup basic facts about a student's name, student ID number, email, sex, date of birth. Special queries exist to find students by birth month, and to count the number of students by sex.
-What information is not available: The Student API does not have direct access to related data about grades, behavior, attendance and other broader topics. It only has access to personal information listed above.
-
 API Name: Attendance API
 What information is available: Primarily used to lookup attendance information such as individual student attendance records for specific dates, listing days by attendance type such as absences and tardies
 
-You are able to, and encouraged to make multiple API calls. 
-If the question is about a specific student, you will first make a student API call to identify the student, and then other API calls to get more specific details.
-If the question is about other topics that affect larger numbers of students, then you will return the list of API calls and queries.
+You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
 
 You will respond with a json object with a "data" key and a value comprising an array of one or more JSON objects like this:
 {
   "data": [
     {
-      "api": "student",
+      "api": "attendance",
       "query": "Search for a student with the keyword bal in the name. Return the student ID, first and last names."
     }
   ]
@@ -218,10 +245,6 @@ Teacher prompt: "Tell me about Tegan's recent attendance data"
 Response:
 {
   "data": [
-    {
-      "api": "student",
-      "query": "Search for a student with the keyword Tegan in the name. Return the student ID, first and last names."
-    },
     {
       "api": "attendance",
       "query": "Look up Tegan's attendance from the past 2 weeks."
