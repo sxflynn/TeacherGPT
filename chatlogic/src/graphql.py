@@ -51,7 +51,8 @@ class GQLAgent:
             "attendance": ["date","dailyAttendanceId","arrival","departure","excuseNote"]
             }
         self.mandatory_fields_mapping = {
-            'attendance': ["attendanceType { attendanceType }"],
+            "student": ["studentId", "firstName", "lastName"],
+            "attendance": ["attendanceType { attendanceType }"],
             }
         self.all_fields = self._get_all_fields(task_key)
         self.lock = asyncio.Lock()
@@ -148,17 +149,20 @@ class GQLAgent:
         return error_message
     
     def _generate_complete_gql_query(self, gql_data: GQLQueryModel) -> str:
-        if self.task_key in self.mandatory_fields_mapping:
-            mandatory_fields = self.mandatory_fields_mapping[self.task_key]
-            for field in mandatory_fields:
-                if field not in gql_data.fields:
-                    gql_data.fields.append(field)
-        int_fields = ["count", "average", "sum"]
-        if not any(keyword in gql_data.query.lower() for keyword in int_fields) and gql_data.fields == 'none':
-            gql_data.fields = self.all_fields
-        fields_query_part = '' if gql_data.fields == 'none' else \
-                            ' '.join(self.all_fields) if gql_data.fields == 'all' else \
-                            ' '.join(gql_data.fields)
+        if gql_data.fields == 'all':
+            fields_query_part = ' '.join(self.all_fields)
+        else:
+            if self.task_key in self.mandatory_fields_mapping:
+                mandatory_fields = self.mandatory_fields_mapping[self.task_key]
+                for field in mandatory_fields:
+                    if field not in gql_data.fields:
+                        gql_data.fields.append(field)
+                        
+            int_fields = ["count", "average", "sum"]
+            if not any(keyword in gql_data.query.lower() for keyword in int_fields) and gql_data.fields == 'none':
+                gql_data.fields = self.all_fields
+            fields_query_part = '' if gql_data.fields == 'none' else ' '.join(gql_data.fields)
+            
         if gql_data.variables:
             variables_part = ', '.join([f'{k}: "{v}"' if isinstance(v, str) else f'{k}: {v}' for k, v in gql_data.variables.items()])
             if fields_query_part:

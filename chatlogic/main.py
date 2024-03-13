@@ -48,8 +48,8 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     await websocket.close()
     return None
 
-async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data) -> str:
-    final_answer_prompt = TemplateManager.render_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data = str(collected_data))
+async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data, id_context) -> str:
+    final_answer_prompt = TemplateManager.render_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data = str(collected_data), id_context = id_context)
     final_answer_engine = LLMPrompt(
         prompt=final_answer_prompt,
         system_prompt=TemplateManager.get_system_prompt()
@@ -81,7 +81,7 @@ async def run_prompt(websocket: WebSocket):
     end = time.time()
     elapsed_time = (end - start)
     print(f"Time elapsed: {elapsed_time:.2f} seconds")
-    await output_final_response(websocket,input_user_prompt, orchestrator.collected_data)
+    await output_final_response(websocket,input_user_prompt, orchestrator.collected_data, orchestrator.id_context)
     return
 
 app.add_middleware(

@@ -62,12 +62,20 @@ class Orchestrator:
         return response_text.lower().startswith('yes')
 
     def _generate_list_of_people(self) -> str:
-        list_of_people = "These are the students that you must make API calls for:\n"
+        if not self.student_list:
+            return "No student data available for API calls."
+
+        list_of_people = "These are the students that you must make API calls for:\n\n"
         for student in self.student_list:
             student_info = (
                 f"First Name: {student.first_name}\n"
+                f"Middle Name: {student.middle_name}\n"
                 f"Last Name: {student.last_name}\n"
-                f"Student ID: {student.student_id}\n\n"
+                f"Sex: {student.sex}\n"
+                f"Date of Birth: {student.dob}\n"
+                f"Email: {student.email}\n"
+                f"Student ID: {student.student_id}\n"
+                f"Ohio SSID: {student.ohio_ssid}\n\n"
             )
             list_of_people += student_info
         return list_of_people
@@ -76,6 +84,7 @@ class Orchestrator:
         list_of_people = "" if not self.has_people else self._generate_list_of_people()
         student_api_name = "" if self.has_people else """
             API Name: Student API
+            Name for the JSON key: student
             What information is available: Primarily used to lookup basic facts about a student's name, student ID number, email, sex, date of birth. Special queries exist to find students by birth month, and to count the number of students by sex.
             What information is not available: The Student API does not have direct access to related data about grades, behavior, attendance, and other broader topics. It only has access to personal information listed above.
             Do not call on the Student API for any information that is otherwise available in other APIs.
@@ -129,24 +138,25 @@ class Orchestrator:
                 self.collected_data.append(gqlworker_data)
                 print("## NOW ADDING TO COLLECTED DATA: {gqlworker_data}")
             
-    async def _handle_person(self, person):
+    async def _handle_person(self, person) -> List[Student]:
         if person.person_type in ["none"]:
             return
         gqlworker_data = await self._gql_retriever(task_key=person.person_type, query=person.query, data_only=True)
         print("gqlworker data in _handle_person: " + str(gqlworker_data))
         if gqlworker_data and 'student' in person.person_type:
-            student_data = next(iter(gqlworker_data.values()))[0]
-            new_student = Student(
-                student_id=student_data.get('studentId', ''),
-                first_name=student_data.get('firstName', ''),
-                middle_name=student_data.get('middleName', ''),
-                last_name=student_data.get('lastName', ''),
-                sex=student_data.get('sex', ''),
-                dob=student_data.get('dob', ''),
-                email=student_data.get('email', ''),
-                ohio_ssid=student_data.get('ohioSsid', '') 
+            student_data_list_raw = next(iter(gqlworker_data.values()), [])
+            for student in student_data_list_raw:
+                new_student = Student(
+                student_id=student.get('studentId', ''),
+                first_name=student.get('firstName', ''),
+                middle_name=student.get('middleName', ''),
+                last_name=student.get('lastName', ''),
+                sex=student.get('sex', ''),
+                dob=student.get('dob', ''),
+                email=student.get('email', ''),
+                ohio_ssid=student.get('ohioSsid', '') 
             )
-            return new_student
+                self.student_list.append(new_student)
             
     async def _gql_retriever(self, task_key:str, query:str, data_only=False):
         task = self.prompt_mapping.get(task_key, None)
@@ -170,10 +180,28 @@ class Orchestrator:
             for person in people:
                 print(f"## NOW CALLING {person.person_type} API AS PART OF ID PROCESS")
                 print(f"## QUERY: {person.query}")
-                new_student = await self._handle_person(person)
-                self.student_list.append(new_student)
-                id_summary = str(new_student)
-                self.id_context += "\n Additional Student context: \n" + id_summary
+                await self._handle_person(person)
+            
+            # Update the ID context only once after all people have been processed
+            if self.student_list:  # Check if the student_list is not empty
+                student_records = []
+                for student in self.student_list:
+                    student_record = f"""\
+                        First Name: {student.first_name}
+                        Middle Name: {student.middle_name}
+                        Last Name: {student.last_name}
+                        Sex: {student.sex}
+                        Date of Birth: {student.dob}
+                        Email: {student.email}
+                        Student ID: {student.student_id}
+                        Ohio SSID: {student.ohio_ssid}\n"""
+                    student_records.append(student_record)
+                
+                # Combining the student records into a single string with separators
+                full_student_records = "\n".join(student_records)
+                
+                # Prepending the header to the full student records string
+                self.id_context += "\nStudent Data to help answer the question:\n" + full_student_records
         
         print("##PROMPTING FOR APIS##")
         api_task_list = await self._prompt_for_apis()

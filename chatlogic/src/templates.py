@@ -81,11 +81,11 @@ Now give a response following the examples and instructions above.
 ),
     "id_gateway_prompt":Template(
       """
-      Read the prompt and answer yes or no on whether or not it contains the name of a person.
+      Read the prompt and answer yes or no on whether or not it contains the name of a person, or if it contains a query that would result in a list of one or more names.
 Here are some example prompts to help you respond correctly:
 
 Prompt: Which students have March birthdays?
-Response: None
+Response: Yes
 
 Prompt: What are Samuel's grades this past quarter?
 Response: Yes
@@ -105,7 +105,10 @@ Response: Yes
 Prompt: Can parents volunteer for library duty?
 Response: None
 
-Here is the prompt from the user. Using the prompt/response pairs above, answer whether or not the prompt contains the name of a person:
+Prompt: Which students have a last name that starts with T?
+Response: Yes
+
+Here is the prompt from the user. Using the prompt/response pairs above, answer whether or not the prompt contains the name of a person, or contains a query that would result in one or more names:
 
 {{ user_prompt }}
       """
@@ -213,6 +216,10 @@ Now give a JSON response based on the Prompt/Response pairs above.
         
         {{ input_user_prompt }}
         
+        These are the student details for the students referred to in the above question:
+        
+        {{ id_context }}
+        
         This is the data that was collected by an AI Agent to help answer that question:
         
         {{ collected_data }}
@@ -260,6 +267,7 @@ Here are the available APIs that you can call:
 {{ student_api_name }}
 
 API Name: Attendance API
+Name for the JSON key: attendance
 What information is available: Primarily used to lookup attendance information such as individual student attendance records for specific dates, listing days by attendance type such as absences and tardies
 
 You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
@@ -274,7 +282,7 @@ You will respond with a json object with a "data" key and a value comprising an 
   ]
 }
 
-If the original question asked for information that would be available in a hypothetic API that you do not know about, then respond with a JSON object like this:
+If the original question asked for information that would be available in a hypothetical API that you do not know about, then respond with a JSON object like this:
 
 {
   "data": [
@@ -295,6 +303,18 @@ If you are unable to understand the original teacher prompt and unable to determ
     }
   ]
 }
+
+If the original prompt is asking for data that you already have in the Student context that was retrieved from an earlier task, then respond like this:
+Teacher: What is Tagan's student ID? Additional Student Context: Tagan Robinson, student ID 45. Tagan Robinson's email is tarobinson26@titanacademy.edu"
+{
+  "data":[
+    {
+      "api":"none",
+      "reason":"Tagan's student ID is 45."
+    }
+  ]
+}
+
 
 Here are some example teacher prompts and your model responses to help you understand your task:
 
@@ -335,6 +355,17 @@ Response:
     {
         "api":"attendance",
         "query":"Look up Hayley's attendance from the past 2 weeks. Student ID is 9"
+    }
+  ]
+}
+
+Teacher prompt: "What is Tagan's email address? Additional Student Context: Tagan Robinson's email is tarobinson26@titanacademy.edu"
+Response:
+{
+  "data": [
+    {
+      "api": "none",
+      "query": "Tagan's email is tarobinson26@titanacademy.edu"
     }
   ]
 }
