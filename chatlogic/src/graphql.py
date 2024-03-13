@@ -6,6 +6,7 @@ from gql.transport.exceptions import TransportQueryError
 from graphql import GraphQLError
 from pydantic import BaseModel, ValidationError
 from src.prompt import LLMPrompt, extractContent
+from src.templates import TemplateManager
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -39,9 +40,8 @@ class GQLQueryModel(BaseModel):
     variables: Optional[dict[str, Any]] = None
 
 class GQLAgent:
-    def __init__(self, client: GQLClient, prompts_file, task:str, user_prompt:str,system_prompt:str, task_key:str):
+    def __init__(self, client: GQLClient, task:str, user_prompt:str,system_prompt:str, task_key:str):
         self.gqlclient = client
-        self.prompts_file = prompts_file
         self.task = task
         self.task_key = task_key
         self.user_prompt = user_prompt
@@ -68,9 +68,9 @@ class GQLAgent:
         combined_fields = list(set(standard_fields + mandatory_fields))
         return combined_fields
     
-    async def _fetch_fields(self, task_prompt, user_prompt) -> str:
+    async def _fetch_fields(self) -> str:
         task_engine = LLMPrompt(
-            prompt=(task_prompt + user_prompt),
+            prompt=TemplateManager.render_template(template_name=self.task, user_prompt=self.user_prompt),
             system_prompt=self.system_prompt,
             async_client=True
             )
@@ -85,7 +85,7 @@ class GQLAgent:
         return final_response
     
     async def _llm_check_query_logic(self, stringquery):
-        check_query_prompt = self.prompts_file.get('check_query_prompt').get('text')
+        check_query_prompt = TemplateManager.render_template(template_name='check_query_prompt')
         combined_prompt = check_query_prompt + self.user_prompt + '\n' + stringquery
         check_query_engine = LLMPrompt(system_prompt=self.system_prompt,
                   prompt=combined_prompt,
@@ -102,7 +102,7 @@ class GQLAgent:
         attempts = 0
         while attempts <= max_retries:
             try:
-                gql_raw_query_builder = await self._fetch_fields(task_prompt=self._get_task_prompt(), user_prompt=self.user_prompt)
+                gql_raw_query_builder = await self._fetch_fields()
                 validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder)                
                 stringquery = self._generate_complete_gql_query(validated_gql_query_args)
                 
@@ -184,6 +184,3 @@ class GQLAgent:
                 }}"""
         print("raw generated gql query is " + str(query))
         return query
-
-    def _get_task_prompt(self):
-        return self.prompts_file.get(self.task).get('text')
