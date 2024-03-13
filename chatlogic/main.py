@@ -5,9 +5,9 @@ import uvicorn # For debugging
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from gql import Client as GQLClient
-from graphql import GraphQLError
 from gql.transport.aiohttp import AIOHTTPTransport
-from src.config import settings, load_prompts
+from src.templates import TemplateManager
+from src.config import settings
 from src.prompt import LLMPrompt, PromptInput, extractContent
 from src.orchestrator import Orchestrator
 from src.graphql import ensure_graphql_server_is_healthy
@@ -22,48 +22,37 @@ async def lifespan(fastapiapp: FastAPI):
     fastapiapp.state.graphql_client = create_graphql_client()
     await ensure_graphql_server_is_healthy(fastapiapp.state.graphql_client)
     await fastapiapp.state.graphql_client.connect_async() # reconnecting=True
-    fastapiapp.state.prompts = load_prompts()
     yield
     # Cleanup below
     await fastapiapp.state.graphql_client.close_async()
 
 app = FastAPI(lifespan=lifespan)
 
-def get_prompt_text(section_name: str) -> str:
-    prompts = app.state.prompts
-    return prompts.get(section_name, {}).get('text', '')
-
-def get_system_prompt() -> str:
-    today = datetime.now()
-    formatted_date = today.strftime("%B %d, %Y")
-    prompts = app.state.prompts
-    system_prompt = (f"Today is {formatted_date}. " + prompts.get('global_system_prompt', {}).get('text', ''))
-    return system_prompt
-
-async def relevancy_check(userprompt:str) -> bool:
-    gateway_prompt = get_prompt_text('gateway_prompt')
+async def relevancy_check(userprompt:str) -> str:
     prompt_engine = LLMPrompt(
-        prompt=(gateway_prompt + userprompt),
-        system_prompt=get_system_prompt(),
+        prompt=TemplateManager.render_template('gateway_prompt', teacher_prompt = userprompt),
+        system_prompt=TemplateManager.get_system_prompt(),
         async_client=True
         )
     response = await prompt_engine.send_async()
-    return "Proceed" in extractContent(response)
-
+    response_text = extractContent(response)
+    return response_text
+     
 async def get_relevant_prompt(websocket: WebSocket) -> str:
     data = await websocket.receive_text()
     prompt_object = PromptInput.model_validate_json(data)
-    if await relevancy_check(prompt_object.prompt):
+    relevancy_answer = await relevancy_check(prompt_object.prompt)
+    if relevancy_answer.lower().startswith('proceed'):
         return prompt_object.prompt
-    await websocket.send_text("That question doesn't require retrieving student data, please try using Google or ChatGPT.")
+    await websocket.send_text(relevancy_answer)
     await websocket.close()
     return None
 
 async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data) -> str:
-    final_answer_prompt = get_prompt_text('final_answer_prompt')
+    final_answer_prompt = TemplateManager.render_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data = str(collected_data))
     final_answer_engine = LLMPrompt(
-        prompt=(str(collected_data) + final_answer_prompt + input_user_prompt),
-        system_prompt=get_system_prompt()
+        prompt=final_answer_prompt,
+        system_prompt=TemplateManager.get_system_prompt()
         )
     print("## FINAL PROMPT: " + final_answer_engine.prompt)
     final_answer = final_answer_engine.send(stream=True)
@@ -86,8 +75,7 @@ async def run_prompt(websocket: WebSocket):
     orchestrator = Orchestrator(
         gqlclient,
         user_prompt=input_user_prompt,
-        system_prompt=get_system_prompt(),
-        prompts_file=websocket.app.state.prompts
+        system_prompt=TemplateManager.get_system_prompt(),
         )
     await orchestrator.run_orchestration()
     end = time.time()

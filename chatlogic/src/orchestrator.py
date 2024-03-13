@@ -3,6 +3,7 @@ import asyncio
 from typing import List, Optional
 from gql import gql, Client as GQLClient
 from pydantic import BaseModel, ValidationError
+from src.templates import TemplateManager
 from src.graphql import GQLAgent
 from src.prompt import LLMPrompt, extractContent
 
@@ -28,14 +29,14 @@ class Student(BaseModel):
     sex: str
     dob: str
     email: str
-    ohio_ssid: str    
+    ohio_ssid: str
    
 class Orchestrator:
-    def __init__(self, gqlclient:GQLClient, user_prompt, prompts_file, system_prompt):
+    def __init__(self, gqlclient:GQLClient, user_prompt, system_prompt):
         self.gqlclient = gqlclient
         self.user_prompt = user_prompt
-        self.prompts_file = prompts_file
         self.system_prompt = system_prompt
+        self.has_people:bool = False
         self.student_list:List[Student] = []
         self.id_context = ""
         self.collected_data = []
@@ -44,10 +45,9 @@ class Orchestrator:
             "attendance": "attendance_general_prompt",
         }
         
-    async def _send_prompt(self, prompt_key: str, json_mode: bool = False) -> str:
-        prompt_details = self.prompts_file.get(prompt_key).get('text')
+    async def _send_prompt(self, prompt_key: str, json_mode: bool = False, **kwargs) -> str:
         prompt_engine = LLMPrompt(
-            prompt=prompt_details + self.user_prompt,
+            prompt=TemplateManager.render_template(template_name=prompt_key, **kwargs),
             system_prompt=self.system_prompt,
             async_client=True
         )
@@ -58,16 +58,34 @@ class Orchestrator:
         return extractContent(response)
     
     async def _check_for_names(self) -> bool:
-        response_text = await self._send_prompt('id_gateway_prompt')
+        response_text = await self._send_prompt('id_gateway_prompt', user_prompt = self.user_prompt)
         return response_text.lower().startswith('yes')
 
+    def _generate_list_of_people(self) -> str:
+        list_of_people = "These are the students that you must make API calls for:\n"
+        for student in self.student_list:
+            student_info = (
+                f"First Name: {student.first_name}\n"
+                f"Last Name: {student.last_name}\n"
+                f"Student ID: {student.student_id}\n\n"
+            )
+            list_of_people += student_info
+        return list_of_people
+
     async def _fetch_api_decision(self) -> str:
-        return await self._send_prompt('orchestrator_prompt', json_mode=True)
+        list_of_people = "" if not self.has_people else self._generate_list_of_people()
+        student_api_name = "" if self.has_people else """
+            API Name: Student API
+            What information is available: Primarily used to lookup basic facts about a student's name, student ID number, email, sex, date of birth. Special queries exist to find students by birth month, and to count the number of students by sex.
+            What information is not available: The Student API does not have direct access to related data about grades, behavior, attendance, and other broader topics. It only has access to personal information listed above.
+            Do not call on the Student API for any information that is otherwise available in other APIs.
+                """
+        return await self._send_prompt('orchestrator_prompt', user_prompt=self.user_prompt, student_api_name=student_api_name, list_of_people = list_of_people, json_mode=True)
 
     async def _fetch_people_list(self) -> str:
-        return await self._send_prompt('identification_prompt', json_mode=True)
-    
-    async def _prompt_for_apis(self, has_people) -> List[ApiDecision]:
+        return await self._send_prompt('identification_prompt', user_prompt = self.user_prompt, json_mode=True)
+
+    async def _prompt_for_apis(self) -> List[ApiDecision]:
         raw_decision_list = await self._fetch_api_decision()
         print("raw decision list is: " + str(raw_decision_list))
         try:
@@ -89,9 +107,10 @@ class Orchestrator:
             raise ValidationError(f"The AI failed to give a JSON object with people type and query.: {e}") from e
         return validated_people_list
     
+    # unused function?
     async def _fetch_id_summary(self, gqlworker_data:str) -> str:
         id_summary_engine = LLMPrompt(
-            prompt=(gqlworker_data + self.prompts_file.get('identification_summary').get('text')),
+            prompt = TemplateManager.render_template('identification_summary', gqlworker_data=gqlworker_data),
             system_prompt=self.system_prompt,
             async_client=True
             )
@@ -133,7 +152,6 @@ class Orchestrator:
         task = self.prompt_mapping.get(task_key, None)
         gqlworker = GQLAgent(
             self.gqlclient,
-            prompts_file=self.prompts_file,
             task_key=task_key,
             task=task,
             user_prompt=query + (self.id_context if self.id_context is not None else ""),
@@ -144,9 +162,9 @@ class Orchestrator:
     
     async def run_orchestration(self):
         print('### CHECKING IF THIS IS A PROMPT CONTAINS NAMES')
-        has_people:bool = await self._check_for_names()
+        self.has_people = await self._check_for_names()
         
-        if has_people:
+        if self.has_people:
             print("##PROMPT HAS PEOPLE --- PROMPTING FOR PEOPLE##")
             people = await self._prompt_for_people()
             for person in people:
@@ -158,5 +176,5 @@ class Orchestrator:
                 self.id_context += "\n Additional Student context: \n" + id_summary
         
         print("##PROMPTING FOR APIS##")
-        api_task_list = await self._prompt_for_apis(has_people)
+        api_task_list = await self._prompt_for_apis()
         await asyncio.gather(*(self._handle_call(api_call) for api_call in api_task_list))

@@ -22,13 +22,6 @@ def load_config():
         config_data = tomllib.load(fp)
     return config_data
 
-def load_prompts():
-    root_dir = pathlib.Path(__file__).parent.parent
-    prompt_path = root_dir / 'prompts.toml'
-    with prompt_path.open(mode="rb") as fp:
-        prompt_data = tomllib.load(fp)
-    return prompt_data
-
 class Config:
     def __init__(self, provider_name = settings.default_service):
         self.config_data = load_config()
