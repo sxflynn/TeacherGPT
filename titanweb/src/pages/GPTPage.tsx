@@ -99,7 +99,7 @@ export function GPTPage() {
                 mt="sm"
                 withCloseButton={false}
                 loading
-                title="Generating text"
+                title="Retrieving data"
               />
             )}
           </Group>
