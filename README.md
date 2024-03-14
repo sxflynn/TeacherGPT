@@ -12,8 +12,7 @@ A GPT chatbot for teachers that uses retrieval-augmentation  to answer questions
 
 
 
-https://github.com/sxflynn/TeacherGPT/assets/2034081/5eae04c7-bffd-498a-8b76-eb3397485f0b
-
+https://github.com/sxflynn/TeacherGPT/assets/2034081/225c88d9-ad9e-44d6-973c-a72b23a43a96
 
 
 ## Aim
