@@ -1,5 +1,6 @@
 package com.flynn.schooldb.graphql.resolver;
 
+import com.flynn.schooldb.dto.AttendanceSummaryDTO;
 import com.flynn.schooldb.entity.DailyAttendance;
 import com.flynn.schooldb.service.DailyAttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,28 @@ public class DailyAttendanceQueryResolver {
     public List<DailyAttendance> dailyAttendanceFindByStudentIdWhereNotFullAttendance(@Argument Long studentId){
         return dailyAttendanceService.findByStudentStudentIdAndNotFullAttendance(studentId);
     }
+
+    @QueryMapping
+    public AttendanceSummaryDTO summarizeStudentAttendance(@Argument Long studentId) {
+        return dailyAttendanceService.summarizeStudentAttendance(studentId);
+    }
+
+    @QueryMapping
+    public AttendanceSummaryDTO summarizeSchoolAttendance() {
+        return dailyAttendanceService.summarizeSchoolAttendance();
+    }
+
+    @QueryMapping
+    public AttendanceSummaryDTO summarizeStudentAttendanceBetweenDates(@Argument Long studentId, @Argument LocalDate startDate, @Argument LocalDate endDate) {
+        return dailyAttendanceService.summarizeStudentAttendanceBetweenDates(studentId, startDate, endDate);
+    }
+
+    @QueryMapping
+    public AttendanceSummaryDTO summarizeSchoolAttendanceBetweenDates(@Argument LocalDate startDate, @Argument LocalDate endDate) {
+        return dailyAttendanceService.summarizeSchoolAttendanceBetweenDates(startDate, endDate);
+    }
+
+
 }
 
 

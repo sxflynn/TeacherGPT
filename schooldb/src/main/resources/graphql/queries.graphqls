@@ -13,6 +13,12 @@ type Query {
     dailyAttendanceFindByStudentIdWhereNotFullAttendance(studentId: ID!): [DailyAttendance]
     dailyAttendanceFindByAttendanceTypeNameAndDate(attendanceTypeName: String!, date:String!):[DailyAttendance]
 
+    #AttendanceSummary
+    summarizeStudentAttendance(studentId: ID!): AttendanceSummary
+    summarizeSchoolAttendance: AttendanceSummary
+    summarizeStudentAttendanceBetweenDates(studentId: ID!, startDate: String!, endDate: String!): AttendanceSummary
+    summarizeSchoolAttendanceBetweenDates(startDate: String!, endDate: String!): AttendanceSummary
+
     #Student
     studentsListAll: [Student]
     studentsFindById(id: ID!): Student

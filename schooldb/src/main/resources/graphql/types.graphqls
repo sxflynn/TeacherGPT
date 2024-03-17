@@ -25,3 +25,13 @@ type Student {
     ohioSsid: String!
     dailyAttendance: [DailyAttendance]
 }
+
+type AttendanceSummary {
+    totalDays: Int
+    daysFullAttendance: Int
+    daysPartialExcusedAbsence: Int
+    daysPartialUnexcusedAbsence: Int
+    daysUnexcusedAbsence: Int
+    daysExcusedAbsence: Int
+    attendanceRate: Float
+}
