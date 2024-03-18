@@ -268,7 +268,11 @@ Here are the available APIs that you can call:
 
 API Name: Attendance API
 Name for the JSON key: attendance
-What information is available: Primarily used to lookup attendance information such as individual student attendance records for specific dates, listing days by attendance type such as absences and tardies
+What information is available: Can look up attendance events for specific dates and specific students, such as knowing what exact attendance event happened on a specific day.
+
+API Name: Attendance Statistics API
+Name for the JSON key: attendanceSummary
+What information is available: Can look up general attendance statistics for a date range and a specific student.
 
 You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
 
@@ -277,7 +281,7 @@ You will respond with a json object with a "data" key and a value comprising an 
   "data": [
     {
       "api": "attendance",
-      "query": "Search for a student with the keyword bal in the name. Return the student ID, first and last names."
+      "query": "What attendance event occured on March 23, 2024 for student Travis Yates, student ID 23."
     }
   ]
 }
@@ -318,13 +322,28 @@ Teacher: What is Tagan's student ID? Additional Student Context: Tagan Robinson,
 
 Here are some example teacher prompts and your model responses to help you understand your task:
 
-Teacher prompt: "Tell me about Tegan's recent attendance data"
+Teacher prompt: "Tell me about Tegan's recent attendance data. Additional context: Tegan Eaton, student ID 56"
 Response:
 {
   "data": [
     {
-      "api": "attendance",
-      "query": "Look up Tegan's attendance from the past 2 weeks."
+      "api": "attendanceSummary",
+      "query": "Look up Tegan Eaton, attendance from the past 2 weeks. Student ID 56"
+    }
+  ]
+}
+
+Teacher prompt: "Has Marco been showing up to school on time recently? Additional context: Marco Nils, student ID 30"
+Response:
+{
+  "data": [
+    {
+      "api": "attendanceSummary",
+      "query": "Look up Marco Nils recent attendance data from the past 2 weeks. Student ID 30"
+    },
+    { 
+      "api":"attendance",
+      "query":"Look up the late arrival times for Marco Nils, student ID 30, from yesterday's school day."
     }
   ]
 }
@@ -334,27 +353,27 @@ Response:
 {
   "data": [
     {
-      "api": "attendance",
+      "api": "attendanceSummary",
       "query": "Look up Michael Freeman's attendance from the past 2 weeks. Student ID is 5"
     },
     {
-        "api":"attendance",
+        "api":"attendanceSummary",
         "query":"Look up Hayley Vas's attendance from the past 2 weeks. Student ID is 9"
     }
   ]
 }
 
-Teacher prompt: "Have Michael and Hayley been going to school lately? Additional Student Context: Michael Freeman. Student ID 5. Hayley Vas. Student ID 9."
+Teacher prompt: "Did Michael and Hayley go to school on Friday? Additional Student Context: Michael Freeman. Student ID 5. Hayley Vas. Student ID 9. Today is March 6, 2024"
 Response:
 {
   "data": [
     {
       "api": "attendance",
-      "query": "Look up Michael's attendance from the past 2 weeks. Student ID is 5"
+      "query": "Look up Michael's attendance for March 1, 2024. Student ID is 5"
     },
     {
         "api":"attendance",
-        "query":"Look up Hayley's attendance from the past 2 weeks. Student ID is 9"
+        "query":"Look up Hayley's attendance for March 1, 2024. Student ID is 9"
     }
   ]
 }
@@ -438,15 +457,13 @@ type Student {
 
 Your job is to generate a JSON object with the following shape:
 {
-  "query":"the name of the query GraphQL query from above", // You choose which query can best answer the teacher's question.
-  "fields": ["firstName", "email"], // You choose which fields are necesary to answer the question
+  "query":"studentsFindByFirstNameIgnoreCase", // You choose which GraphQL from the list above can best answer the teacher's question.
+  "fields": "all"
   "variables": {
-    "lastName": "Michael"
+    "firstName": "Michael"
   }
 }
 
-The only fields you should be selecting are from the schema above. Do not invent or halucinate any new student fields.
-If you believe all student fields should be listed, then use "fields":"all" for the "fields" variable in the JSON object.
 If you are calling a query that will return a primitive such as an Int, then use "fields":"none" for the "fields" nariable in the JSON object.
 Never use "fields":"none" for any query except one that has "CountBy" in the name. So if you invoke "studentsSearchByKeyword" then you must include some fields.
 Dates should always be formatted as a string as "YYYY-MM-DD" (don't use the quotes)
@@ -461,7 +478,7 @@ Query: "Student last name Michael, whats the date of birth and email?"
 Response:
 {
   "query":"studentsFindByLastNameIgnoreCase",
-  "fields": ["dob", "email"],
+  "fields": "all",
   "variables": {
     "lastName": "Michael"
   }
@@ -471,7 +488,7 @@ Prompt: "Who are the students in my class born in 2010?"
 Response: 
 {
   "query":"studentsFindByDobBetween",
-  "fields": ["studentId", "firstName", "lastName"],
+  "fields": "all",
   "variables": {
     "startDate": "2010-01-01",
     "endDate":"2010-12-31"
@@ -482,7 +499,7 @@ Prompt: "How many boys are in the school?"
 Response:
 {
   "query":"studentsCountBySex",
-  "fields": "none",
+  "fields": "none", // selecting "none" because this question will return an int, not a list of students
   "variables": {
     "sex": "M"
   }
@@ -492,7 +509,7 @@ Prompt: Look up information about the student named bal
 Response:
 {
   "query":"studentsSearchByKeyword",
-  "fields": ["studentId", "firstName", "lastName"],
+  "fields": "all",
   "variables": {
     "keyword": "bal"
   }
@@ -596,7 +613,7 @@ Prompt: "Has Liz had any trouble getting to school recently, or has she been on 
 Response:
 {
   "query":"dailyAttendanceFindByStudentIdWhereNotFullAttendance",
-  "fields": ["all"],
+  "fields": "all",
   "variables": {
     "studentId": "23"
   }
@@ -607,6 +624,96 @@ Here is the prompt from the teacher. Read the prompt and respond with a valid JS
 {{ user_prompt }}
       """  
     ),
+    "attendance_statistics_prompt":Template(
+      """
+      You are an AI assisant who specializes in using GraphQL to retrieve summary attendance statistics for either the entire school or a specific student.
+      These are the GraphQL queries you need to know about:
+        summarizeStudentAttendance(studentId: ID!): AttendanceSummary
+        summarizeSchoolAttendance: AttendanceSummary
+        summarizeStudentAttendanceBetweenDates(studentId: ID!, startDate: String!, endDate: String!): AttendanceSummary
+        summarizeSchoolAttendanceBetweenDates(startDate: String!, endDate: String!): AttendanceSummary
+
+
+    This is the AttendanceSummary GraphQL schema type:
+    type AttendanceSummary {
+        totalDays: Int
+        daysFullAttendance: Int
+        daysPartialExcusedAbsence: Int
+        daysPartialUnexcusedAbsence: Int
+        daysUnexcusedAbsence: Int
+        daysExcusedAbsence: Int
+        attendanceRate: String
+    }
+
+Your job is to generate a JSON object with the following shape:
+{
+  "query":"the name of the query GraphQL query from above", // You choose which query can best answer the teacher's question.
+  "fields": ["daysFullAttendance", "attendanceRate"], // You choose which fields are necesary to answer the question
+  "variables": {
+    "studentId": 5,
+    "startDate": "2024-02-05",
+    "endDate":"2024-02-10"
+  }
+}
+
+The only fields you should be selecting are from the schema above. Do not invent or halucinate any new AttendanceSummary fields.
+If you believe all AttendanceSummary fields should be listed, then use "fields":"all" for the "fields" variable in the JSON object.
+If you are calling a query that will return a primitive such as an Int, then use "fields":"none" for the "fields" nariable in the JSON object.
+Dates should always be formatted as a string as "YYYY-MM-DD" (don't use the quotes)
+However, if searching by month by itself, the month should be an int
+
+Here are some examples to help guide your response:
+
+Prompt: "Has Michael been going to school the past two weeks? Context: Michael Freeman, student ID 5. Today is March 1, 2024."
+Response:
+{
+  "query":"summarizeStudentAttendanceBetweenDates",
+  "fields": "all", // because the question is generic, just retrieve all fields to give a response with lots of details
+  "variables": {
+    "studentId": "5",
+    "startDate":"2024-02-16",
+    "endDate":"2024-02-29"
+  }
+}
+
+Prompt: "How many days was Michael absent last month? Context: Michael Freeman, student ID 5. Today is March 1, 2024."
+Response:
+{
+  "query":"summarizeStudentAttendanceBetweenDates",
+  "fields": ["daysUnexcusedAbsence","daysExcusedAbsence"],
+  "variables": {
+    "studentId": "5",
+    "startDate":"2024-02-01",
+    "endDate":"2024-02-29"
+  }
+}
+
+Prompt: "What are the attendance statistics for Ionna Devin this year? Student ID 40"
+Response:
+{
+  "query":"summarizeStudentAttendance",
+  "fields": "all",
+  "variables": {
+     "studentId": "40"
+  }
+}
+
+Prompt: "Retrieve the school's attendance figures for the month of December. Today is January 29, 2024"
+Response:
+{
+  "query":"summarizeSchoolAttendanceBetweenDates",
+  "fields": "all",
+  "variables": {
+    "startDate": "2023-12-01",
+    "endDate":"2023-12-31"
+  }
+}
+
+Here is the prompt from the teacher. Read the prompt and respond with a valid JSON object containing the query, fields and variables:
+
+{{ user_prompt }}
+      """  
+    ), 
     "check_query_prompt":Template(
       """
       Your job is to check the output of an AI Chatbot for number/data accuracy. 

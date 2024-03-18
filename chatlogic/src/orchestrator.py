@@ -10,6 +10,7 @@ from src.prompt import LLMPrompt, extractContent
 prompt_mapping = {
     "student": "student_general_prompt",
     "attendance": "attendance_general_prompt",
+    "attendanceSummary":"attendance_statistics_prompt"
 }
 
 class ApiDecision(BaseModel):
@@ -43,6 +44,7 @@ class Orchestrator:
         self.prompt_mapping = {
             "student": "student_general_prompt",
             "attendance": "attendance_general_prompt",
+            "attendanceSummary":"attendance_statistics_prompt"
         }
         
     async def _send_prompt(self, prompt_key: str, json_mode: bool = False, **kwargs) -> str:

@@ -48,11 +48,13 @@ class GQLAgent:
         self.system_prompt=system_prompt
         self.all_fields_mapping = {
             "student": ["studentId", "firstName", "middleName", "lastName", "sex", "dob", "email", "ohioSsid"],
-            "attendance": ["date","dailyAttendanceId","arrival","departure","excuseNote"]
+            "attendance": ["date","dailyAttendanceId","arrival","departure","excuseNote"],
+            "attendanceSummary":["totalDays","daysFullAttendance","daysPartialExcusedAbsence","daysPartialUnexcusedAbsence","daysUnexcusedAbsence","daysExcusedAbsence","attendanceRate"]
             }
         self.mandatory_fields_mapping = {
             "student": ["studentId", "firstName", "lastName"],
             "attendance": ["attendanceType { attendanceType }"],
+            "attendanceSummary":["attendanceRate"]
             }
         self.all_fields = self._get_all_fields(task_key)
         self.lock = asyncio.Lock()
