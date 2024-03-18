@@ -84,8 +84,8 @@ public class AttendanceSummaryDTO {
         this.daysExcusedAbsence = daysExcusedAbsence;
     }
 
-    public double getAttendanceRate() {
-        return attendanceRate;
+    public String getAttendanceRate() {
+        return String.format("%.2f%%", attendanceRate * 100);
     }
 
     public void setAttendanceRate(double attendanceRate) {

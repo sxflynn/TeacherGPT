@@ -33,5 +33,5 @@ type AttendanceSummary {
     daysPartialUnexcusedAbsence: Int
     daysUnexcusedAbsence: Int
     daysExcusedAbsence: Int
-    attendanceRate: Float
+    attendanceRate: String
 }
