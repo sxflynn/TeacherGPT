@@ -224,7 +224,7 @@ Now give a JSON response based on the Prompt/Response pairs above.
         
         {{ collected_data }}
         
-        Give an detailed answer to the original question asked by the teacher, and make sure to
+        Give a detailed answer to the original question asked by the teacher, and make sure to
         use the collected data and copy it exactly into your answer.
         
         If the question asked you simply to retrieve data or list data, then simply give the data back
