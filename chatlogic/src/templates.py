@@ -115,15 +115,18 @@ Here is the prompt from the user. Using the prompt/response pairs above, answer 
     ),
     "identification_prompt":Template(
     """
-    Your job is to identify the students and/or staff members that the question is asking about.
+    Your job is to identify the students, staff members or parent/guardian/family members that the question is asking about.
+    You should only try to identify people with actual names, not the reference to the existence of a person.
 You must be able to describe the parts of a name, like first name and last name.
-Your job right now is to input the teacher prompt and build a structured object that contains identifiable student or staff data for the next AI chatbot to take and actually look up the data.
+Your job right now is to input the teacher prompt and build a structured object that contains identifiable student, staff or family member data for the next AI chatbot to take and actually look up the data.
 The JSON object for each person or thing looks like this:
 "person_type":"student" if its a student or default value if you are unsure whether or not its a student
 or
-"person_type":"staff" if its a staff only if you are certain its a staff like they use Mr. or Mrs. or Ms. in the name.
+"person_type":"staff" if it's a staff only if you are certain its a staff like they use Mr. or Mrs. or Ms. in the name.
+or 
+"person_type":"familyMember" if it is clearly the parent/guardian or family member of a student.
 
-If a name is given and you're unsure if it's a student or staff member, default to "person_type":"student"
+If a name is given and you're unsure if it's a student, staff member or family member, default to "person_type":"student"
 
 If the question is not really specifying any person, then you can respond with "none" as shown below.
 
@@ -192,6 +195,32 @@ Response:
   ]
 }
 
+Teacher prompt: What is Ms. Pope's email address? Ms. Pope is Richard's mom.
+Response:
+{
+  "data": [
+    {
+      "person_type": "student",
+      "query": "Search for a student first name Richard. Return all available fields."
+    },
+    {
+      "person_type": "familyMember",
+      "query": "Lookup the email address of the parent/guardians with last name Pope."
+    }
+  ]
+}
+
+Teacher prompt: Who are Jack's parents?
+Response:
+{
+  "data": [
+    {
+      "person_type": "student", 
+      "query": "Search for a student first name Jack. Return all available fields."
+    }
+  ] // notice we do not make a second call for "person_type":"familyMember" because no family member names were actually found in the prompt alone. Only "Jack" was found and "Jack" is a student
+}
+
 Teacher prompt: What are the school policies on late homework?
 Response:
 {
@@ -216,7 +245,7 @@ Now give a JSON response based on the Prompt/Response pairs above.
         
         {{ input_user_prompt }}
         
-        These are the student details for the students referred to in the above question:
+        These are the details for the students/family members/staff members referred to in the above question:
         
         {{ id_context }}
         
@@ -274,6 +303,16 @@ API Name: Attendance Statistics API
 Name for the JSON key: attendanceSummary
 What information is available: Can look up general attendance statistics for a date range and a specific student.
 
+API Name: Family Member API
+Name for the JSON key: familyMember
+What information is available: Can look up specific attributes of family members in the school community, such as looking up their name, phone number.
+Do not use to search for family members grouped or linked to students.
+
+API Name: Family Group API
+Name for the JSON key: familyGroup
+What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
+Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
+
 You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
 
 You will respond with a json object with a "data" key and a value comprising an array of one or more JSON objects like this:
@@ -309,6 +348,7 @@ If you are unable to understand the original teacher prompt and unable to determ
 }
 
 If the original prompt is asking for data that you already have in the Student context that was retrieved from an earlier task, then respond like this:
+
 Teacher: What is Tagan's student ID? Additional Student Context: Tagan Robinson, student ID 45. Tagan Robinson's email is tarobinson26@titanacademy.edu"
 {
   "data":[
@@ -336,14 +376,14 @@ Response:
 Teacher prompt: "Has Marco been showing up to school on time recently? Additional context: Marco Nils, student ID 30"
 Response:
 {
-  "data": [
+  "data": [ // It's good to make 2 API calls to help build context to fully answer the teacher's question.
     {
       "api": "attendanceSummary",
       "query": "Look up Marco Nils recent attendance data from the past 2 weeks. Student ID 30"
     },
     { 
-      "api":"attendance",
-      "query":"Look up the late arrival times for Marco Nils, student ID 30, from yesterday's school day."
+      "api":"attendance", // In addition to summary statistics, we want to call the attendance API to look up specific data to make the response more detailed.
+      "query":"Look up the late arrival times for Marco Nils, student ID 30, from yesterday's school day." 
     }
   ]
 }
@@ -372,7 +412,7 @@ Response:
       "query": "Look up Michael's attendance for March 1, 2024. Student ID is 5"
     },
     {
-        "api":"attendance",
+        "api":"attendance", // We are making a 2nd API call because we need one call per student.
         "query":"Look up Hayley's attendance for March 1, 2024. Student ID is 9"
     }
   ]
@@ -386,6 +426,21 @@ Response:
       "api": "none",
       "query": "Tagan's email is tarobinson26@titanacademy.edu"
     }
+  ]
+}
+
+Teacher prompt: "Help me write a text to Timothy's parents explaining his recent attendance concerns. Additional Student Context: Timothy Jones, student ID 80."
+Response:
+{
+  "data": [
+      { 
+        "api":"familyGroup",
+        "query":"Retrieve the data for the parents of Timothy Jones. Student ID is 80"
+      },
+      { 
+        "api":"attendanceSummary", // we needed to make two API calls
+        "query":"Look up Timothy Jones attendance from the past 2 weeks. Student ID is 80"
+      }
   ]
 }
 
@@ -778,6 +833,139 @@ Here is the actual user prompt and the AI-generated query:
 
 {{ user_prompt }}
       """  
+    ),
+    "family_member_general_prompt":Template(
+      """
+    You are an AI assisant who specializes in using GraphQL to retrieve specific data about the family members and parents of studwents in the entire school. These are the GraphQL queries you need to know about:
+    
+    familyMemberListAll: [FamilyMember]
+    familyMemberSearchByKeyword(keyword: String!): [FamilyMember]
+    familyMemberFindByLastName(lastName: String!): [FamilyMember]
+    familyMemberFindByFirstName(firstName: String!): [FamilyMember]
+    familyMemberFindByMiddleName(middleName: String!): [FamilyMember]
+    familyMemberFindByPhoneNumber(phoneNumber: String!): [FamilyMember]
+    
+    This is the FamilyMember GraphQL schema type:
+    type FamilyMember {
+        familyMemberId: ID!
+        firstName: String!
+        middleName: String
+        lastName: String!
+        email: String!
+        phoneNumber: String
+    }
+
+Your job is to generate a JSON object with the following shape:
+{
+  "query":"familyMemberSearchByKeyword", // You choose which GraphQL from the list above can best answer the teacher's question about family members.
+  "fields": "all"
+  "variables": {
+    "keyword": "Johnson" // These are the input arguments for the GraphQL queries
+  }
+}
+
+You must copy the names, keywords and specific query content exactly into the JSON object.
+
+Here are some examples to help guide your response:
+
+Query: "Look up a family member with the name Reyna"
+Response:
+{
+  "query":"familyMemberSearchByKeyword",
+  "fields": "all",
+  "variables": {
+    "keyword": "Reyna"
+  }
+}
+
+Query: "Find all family members with the last name Eaton"
+Response:
+{
+  "query":"familyMemberFindByLastName",
+  "fields": "all",
+  "variables": {
+    "lastName": "Eaton"
+  }
+}
+
+Query: "Look up which family member has the phone number 614-388-2854"
+Response:
+{
+  "query":"familyMemberFindByPhoneNumber",
+  "fields": "all",
+  "variables": {
+    "phoneNumber": "614-388-2854"
+  }
+}
+    
+  Here is the prompt from the teacher. Read the prompt and respond with a valid JSON object containing the query, fields and variables:
+
+      {{ user_prompt }}
+      """
+    ),
+    "family_group_general_prompt":Template(
+      """
+      You are an AI assisant who specializes in using GraphQL to retrieve specific data about family members based on which students they belong to. These are the GraphQL queries you need to know about:
+    
+    familyGroupListAllFamilyMembersByStudentId(studentId: ID!): [FamilyGroup]
+    familyGroupFindByStudentIdAndParentGuardianTrue(studentId: ID!): [FamilyGroup]
+    familyGroupFindByStudentIdAndEmergencyPickupTrue(studentId: ID!): [FamilyGroup]
+    familyGroupFindByFamilyMemberId(familyMemberId: ID!): [FamilyGroup]
+    
+    This is the FamilyGroup GraphQL schema type:
+    type FamilyGroup {
+        familyGroupId: ID!
+        parentGuardian: Boolean
+        emergencyPickup: Boolean
+    }
+
+Your job is to generate a JSON object with the following shape:
+{
+  "query":"familyGroupListAllFamilyMembersByStudentId", // You choose which GraphQL from the list above can best answer the teacher's question about family member grouping with students.
+  "fields": "all"
+  "variables": {
+    "studentId": "1" // These are the input arguments for the GraphQL queries
+  }
+}
+
+You must copy the names, keywords and specific query content exactly into the JSON object.
+
+Here are some examples to help guide your response:
+
+Query: "Who are the parents of Raul? Additional context: Raul Espinosa, student ID 45"
+Response:
+{
+  "query":"familyGroupFindByStudentIdAndParentGuardianTrue", // if parents or guardians are specified in the query, ensure you are selecting the query with parentGuardianTrue
+  "fields": "all",
+  "variables": {
+    "studentId": "45"
+  }
+}
+
+Query: "Find all the family members related to Michael. Additional context, Student ID 78"
+Response:
+{
+  "query":"familyGroupListAllFamilyMembersByStudentId", // its asking for all family members, not just parents, so use the broader familygroup search query.
+  "fields": "all",
+  "variables": {
+    "studentId": "78"
+  }
+}
+
+Query: "Lookup somebody who could come pickup Hayley right now. Additional context: student ID 30"
+Response:
+{
+  "query":"familyGroupFindByStudentIdAndEmergencyPickupTrue",
+  "fields": "all",
+  "variables": {
+    "studentId": "30"
+  }
+}
+    
+  Here is the prompt from the teacher. Read the prompt and respond with a valid JSON object containing the query, fields and variables:
+
+      {{ user_prompt }}
+      """
     ),
 
 }
