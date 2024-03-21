@@ -42,4 +42,18 @@ type Query {
     studentsCountBySex(sex: String!): Int
     studentsFindBySexOrderByLastNameAsc(sex: String!): [Student]
     studentsFindByEmailContainingIgnoreCase(emailFragment: String!): [Student]
+
+    #FamilyGroup
+    familyGroupListAllFamilyMembersByStudentId(studentId: ID!): [FamilyGroup]
+    familyGroupFindByStudentIdAndParentGuardianTrue(studentId: ID!): [FamilyGroup]
+    familyGroupFindByStudentIdAndEmergencyPickupTrue(studentId: ID!): [FamilyGroup]
+    familyGroupFindByFamilyMemberId(familyMemberId: ID!): [FamilyGroup]
+
+    #FamilyMember
+    familyMemberListAll: [FamilyMember]
+    familyMemberSearchByKeyword(keyword: String!): [FamilyMember]
+    familyMemberFindByLastName(lastName: String!): [FamilyMember]
+    familyMemberFindByFirstName(firstName: String!): [FamilyMember]
+    familyMemberFindByMiddleName(middleName: String!): [FamilyMember]
+    familyMemberFindByPhoneNumber(phoneNumber: String!): [FamilyMember]
 }
