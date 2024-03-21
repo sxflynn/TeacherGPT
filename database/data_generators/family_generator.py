@@ -1,4 +1,5 @@
 import random
+import re
 import csv
 from faker import Faker
 
@@ -15,6 +16,11 @@ def read_student_data(file_name):
 def generate_unique_email(first_name, last_name):
     domain = random.choice(["@gmail.com", "@outlook.com", "@icloud.com"])
     return f"{first_name.lower()}.{last_name.lower()}{random.randint(1,999)}{domain}"
+
+def generate_basic_phone_number(fake):
+    phone_number = fake.basic_phone_number()
+    cleaned_phone_number = re.sub(r'\D', '', phone_number)
+    return cleaned_phone_number
 
 # Generates family members for a given student
 def generate_family_members(student, fake):
@@ -44,7 +50,7 @@ def generate_parent(fake, last_name, gender="female", is_father=True):
     middle_name = fake.first_name_female() if gender == "female" else fake.first_name_male()
     last_name = last_name if is_father or random.random() <= 0.8 else fake.last_name_female()
     email = generate_unique_email(first_name, last_name)
-    phone_number = fake.basic_phone_number()
+    phone_number = generate_basic_phone_number(fake)
     # Return the insert value string for the family member and their email for ID lookup
     return (f"('{first_name}', '{middle_name}', '{last_name}', '{email}', '{phone_number}')", email)
 
