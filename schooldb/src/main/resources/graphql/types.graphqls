@@ -35,3 +35,28 @@ type AttendanceSummary {
     daysExcusedAbsence: Int
     attendanceRate: String
 }
+
+type FamilyMember {
+    familyMemberId: ID!
+    firstName: String!
+    middleName: String
+    lastName: String!
+    email: String!
+    phoneNumber: String
+    familyGroups: [FamilyGroup]
+}
+
+type RelationshipType {
+    relationshipTypeId: ID
+    relationshipType: String!
+    familyGroups: [FamilyGroup]
+}
+
+type FamilyGroup {
+    familyGroupId: ID!
+    student: Student!
+    familyMember: FamilyMember!
+    parentGuardian: Boolean
+    emergencyPickup: Boolean
+    relationshipType: RelationshipType
+}

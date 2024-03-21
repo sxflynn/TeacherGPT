@@ -7,12 +7,6 @@ from src.templates import TemplateManager
 from src.graphql import GQLAgent
 from src.prompt import LLMPrompt, extractContent
 
-prompt_mapping = {
-    "student": "student_general_prompt",
-    "attendance": "attendance_general_prompt",
-    "attendanceSummary":"attendance_statistics_prompt"
-}
-
 class ApiDecision(BaseModel):
     api: str
     query: Optional[str] = None
@@ -31,6 +25,14 @@ class Student(BaseModel):
     dob: str
     email: str
     ohio_ssid: str
+    
+class FamilyMember(BaseModel):
+    family_member_id: int
+    first_name: str
+    middle_name: str
+    last_name: str
+    email: str
+    phone_number: str
    
 class Orchestrator:
     def __init__(self, gqlclient:GQLClient, user_prompt, system_prompt):
@@ -39,14 +41,16 @@ class Orchestrator:
         self.system_prompt = system_prompt
         self.has_people:bool = False
         self.student_list:List[Student] = []
+        self.family_member_list:List[FamilyMember] = []
         self.id_context = ""
         self.collected_data = []
         self.prompt_mapping = {
             "student": "student_general_prompt",
             "attendance": "attendance_general_prompt",
-            "attendanceSummary":"attendance_statistics_prompt"
+            "attendanceSummary":"attendance_statistics_prompt",
+            "familyMember":"family_member_general_prompt",
+            "familyGroup":"family_group_general_prompt"
         }
-        
     async def _send_prompt(self, prompt_key: str, json_mode: bool = False, **kwargs) -> str:
         prompt_engine = LLMPrompt(
             prompt=TemplateManager.render_template(template_name=prompt_key, **kwargs),
@@ -70,16 +74,25 @@ class Orchestrator:
         list_of_people = "These are the students that you must make API calls for:\n\n"
         for student in self.student_list:
             student_info = (
-                f"First Name: {student.first_name}\n"
-                f"Middle Name: {student.middle_name}\n"
-                f"Last Name: {student.last_name}\n"
+                f"Student First Name: {student.first_name}\n"
+                f"Student Middle Name: {student.middle_name}\n"
+                f"Student Last Name: {student.last_name}\n"
                 f"Sex: {student.sex}\n"
                 f"Date of Birth: {student.dob}\n"
-                f"Email: {student.email}\n"
+                f"Student Email: {student.email}\n"
                 f"Student ID: {student.student_id}\n"
                 f"Ohio SSID: {student.ohio_ssid}\n\n"
             )
             list_of_people += student_info
+        for family_member in self.family_member_list:
+            family_member_info = (
+                f"Family Member First Name: {family_member.first_name}\n"
+                f"Family Member Middle Name: {family_member.middle_name}\n"
+                f"Family Member Last Name: {family_member.last_name}\n"
+                f"Family Member Email: {family_member.email}\n"
+                f"Family Member Phone Number: {family_member.phone_number}\n"
+            )
+            list_of_people += family_member_info
         return list_of_people
 
     async def _fetch_api_decision(self) -> str:
@@ -159,6 +172,18 @@ class Orchestrator:
                 ohio_ssid=student.get('ohioSsid', '') 
             )
                 self.student_list.append(new_student)
+        if gqlworker_data and 'familyMember' in person.person_type:
+            family_member_data_list_raw = next(iter(gqlworker_data.values()), [])
+            for family_member in family_member_data_list_raw:
+                new_family_member = FamilyMember(
+                    family_member_id=family_member.get('familyMemberId',''),
+                    first_name=family_member.get('firstName',''),
+                    middle_name=family_member.get('middleName',''),
+                    last_name=family_member.get('lastName',''),
+                    email=family_member.get('email',''),
+                    phone_number=family_member.get('phoneNumber',''),
+                )
+                self.family_member_list.append(new_family_member)
             
     async def _gql_retriever(self, task_key:str, query:str, data_only=False):
         task = self.prompt_mapping.get(task_key, None)
@@ -204,6 +229,23 @@ class Orchestrator:
                 
                 # Prepending the header to the full student records string
                 self.id_context += "\nStudent Data to help answer the question:\n" + full_student_records
+            
+            if self.family_member_list:  # Check if the student_list is not empty
+                family_member_records = []
+                for family_member in self.family_member_list:
+                    family_member_record = f"""\
+                        First Name: {family_member.first_name}
+                        Middle Name: {family_member.middle_name}
+                        Last Name: {family_member.last_name}
+                        Email: {family_member.email}
+                        Phone Number: {family_member.phone_number}\n"""
+                    family_member_records.append(family_member_record)
+                
+                # Combining the student records into a single string with separators
+                full_family_member_records = "\n".join(family_member_records)
+                
+                # Prepending the header to the full student records string
+                self.id_context += "\nFamily Member Data to help answer the question:\n" + full_family_member_records
         
         print("##PROMPTING FOR APIS##")
         api_task_list = await self._prompt_for_apis()

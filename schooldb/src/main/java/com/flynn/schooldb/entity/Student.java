@@ -39,6 +39,17 @@ public class Student {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<DailyAttendance> dailyAttendance;
 
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<FamilyGroup> familyGroup;
+
+    public List<FamilyGroup> getFamilyGroup() {
+        return familyGroup;
+    }
+
+    public void setFamilyGroup(List<FamilyGroup> familyGroup) {
+        this.familyGroup = familyGroup;
+    }
+
     public Student() {
     }
 
