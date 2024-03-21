@@ -16,8 +16,23 @@ public class FamilyGroupQueryResolver {
     private FamilyGroupService familyGroupService;
 
     @QueryMapping
-    public Set<FamilyGroup> familyGrouplistAllFamilyMembersByStudentId(@Argument Long studentId){
+    public Set<FamilyGroup> familyGroupListAllFamilyMembersByStudentId(@Argument Long studentId) {
         return familyGroupService.listAllFamilyMembersByStudentId(studentId);
+    }
+
+    @QueryMapping
+    public Set<FamilyGroup> familyGroupFindByStudentIdAndParentGuardianTrue(@Argument Long studentId) {
+        return familyGroupService.findByStudentStudentIdAndParentGuardianTrue(studentId);
+    }
+
+    @QueryMapping
+    public Set<FamilyGroup> familyGroupFindByStudentIdAndEmergencyPickupTrue(@Argument Long studentId) {
+        return familyGroupService.findByStudentStudentIdAndEmergencyPickupTrue(studentId);
+    }
+
+    @QueryMapping
+    public Set<FamilyGroup> familyGroupFindByFamilyMemberId(@Argument Long familyMemberId) {
+        return familyGroupService.findByFamilyMemberFamilyMemberId(familyMemberId);
     }
 
 }

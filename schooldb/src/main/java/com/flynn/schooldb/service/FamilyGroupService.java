@@ -10,5 +10,9 @@ public interface FamilyGroupService {
 
     Set<FamilyGroup> listAllFamilyMembersByStudentId(Long studentId);
 
+    Set<FamilyGroup> findByStudentStudentIdAndParentGuardianTrue(Long studentId);
 
+    Set<FamilyGroup> findByStudentStudentIdAndEmergencyPickupTrue(Long studentId);
+
+    Set<FamilyGroup> findByFamilyMemberFamilyMemberId(Long familyMemberId);
 }

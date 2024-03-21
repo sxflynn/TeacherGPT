@@ -22,4 +22,19 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
     public Set<FamilyGroup> listAllFamilyMembersByStudentId(Long studentId) {
         return familyGroupRepository.findByStudentStudentId(studentId);
     }
+
+    @Override
+    public Set<FamilyGroup> findByStudentStudentIdAndParentGuardianTrue(Long studentId) {
+        return familyGroupRepository.findByStudentStudentIdAndParentGuardianTrue(studentId);
+    }
+
+    @Override
+    public Set<FamilyGroup> findByStudentStudentIdAndEmergencyPickupTrue(Long studentId) {
+        return familyGroupRepository.findByStudentStudentIdAndEmergencyPickupTrue(studentId);
+    }
+
+    @Override
+    public Set<FamilyGroup> findByFamilyMemberFamilyMemberId(Long familyMemberId) {
+        return familyGroupRepository.findByFamilyMemberFamilyMemberId(familyMemberId);
+    }
 }
