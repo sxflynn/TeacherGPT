@@ -514,8 +514,8 @@ Your job is to generate a JSON object with the following shape:
 {
   "query":"studentsFindByFirstNameIgnoreCase", // You choose which GraphQL from the list above can best answer the teacher's question.
   "fields": "all"
-  "variables": {
-    "firstName": "Michael"
+  "variables": { 
+    "firstName": "Michael"  // these are the parameters for the GraphQL query
   }
 }
 
