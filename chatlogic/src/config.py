@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     togetherai_api_key: str
     default_service: str
     graphql_url: str
+    bypass_relevancy_check: str
 
 settings = Settings()
 
@@ -24,11 +25,11 @@ def load_config():
 
 class Config:
     def __init__(self, provider_name = settings.default_service):
-        self.config_data = load_config()
-        if not self.config_data.get(provider_name):
+        self.llm_config_data = load_config()
+        if not self.llm_config_data.get(provider_name):
             raise ValueError(f"{provider_name} is not located in the config.toml file.")
         load_dotenv()
-        provider = self.config_data.get(provider_name,{})
+        provider = self.llm_config_data.get(provider_name,{})
         self.url = provider.get('url','')
         self.key = os.getenv(f'{provider_name.upper()}_API_KEY', 'none') # OpenAI library requires key string
         self.models = provider.get('models', [])
