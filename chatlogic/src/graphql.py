@@ -82,7 +82,7 @@ class GQLAgent:
             async_client=True
             )
         response = await task_engine.send_async(json_mode=True)
-        return extractContent(response)
+        return extractContent(response,json_mode=True)
     
     def _generate_final_response(self, gql_query_response: Dict[str,Any]) -> str:
         final_response = ("The teacher asked the question " 
