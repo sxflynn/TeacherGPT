@@ -155,6 +155,8 @@ class GQLAgent:
         return error_message
     
     def _generate_complete_gql_query(self, gql_data: GQLQueryModel) -> str:
+        if isinstance(gql_data.fields, str) and (gql_data.fields != 'none' and gql_data.fields != 'all'):
+            gql_data.fields = [gql_data.fields] # to guard against lone strings causing exception
         if gql_data.fields == 'all':
             fields_query_part = ' '.join(self.all_fields)
         else:
