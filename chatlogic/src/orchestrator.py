@@ -1,4 +1,5 @@
 import json
+import re 
 import asyncio
 from typing import List, Optional
 from gql import gql, Client as GQLClient
@@ -65,7 +66,7 @@ class Orchestrator:
     
     async def _check_for_names(self) -> bool:
         response_text = await self._send_prompt('id_gateway_prompt', user_prompt = self.user_prompt)
-        return response_text.lower().startswith('yes')
+        return response_text.lower().strip().startswith('yes')
 
     def _generate_list_of_people(self) -> str:
         if not self.student_list:
@@ -120,11 +121,27 @@ class Orchestrator:
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         return validated_decision_list
 
+    ## research better implementations such as using orjson
+    def _sanitize_json_output(self, json_string):
+        pattern = r"{([^}]*)}"
+        result = re.search(pattern, json_string)
+        if result:
+            new_string = json_string[result.start():]
+            new_string = new_string[:new_string.rindex("}")] + "}"
+            return new_string.strip()
+
     async def _prompt_for_people(self) -> List[Identification]:
         raw_people_list = await self._fetch_people_list()
         print("raw people list is: " + str(raw_people_list))
         try:
             people_data = json.loads(raw_people_list)["data"]
+        except json.decoder.JSONDecodeError as e:
+            print("raw_people_list was not a proper JSON object: ", raw_people_list)
+            print("Attempting to sanitize using regex")
+            new_people_list = self._sanitize_json_output(raw_people_list)
+            people_data = json.loads(new_people_list)["data"]
+            print(e)
+        try:
             validated_people_list = [Identification(**item) for item in people_data]
         except ValidationError as e:
             print("raw_people_list couldn't validate: ", raw_people_list)
@@ -200,6 +217,7 @@ class Orchestrator:
     async def run_orchestration(self):
         print('### CHECKING IF THIS IS A PROMPT CONTAINS NAMES')
         self.has_people = await self._check_for_names()
+        # self.has_people = True # for development bypass
         
         if self.has_people:
             print("##PROMPT HAS PEOPLE --- PROMPTING FOR PEOPLE##")
