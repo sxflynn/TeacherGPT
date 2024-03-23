@@ -41,8 +41,11 @@ async def relevancy_check(userprompt:str) -> str:
 async def get_relevant_prompt(websocket: WebSocket) -> str:
     data = await websocket.receive_text()
     prompt_object = PromptInput.model_validate_json(data)
+    if settings.bypass_relevancy_check:
+        return prompt_object.prompt
     relevancy_answer = await relevancy_check(prompt_object.prompt)
-    if relevancy_answer.lower().startswith('proceed'):
+    filtered_answer = relevancy_answer.lower()
+    if filtered_answer.contains('proceed'):
         return prompt_object.prompt
     await websocket.send_text(relevancy_answer)
     await websocket.close()
