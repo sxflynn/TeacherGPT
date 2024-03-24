@@ -1,7 +1,10 @@
+import json
+import re
 from fastapi import HTTPException
 from openai import APIConnectionError, APIError, APIResponseValidationError, APIStatusError, APITimeoutError, BadRequestError, ConflictError, InternalServerError, NotFoundError, PermissionDeniedError, RateLimitError, AuthenticationError, UnprocessableEntityError
 from pydantic import BaseModel
 from src.client import LLMClient
+from src.config import settings
 
 class PromptInput(BaseModel):
     prompt: str
@@ -12,7 +15,25 @@ def handle_api_status_error(e):
 def handle_api_error(e):
     return 500, f"API Error: {e.message}"
 
-def extractContent(response) -> str:
+## research better implementations such as using orjson
+def sanitize_json_output(json_string):
+    pattern = r"{([^}]*)}"
+    result = re.search(pattern, json_string)
+    if result:
+        new_string = json_string[result.start():]
+        new_string = new_string[:new_string.rindex("}")] + "}"
+        return new_string.strip()
+
+def extractContent(response, json_mode=False) -> str:
+    if json_mode:
+        try:
+            extracted_response = response.choices[0].message.content
+            json.loads(extracted_response)
+        except json.decoder.JSONDecodeError:
+            print("extracted_response was not a proper JSON object: ", extracted_response)
+            print("Attempting to sanitize using sanitize_json_output")
+            new_extracted_response = sanitize_json_output(extracted_response)
+            return new_extracted_response
     return response.choices[0].message.content if response.choices else "No response"
 
 exception_mappings = {
@@ -32,8 +53,8 @@ exception_mappings = {
 }
 
 class LLMPrompt:
-    def __init__(self, prompt, system_prompt, config=None, async_client=False):
-        self.client = LLMClient(async_client=async_client, config=config)
+    def __init__(self, prompt, system_prompt, config=None, async_client=False, custom_service = settings.default_service):
+        self.client = LLMClient(async_client=async_client, config=config, custom_service=custom_service)
         self.async_client = async_client
         self.model = self.client.config.selected_model
         self.prompt = prompt
