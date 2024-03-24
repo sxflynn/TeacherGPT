@@ -161,11 +161,12 @@ class GQLAgent:
             fields_query_part = ' '.join(self.all_fields)
         else:
             if self.task_key in self.mandatory_fields_mapping:
+                gql_data.fields = [field for field in gql_data.fields if field in self.all_fields]
                 mandatory_fields = self.mandatory_fields_mapping[self.task_key]
                 for field in mandatory_fields:
                     if field not in gql_data.fields:
                         gql_data.fields.append(field)
-                        
+                                        
             int_fields = ["count", "average", "sum"]
             if not any(keyword in gql_data.query.lower() for keyword in int_fields) and gql_data.fields == 'none':
                 gql_data.fields = self.all_fields
