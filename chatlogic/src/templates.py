@@ -138,7 +138,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Hasan in the name. Return all available fields."
+      "query": "Search for a student with the keyword Hasan in the name."
     }
   ]
 }
@@ -149,7 +149,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Rory last name Dunn. Return all available fields."
+      "query": "Search for a student first name Rory last name Dunn."
     }
   ]
 }
@@ -160,7 +160,7 @@ Response:
   "data": [
     {
       "person_type": "staff",
-      "query": "Search for a staff member with the keyword Rosada in the name. Return all available fields."
+      "query": "Search for a staff member with the keyword Rosada in the name."
     }
   ]
 }
@@ -171,11 +171,11 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Michael in the name. Return all available fields."
+      "query": "Search for a student with the keyword Michael in the name."
     },
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Alina in the name. Return all available fields."
+      "query": "Search for a student with the keyword Alina in the name."
     }
   ]
 }
@@ -186,11 +186,11 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Nicole last name Pope. Return all available fields."
+      "query": "Search for a student first name Nicole last name Pope."
     },
     {
       "person_type": "student",
-      "query": "Search for a student first name Umar last name Soto. Return all available fields."
+      "query": "Search for a student first name Umar last name Soto."
     }
   ]
 }
@@ -201,7 +201,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Richard. Return all available fields."
+      "query": "Search for a student first name Richard."
     },
     {
       "person_type": "familyMember",
@@ -216,7 +216,7 @@ Response:
   "data": [
     {
       "person_type": "student", 
-      "query": "Search for a student first name Jack. Return all available fields."
+      "query": "Search for a student first name Jack."
     }
   ] // notice we do not make a second call for "person_type":"familyMember" because no family member names were actually found in the prompt alone. Only "Jack" was found and "Jack" is a student
 }
@@ -227,7 +227,7 @@ Response:
   "data": [
     {
       "person_class": "none",
-      "query": "none"
+      "query": "none" // Since no people were mentioned in the original prompt, you should return "none" for a query
     }
   ]
 }
@@ -295,21 +295,17 @@ Here are the available APIs that you can call:
 
 {{ student_api_name }}
 
-API Name: Attendance API
-Name for the JSON key: attendance
+API Name: attendance
 What information is available: Can look up attendance events for specific dates and specific students, such as knowing what exact attendance event happened on a specific day.
 
-API Name: Attendance Statistics API
-Name for the JSON key: attendanceSummary
+API Name: attendanceSummary
 What information is available: Can look up general attendance statistics for a date range and a specific student.
 
-API Name: Family Member API
-Name for the JSON key: familyMember
+API Name: familyMember
 What information is available: Can look up specific attributes of family members in the school community, such as looking up their name, phone number.
 Do not use to search for family members grouped or linked to students.
 
-API Name: Family Group API
-Name for the JSON key: familyGroup
+API Name: familyGroup
 What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
 Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
 
@@ -319,13 +315,13 @@ You will respond with a json object with a "data" key and a value comprising an 
 {
   "data": [
     {
-      "api": "attendance",
+      "api": "attendance", // copy the name of the API name exactly into this field
       "query": "What attendance event occured on March 23, 2024 for student Travis Yates, student ID 23."
     }
   ]
 }
 
-If the original question asked for information that would be available in a hypothetical API that you do not know about, then respond with a JSON object like this:
+If the original question asked for information that would be available in a hypothetical API that you do not know about, then respond with a JSON object like this where the api name is "inaccessible":
 
 {
   "data": [
@@ -336,7 +332,7 @@ If the original question asked for information that would be available in a hypo
   ]
 }
 
-If you are unable to understand the original teacher prompt and unable to determine which APIs to call due to lack of information, then respond with a JSON object like this:
+If you are unable to understand the original teacher prompt and unable to determine which APIs to call due to lack of information, then respond with a JSON object like this where the api name is "none":
 
 {
   "data":[
@@ -350,6 +346,7 @@ If you are unable to understand the original teacher prompt and unable to determ
 If the original prompt is asking for data that you already have in the Student context that was retrieved from an earlier task, then respond like this:
 
 Teacher: What is Tagan's student ID? Additional Student Context: Tagan Robinson, student ID 45. Tagan Robinson's email is tarobinson26@titanacademy.edu"
+Response:
 {
   "data":[
     {
