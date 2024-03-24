@@ -7,8 +7,10 @@ class Settings(BaseSettings):
     anyscale_api_key: str
     togetherai_api_key: str
     default_service: str
+    lowcost_service: str
     graphql_url: str
-    bypass_relevancy_check: str
+    bypass_relevancy_check: bool = False
+    bypass_has_people: bool = False
 
 settings = Settings()
 
