@@ -32,7 +32,8 @@ async def relevancy_check(userprompt:str) -> str:
     prompt_engine = LLMPrompt(
         prompt=TemplateManager.render_template('gateway_prompt', teacher_prompt = userprompt),
         system_prompt=TemplateManager.get_system_prompt(),
-        async_client=True
+        async_client=True,
+        custom_service=settings.lowcost_service
         )
     response = await prompt_engine.send_async()
     response_text = extractContent(response)
@@ -42,10 +43,11 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     data = await websocket.receive_text()
     prompt_object = PromptInput.model_validate_json(data)
     if settings.bypass_relevancy_check:
+        print("## BYPASSING RELEVANCY CHECK")
         return prompt_object.prompt
     relevancy_answer = await relevancy_check(prompt_object.prompt)
-    filtered_answer = relevancy_answer.lower()
-    if filtered_answer.contains('proceed'):
+    filtered_answer = relevancy_answer.lower().strip()
+    if 'proceed' in filtered_answer:
         return prompt_object.prompt
     await websocket.send_text(relevancy_answer)
     await websocket.close()
