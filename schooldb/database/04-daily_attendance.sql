@@ -1,5 +1,12 @@
 BEGIN TRANSACTION;
 
+INSERT INTO "attendance_type" ("attendance_type") VALUES
+('Full Attendance'),
+('Partial Excused Absence'),
+('Partial Unexcused Absence'),
+('Unexcused Absence'),
+('Excused Absence');
+
 CREATE INDEX ON student(email);
 CREATE INDEX ON attendance_type(attendance_type);
 
