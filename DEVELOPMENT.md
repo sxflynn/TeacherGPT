@@ -97,7 +97,7 @@ deactivate
 | Relationship Type  |      ✅     |                |     ✅    |    ✅   |            |         |            |         |                 |
 | Daily Attendance   |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
 | Attendance Type    |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
-| Staff              |            |                |          |        |            |         |            |         |                 |
+| Staff              |     ✅       |       ✅         |    ✅      |        |            |         |            |         |                 |
 | Department         |            |                |          |        |            |         |            |         |                 |
 | Grade Level        |            |                |          |        |            |         |            |         |                 |
 | Course             |            |                |          |        |            |         |            |         |                 |
