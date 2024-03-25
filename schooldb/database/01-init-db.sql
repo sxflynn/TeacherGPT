@@ -148,12 +148,12 @@ CREATE TABLE "grade_levels" (
 );
 
 CREATE TABLE "staff_grade_levels" (
-  "grade_level" int,
+  "grade_level_id" int,
   "staff_id" int
 );
 
 CREATE TABLE "student_grade_levels" (
-  "grade_level" int,
+  "grade_level_id" int,
   "student_id" int
 );
 
@@ -301,11 +301,11 @@ ALTER TABLE "staff_department" ADD FOREIGN KEY ("staff_id") REFERENCES "staff" (
 
 ALTER TABLE "grade_levels" ADD FOREIGN KEY ("grade_level_chair") REFERENCES "staff" ("staff_id");
 
-ALTER TABLE "staff_grade_levels" ADD FOREIGN KEY ("grade_level") REFERENCES "grade_levels" ("grade_level_id");
+ALTER TABLE "staff_grade_levels" ADD FOREIGN KEY ("grade_level_id") REFERENCES "grade_levels" ("grade_level_id");
 
 ALTER TABLE "staff_grade_levels" ADD FOREIGN KEY ("staff_id") REFERENCES "staff" ("staff_id");
 
-ALTER TABLE "student_grade_levels" ADD FOREIGN KEY ("grade_level") REFERENCES "grade_levels" ("grade_level_id");
+ALTER TABLE "student_grade_levels" ADD FOREIGN KEY ("grade_level_id") REFERENCES "grade_levels" ("grade_level_id");
 
 ALTER TABLE "student_grade_levels" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
