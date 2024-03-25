@@ -86,7 +86,7 @@ Table grade_levels {
 }
 
 Table staff_grade_levels { //JOIN TABLE
-  grade_level int [ref: > grade_levels.grade_level_id]
+  grade_level_id int [ref: > grade_levels.grade_level_id]
   staff_id int [ref: > staff.staff_id]
 }
 
