@@ -3,7 +3,7 @@ import random
 from datetime import datetime, timedelta
 
 # Define the CSV file name
-csv_file_name = '../03_student/demo-student.csv'
+csv_file_name = 'demo-student.csv'
 
 # Define the SQL output file name
 sql_file_name = 'daily-attendance-insert.sql'
