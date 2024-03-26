@@ -85,7 +85,7 @@ def insert_grade_levels_with_chairs(grade_levels: list[str], teachers: List[Staf
         chair_teacher = random.choice(eligible_teachers)
         chair_teacher.update_position(f"{grade} Grade Level Chair")
         chair_emails.append(chair_teacher.email)
-        values_list.append(f"('{grade} Grade Team', (SELECT staff_id FROM staff WHERE email = '{chair_teacher.email}'))")
+        values_list.append(f"('{grade} Grade', (SELECT staff_id FROM staff WHERE email = '{chair_teacher.email}'))")
     values = ",\n".join(values_list)
     return f'INSERT INTO "grade_levels" ("grade_level_name", "grade_level_chair") VALUES\n{values};\n', chair_emails
 
@@ -94,7 +94,7 @@ def generate_staff_grade_level_inserts(grade_levels: list[str], teachers: List[S
     for grade in grade_levels:
         for teacher in teachers:
             if f'{grade} Grade' in teacher.position:
-                values_list.append(f"((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '{grade} Grade Team'), (SELECT staff_id FROM staff WHERE email = '{teacher.email}'))")
+                values_list.append(f"((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '{grade} Grade'), (SELECT staff_id FROM staff WHERE email = '{teacher.email}'))")
     values = ",\n".join(values_list)
     return f'INSERT INTO "staff_grade_levels" ("grade_level_id", "staff_id") VALUES\n{values};\n'
 
