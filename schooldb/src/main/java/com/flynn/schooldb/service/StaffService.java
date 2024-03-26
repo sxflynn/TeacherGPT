@@ -2,9 +2,12 @@ package com.flynn.schooldb.service;
 import com.flynn.schooldb.entity.Staff;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface StaffService {
+
+    Optional<Staff> staffFindById(Long id);
 
     List<Staff> staffListAllStaff();
 

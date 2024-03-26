@@ -8,6 +8,7 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Controller
@@ -15,6 +16,11 @@ public class StaffQueryResolver {
 
     @Autowired
     private StaffService staffService;
+
+    @QueryMapping
+    public Optional<Staff> staffFindById(@Argument Long id){
+        return staffService.staffFindById(id);
+    }
 
     @QueryMapping
     public List<Staff> staffListAllStaff() {

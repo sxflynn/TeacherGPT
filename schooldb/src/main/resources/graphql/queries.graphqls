@@ -61,6 +61,7 @@ type Query {
     gradeLevelListAll: [GradeLevel]
 
     #Staff
+    staffFindById(id: ID!): Staff
     staffListAllStaff: [Staff]
     staffSearchByKeyword(keyword: String!): [Staff]
     staffFindByLastName(lastName: String!): [Staff]
