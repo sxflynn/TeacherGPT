@@ -99,7 +99,7 @@ deactivate
 | Attendance Type    |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
 | Staff              |     ✅       |       ✅         |    ✅      |        |            |         |            |         |                 |
 | Department         |            |                |          |        |            |         |            |         |                 |
-| Grade Level        |            |                |          |        |            |         |            |         |                 |
+| Grade Level        |     ✅       |       ✅         |     ✅     |        |            |         |            |         |                 |
 | Course             |            |                |          |        |            |         |            |         |                 |
 | Course Rosters     |            |                |          |        |            |         |            |         |                 |
 | Assignment         |            |                |          |        |            |         |            |         |                 |
