@@ -1,4 +1,4 @@
-INSERT INTO "student" ("first_name", "middle_name", "last_name", "sex", "dob", "email", "ohio_ssid")
+INSERT INTO "student" ("first_name", "middle_name", "last_name", "dob", "sex", "email", "ohio_ssid")
 VALUES
 ('Asher', 'Tripp', 'Whitehead', '2012-06-07', 'M', 'atwhitehead29@titanacademy.edu', 'PV8587074'),
 ('Leonard', 'Haiden', 'Roy', '2012-02-01', 'M', 'lhroy29@titanacademy.edu', 'NF3821427'),

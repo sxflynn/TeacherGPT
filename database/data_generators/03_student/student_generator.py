@@ -11,8 +11,8 @@ class Student(BaseModel):
     first_name: str
     middle_name: str
     last_name: str
-    sex: str
     dob: str
+    sex: str
     email: str = ""
     ohio_ssid: str
     grade_level: int # for CSV, not SQL
@@ -64,8 +64,8 @@ def generate_student(gender_int, academic_year, grade_level) -> Student:
         first_name = generate_random_2010_name(GENDER),
         middle_name = generate_random_2010_name(GENDER),
         last_name = fake.last_name(),
-        sex = SEX,
         dob = generate_random_birthday(academic_year),
+        sex = SEX,
         ohio_ssid = generate_random_ohio_ssid(),
         grade_level=grade_level
 )
@@ -108,14 +108,14 @@ def student_to_sql_values(student) -> str:
         # grade level will be included in the exported .csv file to simplify the other data generators
     ]
     return f"({', '.join(values)})"
-
+    
 def generate_insert_statement(table_name, columns, values) -> str:
     columns_formatted = ', '.join([f'"{column}"' for column in columns])
     values_formatted = ',\n'.join(values)
     return f'INSERT INTO "{table_name}" ({columns_formatted})\nVALUES\n{values_formatted};\n\n'
 
 def write_students_to_csv(students: List[Student], filename: str = 'students.csv'):
-    headers = ['first_name', 'middle_name', 'last_name', 'sex', 'dob', 'email', 'ohio_ssid', 'grade_level']    
+    headers = ['first_name', 'middle_name', 'last_name', 'dob', 'sex', 'email', 'ohio_ssid', 'grade_level']    
     with open(filename, mode='w', newline='', encoding='utf-8') as file:
         csv_writer = csv.writer(file)
         csv_writer.writerow(headers)
@@ -123,8 +123,9 @@ def write_students_to_csv(students: List[Student], filename: str = 'students.csv
             # Write the student data
             csv_writer.writerow([
                 student.first_name, student.middle_name, student.last_name, 
-                student.sex, student.dob, student.email, student.ohio_ssid, 
+                student.dob, student.sex, student.email, student.ohio_ssid, 
                 student.grade_level
+                
             ])
 
 fake = Faker()
@@ -137,7 +138,7 @@ reversed_academic_birth_year_list = list(reversed(academic_birth_year_list))
 new_student_list = generate_student_list(250, reversed_academic_birth_year_list, grade_level_list)
 student_inserts = [student_to_sql_values(student) for student in new_student_list]
 
-student_sql_inserts = generate_insert_statement("student", ["first_name","middle_name","last_name","sex","dob","email","ohio_ssid"], student_inserts)
+student_sql_inserts = generate_insert_statement("student", ["first_name","middle_name","last_name","dob","sex","email","ohio_ssid"], student_inserts)
 
 all_sql_inserts = student_sql_inserts
 sql_file_name = 'student-insert.sql'
@@ -146,4 +147,3 @@ with open(sql_file_name, encoding="utf-8", mode='w', newline='') as sql_file:
 
 # Generate the CSV file which includes the grade level column
 write_students_to_csv(new_student_list, 'students.csv')
-
