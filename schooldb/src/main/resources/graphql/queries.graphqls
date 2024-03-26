@@ -59,4 +59,16 @@ type Query {
 
     #GradeLevel
     gradeLevelListAll: [GradeLevel]
+
+    #Staff
+    staffListAllStaff: [Staff]
+    staffSearchByKeyword(keyword: String!): [Staff]
+    staffFindByLastName(lastName: String!): [Staff]
+    staffFindByFirstName(firstName: String!): [Staff]
+    staffFindByMiddleName(middleName: String!): [Staff]
+    staffFindByEmail(email: String!): [Staff]
+    staffFindByPositionContains(position: String!): [Staff]
+    staffFindByGradeLevelName(name: String!): [Staff]
+
+
 }

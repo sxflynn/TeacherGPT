@@ -86,6 +86,7 @@ public class StudentQueryResolver {
     public List<Student> studentsFindBySex(@Argument Character sex){
         return studentService.studentsFindBySex(sex);
     }
+
     @QueryMapping
     public List<Student> studentsFindByDobBetween(@Argument LocalDate startDate, @Argument LocalDate endDate){
         return studentService.studentsFindByDobBetween(startDate, endDate);
