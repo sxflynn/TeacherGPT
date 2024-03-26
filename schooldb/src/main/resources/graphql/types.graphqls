@@ -60,3 +60,18 @@ type FamilyGroup {
     emergencyPickup: Boolean
     relationshipType: RelationshipType
 }
+
+type Staff {
+    staffId: ID!
+    firstName: String!
+    middleName: String
+    lastName: String!
+    email: String!
+    position: String!
+}
+
+type GradeLevel {
+    gradeLevelId: ID!
+    gradeLevelName: String!
+    gradeLevelChair: Staff
+}

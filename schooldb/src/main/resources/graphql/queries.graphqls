@@ -56,4 +56,7 @@ type Query {
     familyMemberFindByFirstName(firstName: String!): [FamilyMember]
     familyMemberFindByMiddleName(middleName: String!): [FamilyMember]
     familyMemberFindByPhoneNumber(phoneNumber: String!): [FamilyMember]
+
+    #GradeLevel
+    gradeLevelListAll: [GradeLevel]
 }
