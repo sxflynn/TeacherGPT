@@ -63,7 +63,7 @@ def generate_family_group_insert(student_id_insert, parent_email):
 # Main logic to orchestrate the generation of SQL statements
 def main():
     fake = Faker('en_US')
-    students = read_student_data('demo-student.csv')
+    students = read_student_data('../03_student/students.csv')
     family_member_inserts = []
     family_group_inserts = []
 
