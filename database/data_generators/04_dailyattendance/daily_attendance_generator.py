@@ -72,8 +72,12 @@ with open(csv_file_name, mode='r', newline='') as csv_file:
 
 # Write the SQL insert statements to the output file
 with open(sql_file_name, mode='w', newline='') as sql_file:
-    sql_file.write('INSERT INTO "daily_attendance" ("student_id", "date", "attendance_type", "arrival", "departure", "excuse_note") VALUES\n')
-    sql_file.write(',\n'.join(all_sql_lines))
-    sql_file.write(';\n')
+    for i in range(0, len(all_sql_lines), 1000):
+        sql_file.write('BEGIN;\n')
+        sql_file.write('INSERT INTO "daily_attendance" ("student_id", "date", "attendance_type_id", "arrival", "departure", "excuse_note") VALUES\n')
+        sql_lines_segment = ',\n'.join(all_sql_lines[i:i+1000])
+        sql_file.write(sql_lines_segment)
+        sql_file.write(';\n')
+        sql_file.write('COMMIT;\n')
 
 print(f"SQL insert statements have been written to {sql_file_name}.")
