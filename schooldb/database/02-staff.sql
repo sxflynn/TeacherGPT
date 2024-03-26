@@ -16,21 +16,21 @@ VALUES
 
 
 INSERT INTO "grade_levels" ("grade_level_name", "grade_level_chair") VALUES
-('6th Grade Team', (SELECT staff_id FROM staff WHERE email = 'scott.arias@titanacademy.edu')),
-('7th Grade Team', (SELECT staff_id FROM staff WHERE email = 'alexis.savage@titanacademy.edu')),
-('8th Grade Team', (SELECT staff_id FROM staff WHERE email = 'clayton.newman@titanacademy.edu'));
+('6th Grade', (SELECT staff_id FROM staff WHERE email = 'scott.arias@titanacademy.edu')),
+('7th Grade', (SELECT staff_id FROM staff WHERE email = 'alexis.savage@titanacademy.edu')),
+('8th Grade', (SELECT staff_id FROM staff WHERE email = 'clayton.newman@titanacademy.edu'));
 
 INSERT INTO "staff_grade_levels" ("grade_level_id", "staff_id") VALUES
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'haley.mccarthy@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'eric.foster@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'scott.arias@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'faith.woods@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'lauren.griffin@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'scott.johnson@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'alexis.savage@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'dakota.hurst@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'mary.wilkins@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'taylor.steele@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '8th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'clayton.newman@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '8th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'shannon.short@titanacademy.edu')),
-((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '8th Grade Team'), (SELECT staff_id FROM staff WHERE email = 'elijah.orr@titanacademy.edu'));
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade'), (SELECT staff_id FROM staff WHERE email = 'haley.mccarthy@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade'), (SELECT staff_id FROM staff WHERE email = 'eric.foster@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade'), (SELECT staff_id FROM staff WHERE email = 'scott.arias@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade'), (SELECT staff_id FROM staff WHERE email = 'faith.woods@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '6th Grade'), (SELECT staff_id FROM staff WHERE email = 'lauren.griffin@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade'), (SELECT staff_id FROM staff WHERE email = 'scott.johnson@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade'), (SELECT staff_id FROM staff WHERE email = 'alexis.savage@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade'), (SELECT staff_id FROM staff WHERE email = 'dakota.hurst@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade'), (SELECT staff_id FROM staff WHERE email = 'mary.wilkins@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '7th Grade'), (SELECT staff_id FROM staff WHERE email = 'taylor.steele@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '8th Grade'), (SELECT staff_id FROM staff WHERE email = 'clayton.newman@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '8th Grade'), (SELECT staff_id FROM staff WHERE email = 'shannon.short@titanacademy.edu')),
+((SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '8th Grade'), (SELECT staff_id FROM staff WHERE email = 'elijah.orr@titanacademy.edu'));

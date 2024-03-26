@@ -45,7 +45,7 @@ DROP TABLE IF EXISTS
     "staff_department",
     "department",
     "staff",
-    "attendance_types",
+    "attendance_type",
     "assignment_types",
     "period_list",
     "rooms",
