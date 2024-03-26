@@ -18,8 +18,8 @@ class StaffMember(BaseModel):
         else:
             self.position = additional_title
 
-NUMBER_OF_STUDENTS = 235
-TEACHING_STAFF_TO_STUDENT_RATIO = 18
+NUMBER_OF_STUDENTS = 250
+TEACHING_STAFF_TO_STUDENT_RATIO = 17
 GRADE_LEVELS_LIST = ["6th","7th","8th"]
 SUBJECT_LIST = ["Math","Science","History","Reading","Writing"]
 
