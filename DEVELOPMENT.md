@@ -91,15 +91,15 @@ deactivate
 |                    | SQL Schema | Data generator | SQL data | Entity | Repository | Service | Controller | GraphQL | Prompt Template |
 |--------------------|------------|----------------|----------|--------|------------|---------|------------|---------|-----------------|
 | Student            |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
-| Enrollment         |            |                |          |        |            |         |            |         |                 |
+| Enrollment         |      ✅      |        ✅        |    ✅      |        |            |         |            |         |                 |
 | Family Member      |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
 | Family Group       |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
 | Relationship Type  |      ✅     |                |     ✅    |    ✅   |            |         |            |         |                 |
 | Daily Attendance   |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
 | Attendance Type    |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
-| Staff              |     ✅       |       ✅         |    ✅      |        |            |         |            |         |                 |
+| Staff              |     ✅       |       ✅         |    ✅      |   ✅     |     ✅       |     ✅    |      ✅      |     ✅    |                 |
 | Department         |            |                |          |        |            |         |            |         |                 |
-| Grade Level        |     ✅       |       ✅         |     ✅     |        |            |         |            |         |                 |
+| Grade Level        |     ✅       |       ✅         |     ✅     |   ✅     |     ✅       |    ✅     |      ✅      |    ✅     |                 |
 | Course             |            |                |          |        |            |         |            |         |                 |
 | Course Rosters     |            |                |          |        |            |         |            |         |                 |
 | Assignment         |            |                |          |        |            |         |            |         |                 |
