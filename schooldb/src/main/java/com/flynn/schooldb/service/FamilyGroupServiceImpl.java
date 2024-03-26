@@ -1,7 +1,6 @@
 package com.flynn.schooldb.service;
 
 import com.flynn.schooldb.entity.FamilyGroup;
-import com.flynn.schooldb.repository.DailyAttendanceRepository;
 import com.flynn.schooldb.repository.FamilyGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

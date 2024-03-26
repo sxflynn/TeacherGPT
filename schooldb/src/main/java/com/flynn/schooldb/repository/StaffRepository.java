@@ -1,6 +1,5 @@
 package com.flynn.schooldb.repository;
 
-import com.flynn.schooldb.entity.FamilyMember;
 import com.flynn.schooldb.entity.Staff;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
