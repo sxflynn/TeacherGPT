@@ -1,7 +1,7 @@
 import json
 import asyncio
 from typing import List, Optional
-from gql import gql, Client as GQLClient
+from gql import Client as GQLClient
 from pydantic import BaseModel, ValidationError
 from src.templates import TemplateManager
 from src.graphql import GQLAgent
