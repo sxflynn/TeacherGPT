@@ -1,5 +1,4 @@
 import json
-import re 
 import asyncio
 from typing import List, Optional
 from gql import gql, Client as GQLClient
