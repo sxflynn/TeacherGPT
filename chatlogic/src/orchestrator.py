@@ -306,7 +306,7 @@ class Orchestrator:
             for person_query in all_people_queries:
                 print(f"## NOW CALLING {person_query.person_type} API AS PART OF ID PROCESS")
                 print(f"## QUERY: {person_query.query}")
-                await self._handle_person(person_query)
+                await asyncio.gather(*(self._handle_person(person_query) for person_query in all_people_queries))
             
             if self.student_list:
                 student_records = []
@@ -334,6 +334,7 @@ class Orchestrator:
         
         enough_context = await self._check_for_satisfactory_data()
         if enough_context:
+            print("## ENOUGH CONTEXT FOUND, SKIPPING APIS")
             return
         print("##PROMPTING FOR APIS##")
         api_task_list = await self._prompt_for_apis()
