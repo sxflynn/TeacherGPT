@@ -30,7 +30,7 @@ app = FastAPI(lifespan=lifespan)
 
 async def relevancy_check(userprompt:str) -> str:
     prompt_engine = LLMPrompt(
-        prompt=TemplateManager.render_template('gateway_prompt', teacher_prompt = userprompt),
+        prompt=TemplateManager.render_llm_template('gateway_prompt', teacher_prompt = userprompt),
         system_prompt=TemplateManager.get_system_prompt(),
         async_client=True,
         custom_service=settings.lowcost_service
@@ -54,7 +54,7 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     return None
 
 async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data, id_context) -> str:
-    final_answer_prompt = TemplateManager.render_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data = str(collected_data), id_context = id_context)
+    final_answer_prompt = TemplateManager.render_llm_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data = str(collected_data), id_context = id_context)
     final_answer_engine = LLMPrompt(
         prompt=final_answer_prompt,
         system_prompt=TemplateManager.get_system_prompt()

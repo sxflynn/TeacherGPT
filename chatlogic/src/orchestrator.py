@@ -65,7 +65,7 @@ class Orchestrator:
         }
     async def _send_prompt(self, prompt_key: str, json_mode: bool = False, **kwargs) -> str:
         prompt_engine = LLMPrompt(
-            prompt=TemplateManager.render_template(template_name=prompt_key, **kwargs),
+            prompt=TemplateManager.render_llm_template(template_name=prompt_key, **kwargs),
             system_prompt=self.system_prompt,
             async_client=True
         )
@@ -133,7 +133,7 @@ class Orchestrator:
     # unused function?
     async def _fetch_id_summary(self, gqlworker_data:str) -> str:
         id_summary_engine = LLMPrompt(
-            prompt = TemplateManager.render_template('identification_summary', gqlworker_data=gqlworker_data),
+            prompt = TemplateManager.render_llm_template('identification_summary', gqlworker_data=gqlworker_data),
             system_prompt=self.system_prompt,
             async_client=True
             )

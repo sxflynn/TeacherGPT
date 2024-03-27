@@ -1052,7 +1052,7 @@ Response:
     }
     
     @staticmethod
-    def render_template(template_name, **kwargs):
+    def render_llm_template(template_name, **kwargs):
         if template_name in TemplateManager.llm_templates:
             template = TemplateManager.llm_templates[template_name]
             return template.render(**kwargs)
@@ -1069,9 +1069,9 @@ Response:
     
     @classmethod
     def get_system_prompt(cls):
-        return cls.render_template('global_system_prompt', formatted_date = TemplateManager.formatted_date)
+        return cls.render_llm_template('global_system_prompt', formatted_date = TemplateManager.formatted_date)
 
 # For testing
 if __name__ == "__main__":
-    rendered_text = TemplateManager.render_template("global_system_prompt", formatted_date = TemplateManager.formatted_date)
+    rendered_text = TemplateManager.render_llm_template("global_system_prompt", formatted_date = TemplateManager.formatted_date)
     print(rendered_text)

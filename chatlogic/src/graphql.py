@@ -79,7 +79,7 @@ class GQLAgent:
     
     async def _fetch_fields(self) -> str:
         task_engine = LLMPrompt(
-            prompt=TemplateManager.render_template(template_name=self.task, user_prompt=self.user_prompt),
+            prompt=TemplateManager.render_llm_template(template_name=self.task, user_prompt=self.user_prompt),
             system_prompt=self.system_prompt,
             async_client=True
             )
@@ -94,7 +94,7 @@ class GQLAgent:
         return final_response
     
     async def _llm_check_query_logic(self, stringquery):
-        check_query_prompt = TemplateManager.render_template(template_name='check_query_prompt')
+        check_query_prompt = TemplateManager.render_llm_template(template_name='check_query_prompt')
         combined_prompt = check_query_prompt + self.user_prompt + '\n' + stringquery
         check_query_engine = LLMPrompt(system_prompt=self.system_prompt,
                   prompt=combined_prompt,
