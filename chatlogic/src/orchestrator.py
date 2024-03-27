@@ -35,6 +35,14 @@ class FamilyMember(BaseModel):
     last_name: str
     email: str
     phone_number: str
+    
+class Staff(BaseModel):
+    staff_id: int
+    first_name: str
+    middle_name: str
+    last_name: str
+    email: str
+    position: str
    
 class Orchestrator:
     def __init__(self, gqlclient:GQLClient, user_prompt, system_prompt):
@@ -44,6 +52,7 @@ class Orchestrator:
         self.has_people:bool = False
         self.student_list:List[Student] = []
         self.family_member_list:List[FamilyMember] = []
+        self.staff_list:List[Staff] = []
         self.id_context = ""
         self.collected_data = []
         self.prompt_mapping = {
@@ -51,7 +60,8 @@ class Orchestrator:
             "attendance": "attendance_general_prompt",
             "attendanceSummary":"attendance_statistics_prompt",
             "familyMember":"family_member_general_prompt",
-            "familyGroup":"family_group_general_prompt"
+            "familyGroup":"family_group_general_prompt",
+            "staff":"staff_general_prompt"
         }
     async def _send_prompt(self, prompt_key: str, json_mode: bool = False, **kwargs) -> str:
         prompt_engine = LLMPrompt(
@@ -73,28 +83,16 @@ class Orchestrator:
         if not self.student_list:
             return "No student data available for API calls."
 
-        list_of_people = "These are the students that you must make API calls for:\n\n"
+        list_of_people = "These are the people that you must make API calls for:\n\n"
         for student in self.student_list:
-            student_info = (
-                f"Student First Name: {student.first_name}\n"
-                f"Student Middle Name: {student.middle_name}\n"
-                f"Student Last Name: {student.last_name}\n"
-                f"Sex: {student.sex}\n"
-                f"Date of Birth: {student.dob}\n"
-                f"Student Email: {student.email}\n"
-                f"Student ID: {student.student_id}\n"
-                f"Ohio SSID: {student.ohio_ssid}\n\n"
-            )
+            student_info = self._print_student_record(student)
             list_of_people += student_info
         for family_member in self.family_member_list:
-            family_member_info = (
-                f"Family Member First Name: {family_member.first_name}\n"
-                f"Family Member Middle Name: {family_member.middle_name}\n"
-                f"Family Member Last Name: {family_member.last_name}\n"
-                f"Family Member Email: {family_member.email}\n"
-                f"Family Member Phone Number: {family_member.phone_number}\n"
-            )
+            family_member_info = self._print_family_member_record(family_member)
             list_of_people += family_member_info
+        for staff in self.staff_list:
+            staff_info = self._print_staff_record(staff)
+            list_of_people += staff_info
         return list_of_people
 
     async def _fetch_api_decision(self) -> str:
@@ -153,16 +151,9 @@ class Orchestrator:
             if gqlworker_data:
                 self.collected_data.append(gqlworker_data)
                 print("## NOW ADDING TO COLLECTED DATA: {gqlworker_data}")
-            
-    async def _handle_person(self, person) -> List[Student]:
-        if person.person_type in ["none"]:
-            return
-        gqlworker_data = await self._gql_retriever(task_key=person.person_type, query=person.query, data_only=True)
-        print("gqlworker data in _handle_person: " + str(gqlworker_data))
-        if gqlworker_data and 'student' in person.person_type:
-            student_data_list_raw = next(iter(gqlworker_data.values()), [])
-            for student in student_data_list_raw:
-                new_student = Student(
+    
+    def _generate_student_object(self, student) -> Student:
+        return Student(
                 student_id=student.get('studentId', ''),
                 first_name=student.get('firstName', ''),
                 middle_name=student.get('middleName', ''),
@@ -171,12 +162,10 @@ class Orchestrator:
                 dob=student.get('dob', ''),
                 email=student.get('email', ''),
                 ohio_ssid=student.get('ohioSsid', '') 
-            )
-                self.student_list.append(new_student)
-        if gqlworker_data and 'familyMember' in person.person_type:
-            family_member_data_list_raw = next(iter(gqlworker_data.values()), [])
-            for family_member in family_member_data_list_raw:
-                new_family_member = FamilyMember(
+        )
+    
+    def _generate_family_member_object(self, family_member) -> FamilyMember:
+        return FamilyMember(
                     family_member_id=family_member.get('familyMemberId',''),
                     first_name=family_member.get('firstName',''),
                     middle_name=family_member.get('middleName',''),
@@ -184,7 +173,41 @@ class Orchestrator:
                     email=family_member.get('email',''),
                     phone_number=family_member.get('phoneNumber',''),
                 )
-                self.family_member_list.append(new_family_member)
+    def _generate_staff_object(self, staff) -> Staff:
+        return Staff(
+            staff_id=staff.get('staffId'),
+            first_name=staff.get('firstName'),
+            middle_name=staff.get('middleName'),
+            last_name=staff.get('lastName'),
+            email=staff.get('email'),
+            position=staff.get('position')
+        )
+    
+    async def _handle_person(self, person_query):
+        if person_query.person_type in ["none"]:
+            return
+        gqlworker_data = await self._gql_retriever(task_key=person_query.person_type, query=person_query.query, data_only=True)
+        print("gqlworker data in _handle_person: " + str(gqlworker_data))
+        first_value = next(iter(gqlworker_data.values()), None)
+        if first_value is not None and not first_value:  # Checks for empty results and appends to id_context
+            empty_search_result_statement = TemplateManager.render_application_template('no_results_found',person_type = person_query.person_type, query = person_query.query)
+            self.id_context += empty_search_result_statement
+        else:
+            if gqlworker_data and 'student' in person_query.person_type:
+                student_data_list_raw = next(iter(gqlworker_data.values()), [])
+                for student in student_data_list_raw:
+                    new_student = self._generate_student_object(student)
+                    self.student_list.append(new_student)
+            if gqlworker_data and 'familyMember' in person_query.person_type:
+                family_member_data_list_raw = next(iter(gqlworker_data.values()), [])
+                for family_member in family_member_data_list_raw:
+                    new_family_member = self._generate_family_member_object(family_member)
+                    self.family_member_list.append(new_family_member)
+            if gqlworker_data and 'staff' in person_query.person_type:
+                staff_data_list_raw = next(iter(gqlworker_data.values()), [])
+                for staff in staff_data_list_raw:
+                    new_staff = self._generate_staff_object(staff)
+                    self.staff_list.append(new_staff)
             
     async def _gql_retriever(self, task_key:str, query:str, data_only=False):
         task = self.prompt_mapping.get(task_key, None)
@@ -198,6 +221,35 @@ class Orchestrator:
         gqlworker_data = await gqlworker.get_data_single_prompt(data_only)
         return gqlworker_data
     
+    def _print_student_record(self, student:Student) -> str:
+        return f"""\
+            Student First Name: {student.first_name}
+            Student Middle Name: {student.middle_name}
+            Student Last Name: {student.last_name}
+            Sex: {student.sex}
+            Date of Birth: {student.dob}
+            Student Email: {student.email}
+            Student ID: {student.student_id}
+            Ohio SSID: {student.ohio_ssid}\n"""
+    
+    def _print_family_member_record(self, family_member:FamilyMember) -> str:
+        return f"""\
+            Family Member ID: {family_member.family_member_id}
+            Family Member First Name: {family_member.first_name}
+            Family Member Middle Name: {family_member.middle_name}
+            Family Member Last Name: {family_member.last_name}
+            Family Member Email: {family_member.email}
+            Family Member Phone Number: {family_member.phone_number}\n"""
+    
+    def _print_staff_record(self, staff:Staff) -> str:
+        return f"""\
+            Staff ID: {staff.staff_id}
+            Staff First Name: {staff.first_name}
+            Staff Middle Name: {staff.middle_name}
+            Staff Last Name: {staff.last_name}
+            Staff Email: {staff.email}
+            Staff Position: {staff.position}\n"""
+
     async def run_orchestration(self):
         if settings.bypass_has_people:
             print("## BYPASS MODE: FORCING HAS_PEOPLE TO TRUE")
@@ -208,49 +260,35 @@ class Orchestrator:
         
         if self.has_people:
             print("##PROMPT HAS PEOPLE --- PROMPTING FOR PEOPLE##")
-            people = await self._prompt_for_people()
-            for person in people:
-                print(f"## NOW CALLING {person.person_type} API AS PART OF ID PROCESS")
-                print(f"## QUERY: {person.query}")
-                await self._handle_person(person)
+            all_people_queries = await self._prompt_for_people()
+            for person_query in all_people_queries:
+                print(f"## NOW CALLING {person_query.person_type} API AS PART OF ID PROCESS")
+                print(f"## QUERY: {person_query.query}")
+                await self._handle_person(person_query)
             
-            # Update the ID context only once after all people have been processed
-            if self.student_list:  # Check if the student_list is not empty
+            if self.student_list:
                 student_records = []
                 for student in self.student_list:
-                    student_record = f"""\
-                        First Name: {student.first_name}
-                        Middle Name: {student.middle_name}
-                        Last Name: {student.last_name}
-                        Sex: {student.sex}
-                        Date of Birth: {student.dob}
-                        Email: {student.email}
-                        Student ID: {student.student_id}
-                        Ohio SSID: {student.ohio_ssid}\n"""
+                    student_record = self._print_student_record(student)
                     student_records.append(student_record)
-                
-                # Combining the student records into a single string with separators
                 full_student_records = "\n".join(student_records)
-                
-                # Prepending the header to the full student records string
-                self.id_context += "\nStudent Data to help answer the question:\n" + full_student_records
+                self.id_context += "\nStudent data to help answer the question:\n" + full_student_records
             
-            if self.family_member_list:  # Check if the student_list is not empty
+            if self.family_member_list:
                 family_member_records = []
                 for family_member in self.family_member_list:
-                    family_member_record = f"""\
-                        First Name: {family_member.first_name}
-                        Middle Name: {family_member.middle_name}
-                        Last Name: {family_member.last_name}
-                        Email: {family_member.email}
-                        Phone Number: {family_member.phone_number}\n"""
+                    family_member_record = self._print_family_member_record(family_member)
                     family_member_records.append(family_member_record)
-                
-                # Combining the student records into a single string with separators
                 full_family_member_records = "\n".join(family_member_records)
+                self.id_context += "\nFamily Member data to help answer the question:\n" + full_family_member_records
                 
-                # Prepending the header to the full student records string
-                self.id_context += "\nFamily Member Data to help answer the question:\n" + full_family_member_records
+            if self.staff_list: 
+                staff_records = []
+                for staff in self.staff_list:
+                    staff_record = self._print_staff_record(staff)
+                    staff_records.append(staff_record)
+                full_staff_records = "\n".join(staff_records)
+                self.id_context += "\nStaff/Teacher data to help answer the question:\n" + full_staff_records
         
         print("##PROMPTING FOR APIS##")
         api_task_list = await self._prompt_for_apis()
