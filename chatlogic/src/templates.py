@@ -4,7 +4,7 @@ from jinja2 import Template
 class TemplateManager:
     today = datetime.now()
     formatted_date = today.strftime("%B %d, %Y")
-    templates = {
+    llm_templates = {
     "global_system_prompt": Template(
 """
 Today is {{formatted_date}}. You are a helpful AI assistant for teachers at Titan Academy, a middle school.
@@ -115,14 +115,26 @@ Here is the prompt from the user. Using the prompt/response pairs above, answer 
     ),
     "identification_prompt":Template(
     """
-    Your job is to identify the students, staff members or parent/guardian/family members that the question is asking about.
+    Your job is to identify the students, staff members or parent/guardian/family members that the prompt is asking about.
     You should only try to identify people with actual names, not the reference to the existence of a person.
+    You should not try to solve the original prompt's issue. You should only identify the people in the prompt.
 You must be able to describe the parts of a name, like first name and last name.
 Your job right now is to input the teacher prompt and build a structured object that contains identifiable student, staff or family member data for the next AI chatbot to take and actually look up the data.
 The JSON object for each person or thing looks like this:
+
+{
+  "data": [
+    {
+      "person_type": "student",  // see below for more directions on the "person_type" value
+      "query": "Search for a student with the keyword Hasan in the name."
+    }
+  ]
+}
+Follow these exact instructions for the "person_type" key/value:
+
 "person_type":"student" if its a student or default value if you are unsure whether or not its a student
 or
-"person_type":"staff" if it's a staff only if you are certain its a staff like they use Mr. or Mrs. or Ms. in the name.
+"person_type":"staff" if it's a staff, only if you are certain its a staff like they use Mr. or Mrs. or Ms. in the name.
 or 
 "person_type":"familyMember" if it is clearly the parent/guardian or family member of a student.
 
@@ -205,7 +217,7 @@ Response:
     },
     {
       "person_type": "familyMember",
-      "query": "Lookup the email address of the parent/guardians with last name Pope."
+      "query": "Lookup the email address of the parent/guardians with last name Pope."  // Do not try to chain the output of the first query to this next query
     }
   ]
 }
@@ -302,12 +314,15 @@ API Name: attendanceSummary
 What information is available: Can look up general attendance statistics for a date range and a specific student.
 
 API Name: familyMember
-What information is available: Can look up specific attributes of family members in the school community, such as looking up their name, phone number.
-Do not use to search for family members grouped or linked to students.
+What information is available: Can search for a family member based on their personal details, such as looking up their name, phone number.
+Do not use to search for family members relationships with students.
 
 API Name: familyGroup
 What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
 Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
+
+API Name: staff
+What information is available: Can search for a staff member based on a first middle or last name, their email and their position title.
 
 You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
 
@@ -964,13 +979,90 @@ Response:
       {{ user_prompt }}
       """
     ),
+    "staff_general_prompt":Template(
+      """
+      You are an AI assisant who specializes in using GraphQL to retrieve specific data about staff members. These are the GraphQL queries you need to know about:
+      staffFindById(id: ID!): Staff
+      staffListAllStaff: [Staff]
+      staffSearchByKeyword(keyword: String!): [Staff]
+      staffFindByLastName(lastName: String!): [Staff]
+      staffFindByFirstName(firstName: String!): [Staff]
+      staffFindByMiddleName(middleName: String!): [Staff]
+      staffFindByEmail(email: String!): [Staff]
+      staffFindByPositionContains(position: String!): [Staff] // Example positions include 8th Grade Math Teacher and 6th Grade Writing Teacher
+      staffFindByGradeLevelName(name: String!): [Staff]
+      
+     This is the FamilyGroup GraphQL schema type:
+      type Staff {
+        staffId: ID!
+        firstName: String!
+        middleName: String
+        lastName: String!
+        email: String!
+        position: String!
+      }
+      
+      Your job is to generate a JSON object with the following shape:
+    {
+      "query":"staffSearchByKeyword", // You choose which GraphQL from the list above can best answer the teacher's question about family member grouping with students.
+      "fields": "all" // the value could either be a string or an array of strings
+      "variables": {
+        "keyword": "Stephen" // These are the input arguments for the GraphQL queries
+      }
+    }
+    
+    You must copy the names, keywords and specific query content exactly into the JSON object.
+
+Here are some examples to help guide your response:
+
+Query: "Search for any staff with the name Jim"
+Response:
+{
+  "query":"staffSearchByKeyword",
+  "fields": "all",
+  "variables": {
+    "keyword": "Jim"
+  }
+}
+
+Query: "Find all the staff members who are history teachers"
+Response:
+{
+  "query":"staffFindByPositionContains",
+  "fields": "all",
+  "variables": {
+    "position": "History"
+  }
+}
+
+  Here is the prompt from the teacher. Read the prompt and respond with a valid JSON object containing the query, fields and variables:
+
+      {{ user_prompt }}
+      """
+    ),
 
 }
+    application_templates ={
+      "no_results_found":Template(
+        """
+        There was a search conducted for a {{person_type}} using the query: {{query}}
+        but there were no search results, which means the {{person_type}} was not found.
+        """
+      )
+    }
     
     @staticmethod
     def render_template(template_name, **kwargs):
-        if template_name in TemplateManager.templates:
-            template = TemplateManager.templates[template_name]
+        if template_name in TemplateManager.llm_templates:
+            template = TemplateManager.llm_templates[template_name]
+            return template.render(**kwargs)
+        else:
+            raise ValueError(f"Template '{template_name}' not found.")
+    
+    @staticmethod
+    def render_application_template(template_name, **kwargs):
+        if template_name in TemplateManager.application_templates:
+            template = TemplateManager.application_templates[template_name]
             return template.render(**kwargs)
         else:
             raise ValueError(f"Template '{template_name}' not found.")
