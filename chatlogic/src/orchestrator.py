@@ -61,17 +61,10 @@ class Orchestrator:
             API Name: attendanceSummary
             What information is available: Can look up general attendance statistics for a date range and a specific student.
 
-            API Name: familyMember
-            What information is available: Can search for a family member based on their personal details, such as looking up their name, phone number.
-            Do not use to search for family members relationships with students.
-
             API Name: familyGroup
             What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
             Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
-
-            API Name: staff
-            What information is available: Can search for a staff member based on a first middle or last name, their email and their position title.
-        """
+            """
         self.prompt_mapping = {
             "student": "student_general_prompt",
             "attendance": "attendance_general_prompt",
@@ -92,6 +85,9 @@ class Orchestrator:
             response = await prompt_engine.send_async()
         return extractContent(response,json_mode=json_mode)
     
+    def _count_people_list(self):
+        return (len(self.student_list) + len(self.family_member_list) + len(self.staff_list))
+
     async def _check_for_names(self) -> bool:
         response_text = await self._send_prompt('id_gateway_prompt', user_prompt = self.user_prompt)
         return response_text.lower().strip().startswith('yes')
@@ -132,17 +128,24 @@ class Orchestrator:
         return list_of_people
 
     async def _fetch_api_decision(self) -> str:
-        list_of_people = "" if not self.has_people else self._generate_list_of_people()
-        student_api_name = "" if self.has_people else """
+        list_of_people = "" if not self._count_people_list() else self._generate_list_of_people()
+        people_apis = "" if self._count_people_list() else """
             API Name: student
             What information is available: Primarily used to lookup basic facts about a student's name, student ID number, email, sex, date of birth. Special queries exist to find students by birth month, and to count the number of students by sex.
             What information is not available: The Student API does not have direct access to related data about grades, behavior, attendance, and other broader topics. It only has access to personal information listed above.
             Do not call on the Student API for any information that is otherwise available in other APIs.
+            
+            API Name: familyMember
+            What information is available: Can search for a family member based on their personal details, such as looking up their name, phone number.
+            Do not use to search for family members relationships with students.
+
+            API Name: staff
+            What information is available: Can search for a staff member based on a first middle or last name, their email and their position title.        
                 """
         return await self._send_prompt('orchestrator_prompt',
                                             user_prompt=self.user_prompt, 
                                             api_descriptions = self.api_descriptions, 
-                                            student_api_name=student_api_name, 
+                                            people_apis=people_apis, 
                                             list_of_people = list_of_people, 
                                             json_mode=True
                                        )
@@ -336,6 +339,6 @@ class Orchestrator:
         if enough_context:
             print("## ENOUGH CONTEXT FOUND, SKIPPING APIS")
             return
-        print("##PROMPTING FOR APIS##")
+        print("##NOT ENOUGH CONTEXT, PROMPTING FOR APIS##")
         api_task_list = await self._prompt_for_apis()
         await asyncio.gather(*(self._handle_call(api_call) for api_call in api_task_list))

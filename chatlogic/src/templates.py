@@ -140,6 +140,8 @@ or
 
 If a name is given and you're unsure if it's a student, staff member or family member, default to "person_type":"student"
 
+If a name is given, only generate one item in the "data" array. Do not take a single name and then try to create multiple "person_type" for it.
+
 If the question is not really specifying any person, then you can respond with "none" as shown below.
 
 Here are some example teacher prompts and your model responses to help you understand your task:
@@ -150,7 +152,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Hasan in the name."
+      "query": "Search for a person with the keyword Hasan in the name."
     }
   ]
 }
@@ -161,7 +163,7 @@ Response:
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Rory last name Dunn."
+      "query": "Search for a person first name Rory last name Dunn."
     }
   ]
 }
@@ -172,28 +174,28 @@ Response:
   "data": [
     {
       "person_type": "staff",
-      "query": "Search for a staff member with the keyword Rosada in the name."
+      "query": "Search for a person member with the keyword Rosada in the name."
     }
   ]
 }
 
 Teacher prompt: Have Michael and Alina been getting in trouble in school recently?
-Response:
+Response: // There are two independent queries because there are two people in the prompt
 {
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Michael in the name."
+      "query": "Search for a person with the keyword Michael in the name."
     },
     {
       "person_type": "student",
-      "query": "Search for a student with the keyword Alina in the name."
+      "query": "Search for a person with the keyword Alina in the name."
     }
   ]
 }
 
 Teacher prompt: Look up the latest behavior reports for Nicole Pope and Umar Soto
-Response:
+Response: // There are two queries because there are two people in the prompt
 {
   "data": [
     {
@@ -208,22 +210,23 @@ Response:
 }
 
 Teacher prompt: What is Ms. Pope's email address? Ms. Pope is Richard's mom.
-Response:
+Response: // There are two independent queries because two people are mentioned in the prompt
 {
   "data": [
     {
       "person_type": "student",
-      "query": "Search for a student first name Richard."
+      "query": "Search for a person first name Richard."
     },
-    {
+    { // Do not try to chain the output of the first query to this next query
+      // Don't say "use the output of the Richard lookup above to search for the parent"
       "person_type": "familyMember",
-      "query": "Lookup the email address of the parent/guardians with last name Pope."  // Do not try to chain the output of the first query to this next query
+      "query": "Lookup the email address of the person with last name Pope."  
     }
   ]
 }
 
 Teacher prompt: Who are Jack's parents?
-Response:
+Response: // There is one query because only one person is mentioned in the prompt
 {
   "data": [
     {
@@ -239,7 +242,7 @@ Response:
   "data": [
     {
       "person_class": "none",
-      "query": "none" // Since no people were mentioned in the original prompt, you should return "none" for a query
+      "query": "none" // Since no people were mentioned in the teacher prompt, you should return "none" for a query
     }
   ]
 }
@@ -254,7 +257,7 @@ Now give a JSON response based on the Prompt/Response pairs above.
     "final_answer_inspection":Template(
       """
       Your job is to inspect the data retrieved to determine if enough information has been provided to answer the original question.
-      
+      Remember, even a failed search with zero results should be considered enough information, because that means no further data might be retrieved from the APIs.
       This was the original question asked by the teacher to an AI chatbot that can retrieve school data:
       
       {{user_prompt}}
@@ -263,7 +266,7 @@ Now give a JSON response based on the Prompt/Response pairs above.
       
       {{retrieved_data}}
       
-      Has enough data been collected for the AI chatbot to provide a satisfactory answer?
+      Has enough data been collected for the AI chatbot to provide a satisfactory answer? Remember, even the lack of data due to a failed search can be considered enough data in context.
       
       Additional context: The AI chatbot will have access to the following APIs to retrieve additional data:
       {{api_descriptions}}
@@ -315,6 +318,11 @@ Prompt: "The teacher asked the question Search for a student with the keyword Ha
 Response: The student's first and last name are Hayley Cervantes and the student ID is 6
         """
     ),
+    "people_finder_prompt":Template(
+      """
+    You are an AI assisant who specializes in using GraphQL to retrieve specific data about individual students, faculty or staff. These are the GraphQL queries you need to know about:
+      """
+    ),
     "orchestrator_prompt":Template(
       """
       You are the orchestrator of an AI chatbot system for teachers to help them retrieve data to answer their question. 
@@ -325,9 +333,9 @@ and to describe what should be queried from those sources/APIs so that the origi
 
 Here are the available APIs that you can call:
 
-{{ student_api_name }}
+{{ people_apis }}
 
-{{api_descriptions}}
+{{ api_descriptions }}
 
 You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
 
