@@ -61,6 +61,6 @@ public class StaffServiceImpl implements StaffService{
 
     @Override
     public Set<Staff> staffFindByGradeLevelName(String name) {
-        return staffRepository.findByStaffGradeLevelsGradeLevelGradeLevelNameContains(name);
+        return staffRepository.findByStaffGradeLevelsGradeLevelGradeLevelNameContainsIgnoreCase(name);
     }
 }
