@@ -55,6 +55,24 @@ class Orchestrator:
         self.staff_list:List[Staff] = []
         self.id_context = ""
         self.collected_data = []
+        self.api_descriptions = """
+            API Name: attendance
+            What information is available: Can look up attendance events for specific dates and specific students, such as knowing what exact attendance event happened on a specific day.
+
+            API Name: attendanceSummary
+            What information is available: Can look up general attendance statistics for a date range and a specific student.
+
+            API Name: familyMember
+            What information is available: Can search for a family member based on their personal details, such as looking up their name, phone number.
+            Do not use to search for family members relationships with students.
+
+            API Name: familyGroup
+            What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
+            Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
+
+            API Name: staff
+            What information is available: Can search for a staff member based on a first middle or last name, their email and their position title.
+        """
         self.prompt_mapping = {
             "student": "student_general_prompt",
             "attendance": "attendance_general_prompt",
@@ -78,21 +96,40 @@ class Orchestrator:
     async def _check_for_names(self) -> bool:
         response_text = await self._send_prompt('id_gateway_prompt', user_prompt = self.user_prompt)
         return response_text.lower().strip().startswith('yes')
+    
+    async def _check_for_satisfactory_data(self) -> bool:
+        response_text = await self._send_prompt('final_answer_inspection', 
+                                                user_prompt = self.user_prompt,
+                                                retrieved_data = self.id_context,
+                                                api_descriptions = self.api_descriptions)
+        return response_text.lower().strip().startswith('yes')
 
     def _generate_list_of_people(self) -> str:
-        if not self.student_list:
-            return "No student data available for API calls."
-
+        if not self.student_list and not self.family_member_list and not self.staff_list:
+            return "No data was found on any of the looked up people."
         list_of_people = "These are the people that you must make API calls for:\n\n"
-        for student in self.student_list:
-            student_info = self._print_student_record(student)
-            list_of_people += student_info
-        for family_member in self.family_member_list:
-            family_member_info = self._print_family_member_record(family_member)
-            list_of_people += family_member_info
-        for staff in self.staff_list:
-            staff_info = self._print_staff_record(staff)
-            list_of_people += staff_info
+
+        if not self.student_list:
+            list_of_people += "No student data was found for API calls.\n"
+        else:
+            for student in self.student_list:
+                student_info = self._print_student_record(student)
+                list_of_people += student_info
+
+        if not self.family_member_list:
+            list_of_people += "No family member data available for API calls.\n"
+        else:
+            for family_member in self.family_member_list:
+                family_member_info = self._print_family_member_record(family_member)
+                list_of_people += family_member_info
+
+        if not self.staff_list:
+            list_of_people += "No staff data available for API calls.\n"
+        else:
+            for staff in self.staff_list:
+                staff_info = self._print_staff_record(staff)
+                list_of_people += staff_info
+
         return list_of_people
 
     async def _fetch_api_decision(self) -> str:
@@ -103,7 +140,13 @@ class Orchestrator:
             What information is not available: The Student API does not have direct access to related data about grades, behavior, attendance, and other broader topics. It only has access to personal information listed above.
             Do not call on the Student API for any information that is otherwise available in other APIs.
                 """
-        return await self._send_prompt('orchestrator_prompt', user_prompt=self.user_prompt, student_api_name=student_api_name, list_of_people = list_of_people, json_mode=True)
+        return await self._send_prompt('orchestrator_prompt',
+                                            user_prompt=self.user_prompt, 
+                                            api_descriptions = self.api_descriptions, 
+                                            student_api_name=student_api_name, 
+                                            list_of_people = list_of_people, 
+                                            json_mode=True
+                                       )
 
     async def _fetch_people_list(self) -> str:
         return await self._send_prompt('identification_prompt', user_prompt = self.user_prompt, json_mode=True)
@@ -290,6 +333,9 @@ class Orchestrator:
                 full_staff_records = "\n".join(staff_records)
                 self.id_context += "\nStaff/Teacher data to help answer the question:\n" + full_staff_records
         
+        enough_context = await self._check_for_satisfactory_data()
+        if enough_context:
+            return
         print("##PROMPTING FOR APIS##")
         api_task_list = await self._prompt_for_apis()
         await asyncio.gather(*(self._handle_call(api_call) for api_call in api_task_list))

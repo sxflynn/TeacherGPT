@@ -251,6 +251,26 @@ Here is the user prompt:
 Now give a JSON response based on the Prompt/Response pairs above.
     """
     ),
+    "final_answer_inspection":Template(
+      """
+      Your job is to inspect the data retrieved to determine if enough information has been provided to answer the original question.
+      
+      This was the original question asked by the teacher to an AI chatbot that can retrieve school data:
+      
+      {{user_prompt}}
+      
+      This is the data that has so far been collected by the AI chatbot:
+      
+      {{retrieved_data}}
+      
+      Has enough data been collected for the AI chatbot to provide a satisfactory answer?
+      
+      Additional context: The AI chatbot will have access to the following APIs to retrieve additional data:
+      {{api_descriptions}}
+      
+      Answer with a Yes or No. Is the data that has been collected so far enough data to answer the original teacher prompt?: {{user_prompt}}
+      """
+      ),
     "final_answer_prompt":Template(
         """
         This is the original question asked by a teacher:
@@ -307,22 +327,7 @@ Here are the available APIs that you can call:
 
 {{ student_api_name }}
 
-API Name: attendance
-What information is available: Can look up attendance events for specific dates and specific students, such as knowing what exact attendance event happened on a specific day.
-
-API Name: attendanceSummary
-What information is available: Can look up general attendance statistics for a date range and a specific student.
-
-API Name: familyMember
-What information is available: Can search for a family member based on their personal details, such as looking up their name, phone number.
-Do not use to search for family members relationships with students.
-
-API Name: familyGroup
-What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
-Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
-
-API Name: staff
-What information is available: Can search for a staff member based on a first middle or last name, their email and their position title.
+{{api_descriptions}}
 
 You will return the list of API calls and queries. If only one API is needed to answer the question, only call one. If the question is broad and vague, then make multiple API calls.
 
@@ -1040,6 +1045,7 @@ Response:
       {{ user_prompt }}
       """
     ),
+
 
 }
     application_templates ={
