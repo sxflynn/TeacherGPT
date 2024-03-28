@@ -229,10 +229,10 @@ class Orchestrator:
         )
 
     async def _handle_person(self, gql_query_model_of_person):
-        query_type = self._categorize_query_by_prefix(gql_query_model_of_person)
+        person_type = self._categorize_query_by_prefix(gql_query_model_of_person)
         gqlworker = GQLAgent(
             self.gqlclient,
-            task_key=query_type,
+            task_key=person_type,
             task=None,
             user_prompt=self.user_prompt,
             system_prompt=self.system_prompt
@@ -241,20 +241,20 @@ class Orchestrator:
         print("gqlworker data in _handle_person: " + str(gqlworker_data))
         first_value = next(iter(gqlworker_data.values()), None)
         if first_value is not None and not first_value:  # Checks for empty results and appends to id_context
-            empty_search_result_statement = TemplateManager.render_application_template('no_results_found',person_type = gql_query_model_of_person.person_type, query = gql_query_model_of_person.query)
+            empty_search_result_statement = TemplateManager.render_application_template('no_results_found',person_type = person_type, query = gql_query_model_of_person.query)
             self.id_context += empty_search_result_statement
         else:
-            if gqlworker_data and 'student' in query_type:
+            if gqlworker_data and 'student' in person_type:
                 student_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for student in student_data_list_raw:
                     new_student = self._generate_student_object(student)
                     self.student_list.append(new_student)
-            if gqlworker_data and 'family' in query_type:
+            if gqlworker_data and 'family' in person_type:
                 family_member_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for family_member in family_member_data_list_raw:
                     new_family_member = self._generate_family_member_object(family_member)
                     self.family_member_list.append(new_family_member)
-            if gqlworker_data and 'staff' in query_type:
+            if gqlworker_data and 'staff' in person_type:
                 staff_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for staff in staff_data_list_raw:
                     new_staff = self._generate_staff_object(staff)
