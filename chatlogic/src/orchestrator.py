@@ -4,7 +4,7 @@ from typing import List, Optional
 from gql import Client as GQLClient
 from pydantic import BaseModel, ValidationError
 from src.templates import TemplateManager
-from src.graphql import GQLAgent
+from src.graphql import GQLAgent, GQLQueryModel
 from src.prompt import LLMPrompt, extractContent
 from src.config import settings
 
@@ -63,9 +63,9 @@ class Orchestrator:
 
             API Name: familyGroup
             What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
-            Do not use if the query is only asking for personal information about a family member unrelated to the student, such as their name, email or phone number.
             """
         self.prompt_mapping = {
+            "people":"people_finder_prompt",
             "student": "student_general_prompt",
             "attendance": "attendance_general_prompt",
             "attendanceSummary":"attendance_statistics_prompt",
@@ -143,12 +143,12 @@ class Orchestrator:
             What information is available: Can search for a staff member based on a first middle or last name, their email and their position title.        
                 """
         return await self._send_prompt('orchestrator_prompt',
-                                            user_prompt=self.user_prompt, 
-                                            api_descriptions = self.api_descriptions, 
-                                            people_apis=people_apis, 
-                                            list_of_people = list_of_people, 
-                                            json_mode=True
-                                       )
+                user_prompt=self.user_prompt, 
+                api_descriptions = self.api_descriptions, 
+                people_apis=people_apis, 
+                list_of_people = list_of_people, 
+                json_mode=True
+            )
 
     async def _fetch_people_list(self) -> str:
         return await self._send_prompt('identification_prompt', user_prompt = self.user_prompt, json_mode=True)
@@ -163,17 +163,16 @@ class Orchestrator:
             print("raw_decision_list couldn't validate: ", raw_decision_list)
             raise ValidationError(f"The AI failed to give a JSON object with fields and variables.: {e}") from e
         return validated_decision_list
-
-    async def _prompt_for_people(self) -> List[Identification]:
-        raw_people_list = await self._fetch_people_list()
-        print("raw people list is: " + str(raw_people_list))
+    
+    async def _prompt_for_people(self) -> List[GQLQueryModel]:
+        response_json = await self._send_prompt('people_finder_prompt', user_prompt=self.user_prompt, json_mode=True)
         try:
-            people_data = json.loads(raw_people_list)["data"]
-            validated_people_list = [Identification(**item) for item in people_data]
+            response_data = json.loads(response_json)["data"]
+            validated_data_list = [GQLQueryModel(**item) for item in response_data]
         except ValidationError as e:
-            print("raw_people_list couldn't validate: ", raw_people_list)
-            raise ValidationError(f"The AI failed to give a JSON object with people type and query.: {e}") from e
-        return validated_people_list
+            print("Error validating response from people_finder_prompt:", e)
+            raise
+        return validated_data_list
     
     # unused function?
     async def _fetch_id_summary(self, gqlworker_data:str) -> str:
@@ -196,28 +195,29 @@ class Orchestrator:
             if gqlworker_data:
                 self.collected_data.append(gqlworker_data)
                 print("## NOW ADDING TO COLLECTED DATA: {gqlworker_data}")
-    
+
     def _generate_student_object(self, student) -> Student:
         return Student(
-                student_id=student.get('studentId', ''),
-                first_name=student.get('firstName', ''),
-                middle_name=student.get('middleName', ''),
-                last_name=student.get('lastName', ''),
-                sex=student.get('sex', ''),
-                dob=student.get('dob', ''),
-                email=student.get('email', ''),
-                ohio_ssid=student.get('ohioSsid', '') 
+            student_id=student.get('studentId', ''),
+            first_name=student.get('firstName', ''),
+            middle_name=student.get('middleName', ''),
+            last_name=student.get('lastName', ''),
+            sex=student.get('sex', ''),
+            dob=student.get('dob', ''),
+            email=student.get('email', ''),
+            ohio_ssid=student.get('ohioSsid', '') 
         )
-    
+
     def _generate_family_member_object(self, family_member) -> FamilyMember:
         return FamilyMember(
-                    family_member_id=family_member.get('familyMemberId',''),
-                    first_name=family_member.get('firstName',''),
-                    middle_name=family_member.get('middleName',''),
-                    last_name=family_member.get('lastName',''),
-                    email=family_member.get('email',''),
-                    phone_number=family_member.get('phoneNumber',''),
-                )
+            family_member_id=family_member.get('familyMemberId',''),
+            first_name=family_member.get('firstName',''),
+            middle_name=family_member.get('middleName',''),
+            last_name=family_member.get('lastName',''),
+            email=family_member.get('email',''),
+            phone_number=family_member.get('phoneNumber',''),
+        )
+
     def _generate_staff_object(self, staff) -> Staff:
         return Staff(
             staff_id=staff.get('staffId'),
@@ -227,33 +227,39 @@ class Orchestrator:
             email=staff.get('email'),
             position=staff.get('position')
         )
-    
-    async def _handle_person(self, person_query):
-        if person_query.person_type in ["none"]:
-            return
-        gqlworker_data = await self._gql_retriever(task_key=person_query.person_type, query=person_query.query, data_only=True)
+
+    async def _handle_person(self, gql_query_model_of_person):
+        query_type = self._categorize_query_by_prefix(gql_query_model_of_person)
+        gqlworker = GQLAgent(
+            self.gqlclient,
+            task_key=query_type,
+            task=None,
+            user_prompt=self.user_prompt,
+            system_prompt=self.system_prompt
+            )
+        gqlworker_data = await gqlworker.get_data_single_prompt(external_gql_model=gql_query_model_of_person, data_only=True)
         print("gqlworker data in _handle_person: " + str(gqlworker_data))
         first_value = next(iter(gqlworker_data.values()), None)
         if first_value is not None and not first_value:  # Checks for empty results and appends to id_context
-            empty_search_result_statement = TemplateManager.render_application_template('no_results_found',person_type = person_query.person_type, query = person_query.query)
+            empty_search_result_statement = TemplateManager.render_application_template('no_results_found',person_type = gql_query_model_of_person.person_type, query = gql_query_model_of_person.query)
             self.id_context += empty_search_result_statement
         else:
-            if gqlworker_data and 'student' in person_query.person_type:
+            if gqlworker_data and 'student' in query_type:
                 student_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for student in student_data_list_raw:
                     new_student = self._generate_student_object(student)
                     self.student_list.append(new_student)
-            if gqlworker_data and 'familyMember' in person_query.person_type:
+            if gqlworker_data and 'family' in query_type:
                 family_member_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for family_member in family_member_data_list_raw:
                     new_family_member = self._generate_family_member_object(family_member)
                     self.family_member_list.append(new_family_member)
-            if gqlworker_data and 'staff' in person_query.person_type:
+            if gqlworker_data and 'staff' in query_type:
                 staff_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for staff in staff_data_list_raw:
                     new_staff = self._generate_staff_object(staff)
                     self.staff_list.append(new_staff)
-            
+
     async def _gql_retriever(self, task_key:str, query:str, data_only=False):
         task = self.prompt_mapping.get(task_key, None)
         gqlworker = GQLAgent(
@@ -265,7 +271,7 @@ class Orchestrator:
             )
         gqlworker_data = await gqlworker.get_data_single_prompt(data_only)
         return gqlworker_data
-    
+
     def _print_student_record(self, student:Student) -> str:
         return f"""\
             Student First Name: {student.first_name}
@@ -294,7 +300,18 @@ class Orchestrator:
             Staff Last Name: {staff.last_name}
             Staff Email: {staff.email}
             Staff Position: {staff.position}\n"""
-
+        
+    def _categorize_query_by_prefix(self, gql_query_model: GQLQueryModel) -> str:
+        query = gql_query_model.query
+        if query.startswith('student'):
+            return 'student'
+        elif query.startswith('staff'):
+            return 'staff'
+        elif query.startswith('family'):
+            return 'familyMember'
+        else:
+            return 'unknown'  # Default case if none of the prefixes match   
+    
     async def run_orchestration(self):
         if settings.bypass_has_people:
             print("## BYPASS MODE: FORCING HAS_PEOPLE TO TRUE")
@@ -302,15 +319,12 @@ class Orchestrator:
         else:
             print('### CHECKING IF THIS IS A PROMPT CONTAINS NAMES')
             self.has_people = await self._check_for_names()
-        
+
         if self.has_people:
             print("##PROMPT HAS PEOPLE --- PROMPTING FOR PEOPLE##")
-            all_people_queries = await self._prompt_for_people()
-            for person_query in all_people_queries:
-                print(f"## NOW CALLING {person_query.person_type} API AS PART OF ID PROCESS")
-                print(f"## QUERY: {person_query.query}")
-                await asyncio.gather(*(self._handle_person(person_query) for person_query in all_people_queries))
-            
+            all_gql_models_of_people = await self._prompt_for_people() #gql query objects list
+            await asyncio.gather(*(self._handle_person(gql_model_of_person) for gql_model_of_person in all_gql_models_of_people))
+           
             if self.student_list:
                 student_records = []
                 for student in self.student_list:
