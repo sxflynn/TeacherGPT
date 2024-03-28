@@ -53,8 +53,11 @@ async def get_relevant_prompt(websocket: WebSocket) -> str:
     await websocket.close()
     return None
 
-async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data, id_context) -> str:
-    final_answer_prompt = TemplateManager.render_llm_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data = str(collected_data), id_context = id_context)
+async def output_final_response(websocket: WebSocket, input_user_prompt, collected_data, id_context, enough_context:bool) -> str:
+    additional_data_string = str(collected_data) if collected_data else "No data was able to be collected for this task."
+    collected_data_statement = "This is the data that was collected by an AI Agent to help answer that question: \n" + additional_data_string
+    final_collected_data_statement = "" if enough_context else collected_data_statement
+    final_answer_prompt = TemplateManager.render_llm_template('final_answer_prompt', input_user_prompt = input_user_prompt, collected_data_statement = final_collected_data_statement, id_context = id_context, enough_context = enough_context)
     final_answer_engine = LLMPrompt(
         prompt=final_answer_prompt,
         system_prompt=TemplateManager.get_system_prompt()
@@ -86,7 +89,7 @@ async def run_prompt(websocket: WebSocket):
     end = time.time()
     elapsed_time = (end - start)
     print(f"Time elapsed: {elapsed_time:.2f} seconds")
-    await output_final_response(websocket,input_user_prompt, orchestrator.collected_data, orchestrator.id_context)
+    await output_final_response(websocket,input_user_prompt, orchestrator.collected_data, orchestrator.id_context, enough_context=orchestrator.enough_context)
     return
 
 app.add_middleware(
