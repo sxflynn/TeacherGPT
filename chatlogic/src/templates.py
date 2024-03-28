@@ -284,15 +284,14 @@ Now give a JSON response based on the Prompt/Response pairs above.
         
         {{ id_context }}
         
-        This is the data that was collected by an AI Agent to help answer that question:
-        
-        {{ collected_data }}
+        {{ collected_data_statement }}
         
         Give a detailed answer to the original question asked by the teacher, and make sure to
-        use the collected data and copy it exactly into your answer.
+        use all the collected data and copy it exactly into your answer.
         
         If the question asked you simply to retrieve data or list data, then simply give the data back
-        in a nicely-formatted manner.
+        in a nicely-formatted manner, and make sure to include as much data as possible that makes sense
+        for the question.
         
         If the original question included a request for advice, make sure to use the collected data
         as part of your response.
