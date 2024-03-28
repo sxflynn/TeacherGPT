@@ -54,6 +54,7 @@ class Orchestrator:
         self.staff_list:List[Staff] = []
         self.id_context = ""
         self.collected_data = []
+        self.enough_context:bool = False
         self.api_descriptions = """
             API Name: attendance
             What information is available: Can look up attendance events for specific dates and specific students, such as knowing what exact attendance event happened on a specific day.
@@ -260,11 +261,18 @@ class Orchestrator:
         else:
             return 'unknown'  # Default case if none of the prefixes match   
     
+    # def _append_model_records_to_context(self, model_list: List[BaseModel], header: str):
+    #     if model_list:
+    #         model_records = [self._print_model_record(model) for model in model_list]
+    #         full_model_records = "\n".join(model_records)
+    #         self.id_context += f"\n{header} data to help answer the question:\n" + full_model_records
+            
     def _append_model_records_to_context(self, model_list: List[BaseModel], header: str):
         if model_list:
             model_records = [self._print_model_record(model) for model in model_list]
-            full_model_records = "\n".join(model_records)
-            self.id_context += f"\n{header} data to help answer the question:\n" + full_model_records
+            full_model_records = "\n\n".join(model_records)
+            self.id_context += f"\n{header} data to help answer the question:\n\n" + full_model_records
+
               
     async def run_orchestration(self):
         if settings.bypass_has_people:
@@ -283,8 +291,8 @@ class Orchestrator:
             self._append_model_records_to_context(self.family_member_list, "Family Member")
             self._append_model_records_to_context(self.staff_list, "Staff/Teacher")
         
-        enough_context = await self._check_for_satisfactory_data()
-        if enough_context:
+        self.enough_context = await self._check_for_satisfactory_data()
+        if self.enough_context:
             print("## ENOUGH CONTEXT FOUND, SKIPPING APIS")
             return
         print("##NOT ENOUGH CONTEXT, PROMPTING FOR APIS##")
