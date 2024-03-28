@@ -1,8 +1,8 @@
 import json
 import asyncio
-from typing import List, Optional
+from typing import List, Optional, Type
 from gql import Client as GQLClient
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 from src.templates import TemplateManager
 from src.graphql import GQLAgent, GQLQueryModel
 from src.prompt import LLMPrompt, extractContent
@@ -18,30 +18,30 @@ class Identification(BaseModel):
     query: str
    
 class Student(BaseModel):
-    student_id: int
-    first_name: str
-    middle_name: str
-    last_name: str
-    sex: str
-    dob: str
-    email: str
-    ohio_ssid: str
-    
+    student_id: int = Field(..., alias='studentId')
+    first_name: str = Field(..., alias='firstName')
+    middle_name: str = Field(..., alias='middleName')
+    last_name: str = Field(..., alias='lastName')
+    sex: str = Field(..., alias='sex')
+    dob: str = Field(..., alias='dob')
+    email: str = Field(..., alias='email')
+    ohio_ssid: str = Field(..., alias='ohioSsid')
+
 class FamilyMember(BaseModel):
-    family_member_id: int
-    first_name: str
-    middle_name: str
-    last_name: str
-    email: str
-    phone_number: str
-    
+    family_member_id: int = Field(..., alias='familyMemberId')
+    first_name: str = Field(..., alias='firstName')
+    middle_name: str = Field(..., alias='middleName')
+    last_name: str = Field(..., alias='lastName')
+    email: str = Field(..., alias='email')
+    phone_number: str = Field(..., alias='phoneNumber')
+
 class Staff(BaseModel):
-    staff_id: int
-    first_name: str
-    middle_name: str
-    last_name: str
-    email: str
-    position: str
+    staff_id: int = Field(..., alias='staffId')
+    first_name: str = Field(..., alias='firstName')
+    middle_name: str = Field(..., alias='middleName')
+    last_name: str = Field(..., alias='lastName')
+    email: str = Field(..., alias='email')
+    position: str = Field(..., alias='position')
    
 class Orchestrator:
     def __init__(self, gqlclient:GQLClient, user_prompt, system_prompt):
@@ -108,21 +108,21 @@ class Orchestrator:
             list_of_people += "No student data was found for API calls.\n"
         else:
             for student in self.student_list:
-                student_info = self._print_student_record(student)
+                student_info = self._print_model_record(student)
                 list_of_people += student_info
 
         if not self.family_member_list:
             list_of_people += "No family member data available for API calls.\n"
         else:
             for family_member in self.family_member_list:
-                family_member_info = self._print_family_member_record(family_member)
+                family_member_info = self._print_model_record(family_member)
                 list_of_people += family_member_info
 
         if not self.staff_list:
             list_of_people += "No staff data available for API calls.\n"
         else:
             for staff in self.staff_list:
-                staff_info = self._print_staff_record(staff)
+                staff_info = self._print_model_record(staff)
                 list_of_people += staff_info
 
         return list_of_people
@@ -196,37 +196,8 @@ class Orchestrator:
                 self.collected_data.append(gqlworker_data)
                 print("## NOW ADDING TO COLLECTED DATA: {gqlworker_data}")
 
-    def _generate_student_object(self, student) -> Student:
-        return Student(
-            student_id=student.get('studentId', ''),
-            first_name=student.get('firstName', ''),
-            middle_name=student.get('middleName', ''),
-            last_name=student.get('lastName', ''),
-            sex=student.get('sex', ''),
-            dob=student.get('dob', ''),
-            email=student.get('email', ''),
-            ohio_ssid=student.get('ohioSsid', '') 
-        )
-
-    def _generate_family_member_object(self, family_member) -> FamilyMember:
-        return FamilyMember(
-            family_member_id=family_member.get('familyMemberId',''),
-            first_name=family_member.get('firstName',''),
-            middle_name=family_member.get('middleName',''),
-            last_name=family_member.get('lastName',''),
-            email=family_member.get('email',''),
-            phone_number=family_member.get('phoneNumber',''),
-        )
-
-    def _generate_staff_object(self, staff) -> Staff:
-        return Staff(
-            staff_id=staff.get('staffId'),
-            first_name=staff.get('firstName'),
-            middle_name=staff.get('middleName'),
-            last_name=staff.get('lastName'),
-            email=staff.get('email'),
-            position=staff.get('position')
-        )
+    def _generate__pydantic_object(self, data: dict, model_class: Type[BaseModel]) -> BaseModel:
+        return model_class.model_validate(data)
 
     async def _handle_person(self, gql_query_model_of_person):
         person_type = self._categorize_query_by_prefix(gql_query_model_of_person)
@@ -247,17 +218,17 @@ class Orchestrator:
             if gqlworker_data and 'student' in person_type:
                 student_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for student in student_data_list_raw:
-                    new_student = self._generate_student_object(student)
+                    new_student = self._generate__pydantic_object(student, Student)
                     self.student_list.append(new_student)
             if gqlworker_data and 'family' in person_type:
                 family_member_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for family_member in family_member_data_list_raw:
-                    new_family_member = self._generate_family_member_object(family_member)
+                    new_family_member = self._generate__pydantic_object(family_member, FamilyMember)
                     self.family_member_list.append(new_family_member)
             if gqlworker_data and 'staff' in person_type:
                 staff_data_list_raw = next(iter(gqlworker_data.values()), [])
                 for staff in staff_data_list_raw:
-                    new_staff = self._generate_staff_object(staff)
+                    new_staff = self._generate__pydantic_object(staff, Staff)
                     self.staff_list.append(new_staff)
 
     async def _gql_retriever(self, task_key:str, query:str, data_only=False):
