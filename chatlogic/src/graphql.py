@@ -1,6 +1,6 @@
 import logging
 import asyncio
-from typing import Dict, Optional, Union, Any
+from typing import Dict, List, Optional, Union, Any
 from gql import gql, Client as GQLClient
 from gql.transport.exceptions import TransportQueryError
 from graphql import GraphQLError
@@ -106,14 +106,18 @@ class GQLAgent:
         print(f"## RESPONSE: {response_return}")
         return response_return
         
-    async def get_data_single_prompt(self,data_only=False):
+    async def get_data_single_prompt(self, data_only=False, external_gql_model:GQLQueryModel=None):
         max_retries = 2
         attempts = 0
         while attempts <= max_retries:
             try:
-                gql_raw_query_builder = await self._fetch_fields()
-                validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder)                
-                stringquery = self._generate_complete_gql_query(validated_gql_query_args)
+                if not external_gql_model:
+                    gql_raw_query_builder = await self._fetch_fields()
+                    validated_gql_query_args = GQLQueryModel.model_validate_json(gql_raw_query_builder) 
+                if external_gql_model:
+                     stringquery = self._generate_complete_gql_query(external_gql_model)         
+                else:
+                    stringquery = self._generate_complete_gql_query(validated_gql_query_args)
                 
                 # Performance issues with this code
                 # is_logical_query = await self._llm_check_query_logic(stringquery)
