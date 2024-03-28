@@ -271,35 +271,12 @@ class Orchestrator:
             )
         gqlworker_data = await gqlworker.get_data_single_prompt(data_only)
         return gqlworker_data
-
-    def _print_student_record(self, student:Student) -> str:
-        return f"""\
-            Student First Name: {student.first_name}
-            Student Middle Name: {student.middle_name}
-            Student Last Name: {student.last_name}
-            Sex: {student.sex}
-            Date of Birth: {student.dob}
-            Student Email: {student.email}
-            Student ID: {student.student_id}
-            Ohio SSID: {student.ohio_ssid}\n"""
-    
-    def _print_family_member_record(self, family_member:FamilyMember) -> str:
-        return f"""\
-            Family Member ID: {family_member.family_member_id}
-            Family Member First Name: {family_member.first_name}
-            Family Member Middle Name: {family_member.middle_name}
-            Family Member Last Name: {family_member.last_name}
-            Family Member Email: {family_member.email}
-            Family Member Phone Number: {family_member.phone_number}\n"""
-    
-    def _print_staff_record(self, staff:Staff) -> str:
-        return f"""\
-            Staff ID: {staff.staff_id}
-            Staff First Name: {staff.first_name}
-            Staff Middle Name: {staff.middle_name}
-            Staff Last Name: {staff.last_name}
-            Staff Email: {staff.email}
-            Staff Position: {staff.position}\n"""
+           
+    def _print_model_record(self, model_instance: BaseModel) -> str:
+        model_name = model_instance.__class__.__name__
+        lines = [f"{model_name} {field.replace('_', ' ').title()}: {getattr(model_instance, field)}"
+                for field in model_instance.model_fields]
+        return "\n".join(lines)
         
     def _categorize_query_by_prefix(self, gql_query_model: GQLQueryModel) -> str:
         query = gql_query_model.query
@@ -312,6 +289,12 @@ class Orchestrator:
         else:
             return 'unknown'  # Default case if none of the prefixes match   
     
+    def _append_model_records_to_context(self, model_list: List[BaseModel], header: str):
+        if model_list:
+            model_records = [self._print_model_record(model) for model in model_list]
+            full_model_records = "\n".join(model_records)
+            self.id_context += f"\n{header} data to help answer the question:\n" + full_model_records
+              
     async def run_orchestration(self):
         if settings.bypass_has_people:
             print("## BYPASS MODE: FORCING HAS_PEOPLE TO TRUE")
@@ -325,29 +308,9 @@ class Orchestrator:
             all_gql_models_of_people = await self._prompt_for_people() #gql query objects list
             await asyncio.gather(*(self._handle_person(gql_model_of_person) for gql_model_of_person in all_gql_models_of_people))
            
-            if self.student_list:
-                student_records = []
-                for student in self.student_list:
-                    student_record = self._print_student_record(student)
-                    student_records.append(student_record)
-                full_student_records = "\n".join(student_records)
-                self.id_context += "\nStudent data to help answer the question:\n" + full_student_records
-            
-            if self.family_member_list:
-                family_member_records = []
-                for family_member in self.family_member_list:
-                    family_member_record = self._print_family_member_record(family_member)
-                    family_member_records.append(family_member_record)
-                full_family_member_records = "\n".join(family_member_records)
-                self.id_context += "\nFamily Member data to help answer the question:\n" + full_family_member_records
-                
-            if self.staff_list: 
-                staff_records = []
-                for staff in self.staff_list:
-                    staff_record = self._print_staff_record(staff)
-                    staff_records.append(staff_record)
-                full_staff_records = "\n".join(staff_records)
-                self.id_context += "\nStaff/Teacher data to help answer the question:\n" + full_staff_records
+            self._append_model_records_to_context(self.student_list, "Student")
+            self._append_model_records_to_context(self.family_member_list, "Family Member")
+            self._append_model_records_to_context(self.staff_list, "Staff/Teacher")
         
         enough_context = await self._check_for_satisfactory_data()
         if enough_context:
