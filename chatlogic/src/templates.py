@@ -320,7 +320,185 @@ Response: The student's first and last name are Hayley Cervantes and the student
     ),
     "people_finder_prompt":Template(
       """
-    You are an AI assisant who specializes in using GraphQL to retrieve specific data about individual students, faculty or staff. These are the GraphQL queries you need to know about:
+    You are an AI assisant for teachers who specializes in using GraphQL to retrieve individual students, family members or staff in a K12 school.
+    You must think intelligently about whether you think the named entities in the query are students, family members or staff.
+    Your job is to create a JSON object that will help identify a specific person, or multiple people.
+    
+    These are the GraphQL queries you need to know about:
+    
+    studentsSearchByKeyword(keyword: String!): [Student]
+    studentsFindById(id: ID!): Student
+    studentsFindByOhioSsid(ohioSsid: String!): Student
+    studentsFindByFirstNameIgnoreCase(firstName: String!): [Student]
+    studentsFindByLastNameIgnoreCase(lastName: String!): [Student]
+    studentsFindByLastNameStartingWith(firstLetter: String!): [Student]
+    studentsFindByFirstNameStartingWith(firstLetter: String!): [Student]
+    studentsFindByMiddleNameIgnoreCase(middleName: String!): [Student]
+    studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName: String!, lastName: String!): [Student]
+    studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(firstName: String!, middleName: String!, lastName: String!): [Student]
+    
+    familyMemberSearchByKeyword(keyword: String!): [FamilyMember]
+    familyMemberFindByLastName(lastName: String!): [FamilyMember]
+    familyMemberFindByFirstName(firstName: String!): [FamilyMember]
+    familyMemberFindByMiddleName(middleName: String!): [FamilyMember]
+    familyMemberFindByPhoneNumber(phoneNumber: String!): [FamilyMember]
+    
+    staffSearchByKeyword(keyword: String!): [Staff]
+    staffFindByLastName(lastName: String!): [Staff]
+    staffFindByFirstName(firstName: String!): [Staff]
+    staffFindByMiddleName(middleName: String!): [Staff]
+    
+    These are the GraphQL types you need to know about:
+    
+    This is the Student GraphQL schema type:
+    type Student {
+      studentId: ID!
+      firstName: String!
+      middleName: String
+      lastName: String!
+      sex: String
+      dob: String!
+      email: String!
+      ohioSsid: String!
+    }
+    
+    This is the FamilyMember GraphQL schema type:
+    type FamilyMember {
+        familyMemberId: ID!
+        firstName: String!
+        middleName: String
+        lastName: String!
+        email: String!
+        phoneNumber: String
+    }
+    
+    This is the Staff GraphQL schema type:
+      type Staff {
+        staffId: ID!
+        firstName: String!
+        middleName: String
+        lastName: String!
+        email: String!
+        position: String!
+      }
+    
+    
+    Your job is to generate a JSON object with the following shape:
+      {
+      "data": [
+        {
+          "query": "studentsFindByFirstNameIgnoreCase", // choose the best query for searching the information
+          "fields": "all", // "fields" will always be "all"
+          "variables": {
+            "firstName": "Michael"
+          }
+        }
+      ]
+    }
+  
+    
+    Here are some prompts/response examples to help guide your response.
+    
+    Prompt: Look up information about the student named bal
+    Response:
+
+      {
+      "data": [
+        {
+          "query": "studentsSearchByKeyword",
+          "fields": "all",
+          "variables": {
+            "keyword": "bal"
+          }
+        }
+      ]
+    }
+    
+    Prompt: What are Richard parent's phone numbers
+    Response:
+
+      {
+      "data": [
+        {
+          "query": "studentsSearchByKeyword", // we choose a student query because Richard is a student
+          "fields": "all",
+          "variables": {
+            "keyword": "Richard"
+          }
+        }
+      ]
+    }
+    
+    Prompt: What are the average test scores for Mr. Rosada's history class the last month?
+    Response:
+
+      {
+      "data": [
+        {
+          "query": "staffFindByLastName", // we choose a staff member because Mr. Rosada is clearly a teacher
+          "fields": "all",
+          "variables": {
+            "keyword": "Rosada"
+          }
+        }
+      ]
+    }
+    
+    Prompt: I need to send a text to Hayley's mom to describe her latest behavior reports.
+    Response:
+
+      {
+      "data": [
+        {
+          "query": "studentsSearchByKeyword", // we choose a student because even though it's asking for Hayley's mom, we need to find Hayley first
+          "fields": "all",
+          "variables": {
+            "keyword": "Hayley"
+          }
+        }
+      ]
+    }
+    
+    Prompt: I need to send a text to Ms. Redding to update her on the latest attendance issues.
+    Response:
+
+      {
+      "data": [
+        {
+          "query": "familyMemberFindByLastName", // we choose a family member because a teacher would only be trying to send a text to a family member
+          "fields": "all",
+          "variables": {
+            "keyword": "Hayley"
+          }
+        }
+      ]
+    }
+    
+    
+    Prompt: I need help understanding why Richard and Alina keep getting in trouble.
+    Response:
+        {
+      "data": [
+        {
+          "query": "studentsSearchByKeyword",  // these are clearly students because they are getting in trouble in school.
+          "fields": "all",
+          "variables": {
+            "keyword": "Richard"
+          }
+        },
+        {
+          "query": "studentsSearchByKeyword",
+          "fields": "all",
+          "variables": {
+            "keyword": "Alina"
+          }
+        }
+      ]
+    }
+    
+    Here is the prompt from the teacher. Read the prompt and respond with a valid JSON object containing the best query, fields and variables:
+
+    {{ user_prompt }}
       """
     ),
     "orchestrator_prompt":Template(
@@ -501,16 +679,6 @@ Remember to make multiple API calls if there are multiple people in the prompt:
         """
 You are an AI assisant who specializes in using GraphQL to retrieve specific data about students in the entire school, or single individual students. These are the GraphQL queries you need to know about.
 studentsListAll: [Student]
-studentsFindById(id: ID!): Student
-studentsFindByOhioSsid(ohioSsid: String!): Student
-studentsFindByFirstNameIgnoreCase(firstName: String!): [Student]
-studentsFindByLastNameIgnoreCase(lastName: String!): [Student]
-studentsFindByLastNameStartingWith(firstLetter: String!): [Student]
-studentsFindByFirstNameStartingWith(firstLetter: String!): [Student]
-studentsFindByMiddleNameIgnoreCase(middleName: String!): [Student]
-studentsFindByFirstNameIgnoreCaseAndLastNameIgnoreCase(firstName: String!, lastName: String!): [Student]
-studentsFindByFirstNameIgnoreCaseOrMiddleNameIgnoreCaseOrLastNameIgnoreCase(firstName: String!, middleName: String!, lastName: String!): [Student]
-studentsSearchByKeyword(keyword: String!): [Student]
 studentsFindByEmail(email: String!): Student
 studentsFindByBirthMonth(month: Int!): [Student]
 studentsFindByDob(dob: String!): [Student]
@@ -864,12 +1032,7 @@ Here is the actual user prompt and the AI-generated query:
     You are an AI assisant who specializes in using GraphQL to retrieve specific data about the family members and parents of studwents in the entire school. These are the GraphQL queries you need to know about:
     
     familyMemberListAll: [FamilyMember]
-    familyMemberSearchByKeyword(keyword: String!): [FamilyMember]
-    familyMemberFindByLastName(lastName: String!): [FamilyMember]
-    familyMemberFindByFirstName(firstName: String!): [FamilyMember]
-    familyMemberFindByMiddleName(middleName: String!): [FamilyMember]
-    familyMemberFindByPhoneNumber(phoneNumber: String!): [FamilyMember]
-    
+ 
     This is the FamilyMember GraphQL schema type:
     type FamilyMember {
         familyMemberId: ID!
@@ -997,15 +1160,11 @@ Response:
       You are an AI assisant who specializes in using GraphQL to retrieve specific data about staff members. These are the GraphQL queries you need to know about:
       staffFindById(id: ID!): Staff
       staffListAllStaff: [Staff]
-      staffSearchByKeyword(keyword: String!): [Staff]
-      staffFindByLastName(lastName: String!): [Staff]
-      staffFindByFirstName(firstName: String!): [Staff]
-      staffFindByMiddleName(middleName: String!): [Staff]
       staffFindByEmail(email: String!): [Staff]
       staffFindByPositionContains(position: String!): [Staff] // Example positions include 8th Grade Math Teacher and 6th Grade Writing Teacher
       staffFindByGradeLevelName(name: String!): [Staff]
       
-     This is the FamilyGroup GraphQL schema type:
+     This is the Staff GraphQL schema type:
       type Staff {
         staffId: ID!
         firstName: String!
