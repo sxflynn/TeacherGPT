@@ -1,5 +1,7 @@
 package com.flynn.schooldb.entity;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -8,15 +10,27 @@ public class GradeLevel {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "grade_level_id")
     private Long gradeLevelId;
 
     @Column(name = "grade_level_name", nullable = false)
     private String gradeLevelName;
 
-    @ManyToOne
-    @JoinColumn(name = "grade_level_chair", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "grade_level_chair", nullable = false, unique = true)
     private Staff gradeLevelChair;
 
+    @OneToMany(mappedBy = "gradeLevel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Student> students;
+
+    @ManyToMany
+    @JoinTable(
+      name = "staff_grade_levels",
+      joinColumns = @JoinColumn(name = "grade_level_id"),
+      inverseJoinColumns = @JoinColumn(name = "staff_id")
+    )
+    private List<Staff> staffMembers;
+     
     public GradeLevel (){
     }
 

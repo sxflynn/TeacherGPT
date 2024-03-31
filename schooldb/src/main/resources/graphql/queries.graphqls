@@ -42,6 +42,7 @@ type Query {
     studentsCountBySex(sex: String!): Int
     studentsFindBySexOrderByLastNameAsc(sex: String!): [Student]
     studentsFindByEmailContainingIgnoreCase(emailFragment: String!): [Student]
+    studentsFindByGradeLevel(gradeLevel: String!):[Student]
 
     #FamilyGroup
     familyGroupListAllFamilyMembersByStudentId(studentId: ID!): [FamilyGroup]
@@ -70,6 +71,5 @@ type Query {
     staffFindByEmail(email: String!): [Staff]
     staffFindByPositionContains(position: String!): [Staff]
     staffFindByGradeLevelName(name: String!): [Staff]
-
 
 }

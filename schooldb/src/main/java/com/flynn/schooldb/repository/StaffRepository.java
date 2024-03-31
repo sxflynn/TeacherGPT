@@ -22,6 +22,6 @@ public interface StaffRepository extends JpaRepository<Staff, Long>  {
 
     Set<Staff> findByPositionContains(String position);
 
-    Set<Staff> findByStaffGradeLevelsGradeLevelGradeLevelNameContainsIgnoreCase(String name);
+    Set<Staff> findByGradeLevelsGradeLevelNameContainsIgnoreCase(String name);
 
 }

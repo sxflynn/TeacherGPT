@@ -24,6 +24,9 @@ type Student {
     email: String!
     ohioSsid: String!
     dailyAttendance: [DailyAttendance]
+    familyGroup: [FamilyGroup]
+    gradeLevel: GradeLevel
+
 }
 
 type AttendanceSummary {
@@ -68,10 +71,13 @@ type Staff {
     lastName: String!
     email: String!
     position: String!
+    gradeLevels: [GradeLevel]
 }
 
 type GradeLevel {
     gradeLevelId: ID!
     gradeLevelName: String!
     gradeLevelChair: Staff
+    students: [Student]
+    staffMembers: [Staff]
 }

@@ -17,4 +17,6 @@ public interface FamilyGroupRepository extends JpaRepository<FamilyGroup, Long> 
 
     public Set<FamilyGroup> findByFamilyMemberFamilyMemberId(Long familyMemberId);
 
+    public Set<FamilyGroup> findByStudentGradeLevelGradeLevelNameContains(String gradeLevelName);
+
 }

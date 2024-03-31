@@ -28,11 +28,10 @@ public class Staff {
     @Column(name = "position")
     private String position;
 
-    @OneToMany(mappedBy = "staff", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<StaffGradeLevel> staffGradeLevels;
+    @ManyToMany(mappedBy = "staffMembers")
+    private List<GradeLevel> gradeLevels;
 
     public Staff() {
-
     }
 
     public Staff(Long staffId, String firstName, String middleName, String lastName, String email, String position) {
@@ -92,19 +91,10 @@ public class Staff {
         this.position = position;
     }
 
-    public List<StaffGradeLevel> getStaffGradeLevels() {
-        return staffGradeLevels;
-    }
-
-    public void setStaffGradeLevels(List<StaffGradeLevel> staffGradeLevels) {
-        this.staffGradeLevels = staffGradeLevels;
-    }
-
     @Override
     public String toString() {
         return "Staff [staffId=" + staffId + ", firstName=" + firstName + ", middleName=" + middleName + ", lastName="
                 + lastName + ", email=" + email + ", position=" + position + "]";
     }
-
 
 }
