@@ -42,13 +42,9 @@ public class Student {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<FamilyGroup> familyGroup;
 
-    public List<FamilyGroup> getFamilyGroup() {
-        return familyGroup;
-    }
-
-    public void setFamilyGroup(List<FamilyGroup> familyGroup) {
-        this.familyGroup = familyGroup;
-    }
+    @ManyToOne
+    @JoinColumn(name = "grade_level_id", nullable = false)
+    private GradeLevel gradeLevel;
 
     public Student() {
     }
@@ -74,7 +70,7 @@ public class Student {
                 ", dob=" + dob +
                 ", email='" + email + '\'' +
                 ", ohioSsid='" + ohioSsid + '\'' +
-                ", dailyAttendance=" + dailyAttendance +
+                ", gradeLevel='" + gradeLevel + '\'' +
                 '}';
     }
 
@@ -149,4 +145,21 @@ public class Student {
     public void setDailyAttendance(List<DailyAttendance> dailyAttendance) {
         this.dailyAttendance = dailyAttendance;
     }
+
+    public List<FamilyGroup> getFamilyGroup() {
+        return familyGroup;
+    }
+
+    public void setFamilyGroup(List<FamilyGroup> familyGroup) {
+        this.familyGroup = familyGroup;
+    }
+
+    public GradeLevel getGradeLevel() {
+        return gradeLevel;
+    }
+
+    public void setGradeLevel(GradeLevel gradeLevel) {
+        this.gradeLevel = gradeLevel;
+    }
+
 }

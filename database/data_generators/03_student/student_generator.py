@@ -103,9 +103,9 @@ def student_to_sql_values(student) -> str:
         quote_sql_string(student_dict.get('dob')),
         quote_sql_string(student_dict.get('sex')),
         quote_sql_string(student_dict.get('email')),
-        quote_sql_string(student_dict.get('ohio_ssid'))
-        # grade level deliberately missing from SQL inserts because the student table doesn't include grade level
-        # grade level will be included in the exported .csv file to simplify the other data generators
+        quote_sql_string(student_dict.get('ohio_ssid')),
+    f"(SELECT grade_level_id FROM grade_levels WHERE grade_level_name = '{student.grade_level}th Grade')"
+        # grade level will be included in the exported .csv file as an int to simplify the other data generators
     ]
     return f"({', '.join(values)})"
     
@@ -125,7 +125,6 @@ def write_students_to_csv(students: List[Student], filename: str = 'students.csv
                 student.first_name, student.middle_name, student.last_name, 
                 student.dob, student.sex, student.email, student.ohio_ssid, 
                 student.grade_level
-                
             ])
 
 fake = Faker()
@@ -138,7 +137,7 @@ reversed_academic_birth_year_list = list(reversed(academic_birth_year_list))
 new_student_list = generate_student_list(250, reversed_academic_birth_year_list, grade_level_list)
 student_inserts = [student_to_sql_values(student) for student in new_student_list]
 
-student_sql_inserts = generate_insert_statement("student", ["first_name","middle_name","last_name","dob","sex","email","ohio_ssid"], student_inserts)
+student_sql_inserts = generate_insert_statement("student", ["first_name","middle_name","last_name","dob","sex","email","ohio_ssid","grade_level_id"], student_inserts)
 
 all_sql_inserts = student_sql_inserts
 sql_file_name = 'student-insert.sql'

@@ -107,6 +107,11 @@ public class StudentQueryResolver {
     public List<Student> studentsFindByEmailContainingIgnoreCase(@Argument String emailFragment){
         return studentService.studentsFindByEmailContainingIgnoreCase(emailFragment);
     }
+
+    @QueryMapping
+    public List<Student> studentsFindByGradeLevel(@Argument String gradeLevel){
+        return studentService.studentsFindByGradeLevel(gradeLevel);
+    }
 }
 
 

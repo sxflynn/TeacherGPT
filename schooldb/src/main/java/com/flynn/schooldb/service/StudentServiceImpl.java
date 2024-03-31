@@ -151,4 +151,9 @@ public class StudentServiceImpl implements StudentService{
     public Optional<Student> studentsFindByOhioSsid(String ohioSsid) {
         return studentRepository.findByOhioSsid(ohioSsid);
     }
+
+    @Override
+    public List<Student> studentsFindByGradeLevel(String gradeLevel) {
+        return studentRepository.findByGradeLevelGradeLevelNameContains(gradeLevel);
+    }
 }

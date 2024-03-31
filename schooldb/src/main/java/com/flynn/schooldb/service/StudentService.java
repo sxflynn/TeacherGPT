@@ -28,5 +28,6 @@ public interface StudentService {
     long studentsCountBySex(Character sex);
     List<Student> studentsFindBySexOrderByLastNameAsc(Character sex);
     List<Student> studentsFindByEmailContainingIgnoreCase(String emailFragment);
+    List<Student> studentsFindByGradeLevel(String gradeLevel);
 
 }

@@ -57,4 +57,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     List<Student> findByEmailContainingIgnoreCase(String emailFragment);
 
+    List<Student> findByGradeLevelGradeLevelNameContains(String gradeLevelName);
+
+
 }
