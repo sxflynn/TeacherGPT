@@ -419,6 +419,9 @@ VALUES
 ('Steven', 'Gregory', 'Parker', 'steven.parker468@icloud.com', '4823527138'),
 ('Cheyenne', 'Kelly', 'Parker', 'cheyenne.parker523@gmail.com', '3498199080');
 
+CREATE INDEX ON student(email);
+CREATE INDEX ON family_member(email);
+
 INSERT INTO "family_group" ("student_id", "family_member_id", "parent_guardian", "emergency_pickup", "relationship_type_id")
 VALUES
 ((SELECT student_id FROM student WHERE email = 'atwhitehead29@titanacademy.edu'), (SELECT family_member_id FROM family_member WHERE email = 'robert.whitehead126@outlook.com'), TRUE, TRUE, 1),
