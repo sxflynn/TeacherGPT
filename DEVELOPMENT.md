@@ -100,8 +100,8 @@ deactivate
 | Staff              |     ✅       |       ✅         |    ✅      |   ✅     |     ✅       |     ✅    |      ✅      |     ✅    |                 |
 | Department         |            |                |          |        |            |         |            |         |                 |
 | Grade Level        |     ✅       |       ✅         |     ✅     |   ✅     |     ✅       |    ✅     |      ✅      |    ✅     |                 |
-| Course             |            |                |          |        |            |         |            |         |                 |
-| Course Rosters     |            |                |          |        |            |         |            |         |                 |
+| Course             |      ✅      |        ✅        |    ✅      |        |            |         |            |         |                 |
+| Course Rosters     |      ✅      |         ✅       |    ✅      |        |            |         |            |         |                 |
 | Assignment         |            |                |          |        |            |         |            |         |                 |
 | Assignment Types   |            |                |          |        |            |         |            |         |                 |
 | Student Scores     |            |                |          |        |            |         |            |         |                 |

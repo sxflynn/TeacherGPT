@@ -1,0 +1,16 @@
+INSERT INTO "course" ("course_name", "lead_teacher_id", "grade_level_id") VALUES
+('6th Grade Math', (SELECT staff_id FROM staff WHERE position LIKE '6th Grade Math%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '6%') ),
+('6th Grade Science', (SELECT staff_id FROM staff WHERE position LIKE '6th Grade Science%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '6%') ),
+('6th Grade History', (SELECT staff_id FROM staff WHERE position LIKE '6th Grade History%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '6%') ),
+('6th Grade Reading', (SELECT staff_id FROM staff WHERE position LIKE '6th Grade Reading%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '6%') ),
+('6th Grade Writing', (SELECT staff_id FROM staff WHERE position LIKE '6th Grade Writing%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '6%') ),
+('7th Grade Math', (SELECT staff_id FROM staff WHERE position LIKE '7th Grade Math%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '7%') ),
+('7th Grade Science', (SELECT staff_id FROM staff WHERE position LIKE '7th Grade Science%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '7%') ),
+('7th Grade History', (SELECT staff_id FROM staff WHERE position LIKE '7th Grade History%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '7%') ),
+('7th Grade Reading', (SELECT staff_id FROM staff WHERE position LIKE '7th Grade Reading%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '7%') ),
+('7th Grade Writing', (SELECT staff_id FROM staff WHERE position LIKE '7th Grade Writing%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '7%') ),
+('8th Grade Math', (SELECT staff_id FROM staff WHERE position LIKE '8th Grade Math%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '8%') ),
+('8th Grade Science', (SELECT staff_id FROM staff WHERE position LIKE '8th Grade Science%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '8%') ),
+('8th Grade History', (SELECT staff_id FROM staff WHERE position LIKE '8th Grade History%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '8%') ),
+('8th Grade Reading', (SELECT staff_id FROM staff WHERE position LIKE '8th Grade Reading%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '8%') ),
+('8th Grade Writing', (SELECT staff_id FROM staff WHERE position LIKE '8th Grade Writing%'), (SELECT grade_level_id FROM grade_levels WHERE grade_level_name LIKE '8%') );
