@@ -64,6 +64,10 @@ class Orchestrator:
 
             API Name: familyGroup
             What information is available: Can look up which family members are related to specific students, which family members are emergency pickups or parent/guardians of specific students and what their relationship is to the student.
+            
+            API Name: course
+            What information is available: Can look up basic course information in the school, including searching course titles, searching courses by student ID, searching courses by teacher, and listing the students enrolled in the course.
+            
             """
         self.prompt_mapping = {
             "people":"people_finder_prompt",
@@ -72,7 +76,8 @@ class Orchestrator:
             "attendanceSummary":"attendance_statistics_prompt",
             "familyMember":"family_member_general_prompt",
             "familyGroup":"family_group_general_prompt",
-            "staff":"staff_general_prompt"
+            "staff":"staff_general_prompt",
+            "course":"course_general_prompt"
         }
     async def _send_prompt(self, prompt_key: str, json_mode: bool = False, **kwargs) -> str:
         prompt_engine = LLMPrompt(

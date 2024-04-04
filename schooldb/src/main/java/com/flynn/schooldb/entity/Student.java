@@ -46,6 +46,10 @@ public class Student {
     @JoinColumn(name = "grade_level_id", nullable = false)
     private GradeLevel gradeLevel;
 
+    @ManyToMany(mappedBy = "students")
+    private List<Course> courses;
+
+
     public Student() {
     }
 

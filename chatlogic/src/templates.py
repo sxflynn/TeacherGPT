@@ -1211,7 +1211,62 @@ Response:
       {{ user_prompt }}
       """
     ),
+"course_general_prompt":Template(
+      """
+      You are an AI assisant who specializes in using GraphQL to retrieve specific data about courses in the school. These are the GraphQL queries you need to know about:
+    
+    courseFindByCourseNameContains(courseName: String!): [Course]
+    courseFindByTeacherLastName(lastName: String!):[Course]
+    courseFindByGradeLevelName(gradeLevelName: String!): [Course]
+    courseFindByStudentId(studentId: String!): [Course]
+    
+    This is the Course GraphQL schema type:
+    type Course {
+        courseId: ID!
+        courseName: String!
+        leadTeacher: Staff
+        gradeLevel: GradeLevel
+    }
 
+Your job is to generate a JSON object with the following shape:
+{
+  "query":"courseFindByCourseNameContains", // You choose which GraphQL from the list above can best answer the teacher's question about family member grouping with students.
+  "fields": "all"
+  "variables": {
+    "courseName": "History" // These are the input arguments for the GraphQL queries
+  }
+}
+
+You must copy the names, keywords and specific query content exactly into the JSON object.
+
+Here are some examples to help guide your response:
+
+Query: "Retrieve every course taught by Mr. Newby."
+Response:
+{
+  "query":"courseFindByTeacherLastName", // if parents or guardians are specified in the query, ensure you are selecting the query with parentGuardianTrue
+  "fields": "all",
+  "variables": {
+    "lastName": "Newby"
+  }
+}
+
+Query: "What are all the courses that Hayley is enrolled in? Additional context, Student ID 78"
+Response:
+{
+  "query":"courseFindByStudentId",
+  "fields": "all",
+  "variables": {
+    "studentId": "78"
+  }
+}
+    
+  Here is the prompt from the teacher. Read the prompt and respond with a valid JSON object containing the query, fields and variables:
+
+      {{ user_prompt }}
+      """
+    ),
+    
 
 }
     application_templates ={

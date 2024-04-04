@@ -81,3 +81,10 @@ type GradeLevel {
     students: [Student]
     staffMembers: [Staff]
 }
+
+type Course {
+    courseId: ID!
+    courseName: String!
+    leadTeacher: Staff
+    gradeLevel: GradeLevel
+}

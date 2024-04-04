@@ -53,6 +53,7 @@ class GQLAgent:
             "familyMember":["familyMemberId","firstName","middleName","lastName","email","phoneNumber"],
             "familyGroup":["familyGroupId","parentGuardian","emergencyPickup"],
             "staff":["staffId", "firstName", "middleName", "lastName", "email", "position"],
+            "course":["courseId", "courseName"]
             }
         self.mandatory_fields_mapping = {
             "student": ["studentId", "firstName", "lastName"],
@@ -61,6 +62,7 @@ class GQLAgent:
             "familyMember":["familyMemberId","firstName","lastName"],
             "familyGroup":["familyMember { firstName lastName email phoneNumber }","relationshipType { relationshipType }"],
             "staff":["staffId", "firstName", "middleName", "lastName", "email", "position"],
+            "course":["courseId", "courseName", "leadTeacher { lastName position }", "gradeLevel { gradeLevelName }"]
             }
         self.all_fields = self._get_all_fields(task_key)
         self.lock = asyncio.Lock()
