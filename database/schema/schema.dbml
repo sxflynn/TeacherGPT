@@ -93,6 +93,7 @@ Table staff_grade_levels { //JOIN TABLE
 // Classes, courses and academics
 Table course {
   course_id int [pk, increment]
+  course_name varchar
   lead_teacher_id int [ref: > staff.staff_id]
   grade_level_id int [ref: > grade_levels.grade_level_id] 
 }
