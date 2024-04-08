@@ -44,7 +44,7 @@ DROP TABLE IF EXISTS
     "department",
     "staff",
     "attendance_type",
-    "assignment_types",
+    -- "assignment_types",
     "period_list",
     "rooms",
     "daily_attendance",
@@ -170,17 +170,18 @@ CREATE TABLE "course_student" (
 CREATE TABLE "assignment" (
   "assignment_id" SERIAL PRIMARY KEY,
   "assignment_title" varchar,
-  "assignment_type_id" int,
+  "assignment_type" varchar,
+  "assignment_value" int,
   "date_assigned" date,
   "date_due" date,
   "weight" float DEFAULT 1,
   "course_id" int
 );
 
-CREATE TABLE "assignment_types" (
-  "assignment_type_id" SERIAL PRIMARY KEY,
-  "assignment_type" varchar
-);
+-- CREATE TABLE "assignment_types" (
+--   "assignment_type_id" SERIAL PRIMARY KEY,
+--   "assignment_type" varchar
+-- );
 
 CREATE TABLE "student_score" (
   "student_id" int,
@@ -307,7 +308,7 @@ ALTER TABLE "course_student" ADD FOREIGN KEY ("student_id") REFERENCES "student"
 
 ALTER TABLE "course_student" ADD FOREIGN KEY ("course_id") REFERENCES "course" ("course_id");
 
-ALTER TABLE "assignment" ADD FOREIGN KEY ("assignment_type_id") REFERENCES "assignment_types" ("assignment_type_id");
+-- ALTER TABLE "assignment" ADD FOREIGN KEY ("assignment_type_id") REFERENCES "assignment_types" ("assignment_type_id");
 
 ALTER TABLE "assignment" ADD FOREIGN KEY ("course_id") REFERENCES "course" ("course_id");
 
