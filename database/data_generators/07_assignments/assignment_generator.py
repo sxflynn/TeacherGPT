@@ -6,12 +6,6 @@ from pprint import pprint
 from typing import List, Optional
 from pydantic import BaseModel
 
-class StudentScore(BaseModel):
-    student_id: str
-    assignment_id: str
-    points_earned: int
-    missing: bool
-
 class AssignmentType(str, Enum):
     UNIT_TEST = "Unit Test"
     QUIZ = "Quiz"
