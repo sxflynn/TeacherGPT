@@ -137,6 +137,7 @@ CREATE TABLE "assignment" (
 CREATE TABLE "student_score" (
   "student_id" int,
   "assignment_id" int,
+  "points_earned" int,
   "percentage_score" float
 );
 

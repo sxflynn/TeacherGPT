@@ -121,6 +121,7 @@ Table assignment {
 Table student_score {
   student_id int [ref:>student.student_id]
   assignment_id int [ref:> assignment.assignment_id]
+  points_earned int
   percentage_score float
 }
 
