@@ -123,6 +123,7 @@ Table student_score {
   assignment_id int [ref:> assignment.assignment_id]
   points_earned int
   percentage_score float
+  missing bool
 }
 
 

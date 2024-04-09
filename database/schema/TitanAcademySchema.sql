@@ -138,7 +138,8 @@ CREATE TABLE "student_score" (
   "student_id" int,
   "assignment_id" int,
   "points_earned" int,
-  "percentage_score" float
+  "percentage_score" float,
+  "missing" bool
 );
 
 CREATE TABLE "sped_roster" (
