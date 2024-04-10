@@ -1,9 +1,6 @@
 from collections import defaultdict
-from datetime import datetime
 import random
 import re
-import pprint
-from typing import Optional
 from pydantic import BaseModel
 
 class StudentScore(BaseModel):
@@ -117,12 +114,6 @@ def _generate_score(attendance_rate, assignment_value) -> int:
     points_earned = round(base_score * assignment_value)
     return points_earned
 
-# def _find_record_by_date(attendance_data: list[StudentAttendanceDay], specific_date: str) -> Optional[StudentAttendanceDay]:
-#     for record in attendance_data:
-#         if record.date == specific_date:
-#             return record
-#     return None
-
 def _generate_single_student_scores_list(attendance_data:list[StudentAttendanceDay], student_profiles:list[StudentProfile], assignment_data:list[Assignment], email:str) -> list[StudentScore]:
     student_scores:list[StudentScore] = []
     grade = get_grade_from_email(email)
@@ -163,8 +154,20 @@ def generate_all_student_score_values(student_scores:list[StudentScore]) -> list
         values.append(_generate_student_score_sql_value_from_object(score))
     return values
 
+def generate_insert_statement(table_name, columns: list[str], values: list[str]) -> str:
+    def chunked_list(lst, n):
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+    columns_formatted = ', '.join([f'"{column}"' for column in columns])
+    values_chunks = list(chunked_list(values, 1000))
+    insert_statements = []
+    for chunk in values_chunks:
+        values_formatted = ',\n'.join(chunk)
+        insert_statements.append(f'INSERT INTO "{table_name}" ({columns_formatted})\nVALUES\n{values_formatted};\n\n')
+    return ''.join(insert_statements)
+
 def main():
-    # student_csv_file_name = '../03_student/students.csv'
+    student_score_sql_insert_file_name = 'student-score-insert.sql'
     daily_attendance_sql_inserts = '../04_dailyattendance/daily-attendance-insert.sql'
     assignments_inserts = '../07_assignments/assignment-inserts.sql'
     assignment_data = parse_assignment_sql_file(assignments_inserts)
@@ -172,22 +175,9 @@ def main():
     student_attendance_rate_profiles = create_student_profiles(attendance_data)
     all_student_scores:list[StudentScore] = generate_all_student_scores(student_attendance_rate_profiles, attendance_data, assignment_data)
     student_score_insert_values = generate_all_student_score_values(all_student_scores)
-    print(student_score_insert_values[0])
-
-def generate_insert_statement(table_name, columns:list[str], values):
-    columns_formatted = ', '.join([f'"{column}"' for column in columns])
-    values_formatted = ',\n'.join(values)
-    return f'INSERT INTO "{table_name}" ({columns_formatted})\nVALUES\n{values_formatted};\n\n'
-
+    student_score_insert = generate_insert_statement("student_score",columns=["student_id","assignment_id","points_earned","percentage_score","missing"],values=student_score_insert_values)
+    with open(student_score_sql_insert_file_name, encoding="utf-8", mode='w', newline='') as sql_file:
+        sql_file.write(student_score_insert)
+   
 if __name__ == "__main__":
     main()
-
-
-# INSERT INTO student_score (student_id, assignment_id, points_earned, percentage_score, missing)
-# VALUES (
-#   (SELECT student_id FROM student WHERE email = 'atwhitehead29@titanacademy.edu'),
-#   (SELECT assignment_id FROM assignment WHERE assignment_title = 'Unit 1 Day 1' AND course_id = (SELECT course_id FROM course WHERE course_name = '6th Grade Math')),
-#   4,
-#   0.8,
-#   False
-# );
