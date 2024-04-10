@@ -120,19 +120,29 @@ def _generate_single_student_scores_list(attendance_data:list[StudentAttendanceD
     student_attendance_record = _filter_attendance_record_by_email(attendance_data, email)
     student_profile = _filter_student_profiles_by_email(student_profiles, email)
     grade_level_assignments = _filter_assignments_by_grade_level(assignment_data,grade)
+
+    never_miss_chance = 0.1  # 10% chance a student never misses any work
+    high_miss_chance = 0.05  # 5% of students missing around 15% of assignments
+    random_number = random.random()
+    if random_number < never_miss_chance:
+        miss_rate = 0  # This student never misses assignments
+    elif random_number < high_miss_chance:
+        miss_rate = 0.15  # This student misses 15% of assignments
+    else:
+        miss_rate = 0.05  # Default miss rate for remaining students
+
     for day in student_attendance_record:
         daily_assignments = _filter_assignments_by_day(grade_level_assignments,day.date)
-        for assignment in daily_assignments: 
-            points_earned = _generate_score(attendance_rate=student_profile.attendance_rate,assignment_value=assignment.assignment_value)
-            if day.absent:
-                points_earned = 0
-            percentage_score = round(points_earned / assignment.assignment_value, 2)
+        for assignment in daily_assignments:
+            missing = random.random() < miss_rate or day.absent
+            points_earned = 0 if missing else _generate_score(attendance_rate=student_profile.attendance_rate, assignment_value=assignment.assignment_value)
+            percentage_score = 0 if missing else round(points_earned / assignment.assignment_value, 2)
             student_scores.append(StudentScore(
                 student_id=f"(SELECT student_id FROM student WHERE email = '{email}')",
                 assignment_id=f"(SELECT assignment_id FROM assignment WHERE assignment_title = '{assignment.assignment_title}' AND course_id = (SELECT course_id from course WHERE course_name = '{assignment.course_name}'))",
                 points_earned=points_earned,
                 percentage_score=percentage_score,
-                missing=day.absent
+                missing=missing
             ))
     return student_scores
 
