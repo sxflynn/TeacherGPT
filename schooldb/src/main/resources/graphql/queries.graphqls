@@ -73,6 +73,7 @@ type Query {
     staffFindByGradeLevelName(name: String!): [Staff]
 
     #Course
+    courseFindAll: [Course]
     courseFindByCourseNameContains(courseName: String!): [Course]
     courseFindByTeacherLastName(lastName: String!):[Course]
     courseFindByGradeLevelName(gradeLevelName: String!): [Course]

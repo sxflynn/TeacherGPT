@@ -1,8 +1,12 @@
 package com.flynn.schooldb.service;
 import com.flynn.schooldb.entity.Course;
+
+import java.util.List;
 import java.util.Set;
 
 public interface CourseService {
+
+    List<Course> findAll();
 
     Set<Course> findByCourseNameContains(String courseName);
 

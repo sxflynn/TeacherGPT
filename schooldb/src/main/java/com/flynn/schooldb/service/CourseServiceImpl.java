@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -16,6 +17,11 @@ public class CourseServiceImpl implements CourseService{
     @Autowired
     public CourseServiceImpl(CourseRepository courseRepository){
         this.courseRepository = courseRepository;
+    }
+
+    @Override
+    public List<Course> findAll() {
+        return courseRepository.findAll();
     }
 
     @Override

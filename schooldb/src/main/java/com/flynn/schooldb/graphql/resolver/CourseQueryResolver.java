@@ -7,6 +7,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -18,6 +19,11 @@ public class CourseQueryResolver {
     @QueryMapping
     Set<Course> courseFindByCourseNameContains(@Argument String courseName){
         return courseService.findByCourseNameContains(courseName);
+    }
+
+    @QueryMapping
+    List<Course> courseFindAll(){
+        return courseService.findAll();
     }
 
     @QueryMapping
