@@ -77,4 +77,12 @@ type Query {
     courseFindByTeacherLastName(lastName: String!):[Course]
     courseFindByGradeLevelName(gradeLevelName: String!): [Course]
     courseFindByStudentId(studentId: String!): [Course]
+
+    #Assignment
+    assignmentsFindByCourseId(courseId: ID!): [Assignment]
+    assignmentsFindByStudentIdAndDateRange(studentId: ID!, startDate: String!, endDate: String!): [Assignment]
+    assignmentsFindByTeacherIdAndDateRange(staffId: ID!, startDate: String!, endDate: String!): [Assignment]
+    assignmentsFindByCourseIdAndAssignmentType(courseId: ID!, assignmentType: String!): [Assignment]
+    assignmentsFindByCourseIdAndDateAssignedBetweenAndAssignmentType(courseId: ID!, startDate: String!, endDate: String!, assignmentType: String!): [Assignment]
+
 }

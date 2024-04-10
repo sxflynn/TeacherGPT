@@ -88,3 +88,13 @@ type Course {
     leadTeacher: Staff
     gradeLevel: GradeLevel
 }
+
+type Assignment {
+    assignmentId: ID!
+    assignmentTitle: String!
+    assignmentType: String!
+    assignmentValue: Int!
+    dateAssigned: String!
+    dateDue: String!
+    course: Course!
+}
