@@ -98,3 +98,11 @@ type Assignment {
     dateDue: String!
     course: Course!
 }
+
+type StudentScore {
+    student:Student!
+    assignment:Assignment!
+    pointsEarned:Int!
+    percentageScore:String!
+    missing:Boolean
+}

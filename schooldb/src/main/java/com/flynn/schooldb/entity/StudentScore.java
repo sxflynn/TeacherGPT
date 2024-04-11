@@ -69,8 +69,8 @@ public class StudentScore {
         this.pointsEarned = pointsEarned;
     }
 
-    public Float getPercentageScore() {
-        return percentageScore;
+    public String getPercentageScore() {
+        return String.format("%d%%", Math.round(percentageScore * 100));
     }
 
     public void setPercentageScore(Float percentageScore) {

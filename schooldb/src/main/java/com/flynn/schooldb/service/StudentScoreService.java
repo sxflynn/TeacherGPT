@@ -14,7 +14,7 @@ public interface StudentScoreService {
 
     List<StudentScore> findByStudentIdAndCourseNameAndDateAssignedBetween(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
 
-    List<StudentScore> findByStudentIdAndMissing(Long studentId, Limit limit);
+    List<StudentScore> findByStudentIdAndMissing(Long studentId, Integer limit);
 
     List<StudentScore> findByStudentIdAndPercentageScoreLessThan(Long studentId, Float scoreThreshold);
 

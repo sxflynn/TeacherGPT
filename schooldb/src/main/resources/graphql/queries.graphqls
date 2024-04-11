@@ -86,4 +86,14 @@ type Query {
     assignmentsFindByCourseIdAndAssignmentType(courseId: ID!, assignmentType: String!): [Assignment]
     assignmentsFindByCourseIdAndDateAssignedBetweenAndAssignmentType(courseId: ID!, startDate: String!, endDate: String!, assignmentType: String!): [Assignment]
 
+    #StudentScore
+    findByStudentId(studentId:ID!):[StudentScore]
+    studentScoreFindByStudentIdAndCourseName(studentId:ID!, courseName:String!): [StudentScore]
+    studentScoreFindByStudentIdAndCourseNameAndDateAssignedBetween(studentId:ID!, courseName:String!, startDate:String!, endDate:String!):[StudentScore]
+    studentScoreFindByStudentIdAndMissing(studentId:ID!, limit:Int!):[StudentScore]
+    studentScoreFindByStudentIdAndPercentageScoreLessThan(studentId:ID!, scoreThreshold:Float!):[StudentScore]
+    studentScoreFindByCourseNameContainsAndDateAssignedBetween(courseName:String!, startDate:String!, endDate:String!):[StudentScore]
+    studentScoreFindByCourseNameContainsAndDateAssignedBetweenAndPercentageScoreLessThan(courseName:String!, startDate:String!,endDate:String!,threshold:Float!):[StudentScore]
+    studentScoreFindByCourseNameContainsAndDateAssignedBetweenAndMissingIsTrue(courseName:String!,startDate:String!,endDate:String!):[StudentScore]
+
 }
