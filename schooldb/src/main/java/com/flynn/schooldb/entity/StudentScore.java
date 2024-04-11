@@ -15,13 +15,13 @@ public class StudentScore {
     @Column(name = "assignment_id")
     private Long assignmentId;
 
-    @Column(name="points_earned")
+    @Column(name = "points_earned")
     private Long pointsEarned;
 
-    @Column(name="percentage_score")
+    @Column(name = "percentage_score")
     private Float percentageScore;
 
-    @Column(name="missing")
+    @Column(name = "missing")
     private Boolean missing;
 
     @ManyToOne
