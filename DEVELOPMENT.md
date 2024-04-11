@@ -104,7 +104,7 @@ deactivate
 | Course Rosters     |      ✅      |         ✅       |    ✅      |        |            |         |            |         |                 |
 | Assignment         |     ✅       |        ✅        |    ✅      |     ✅   |      ✅      |     ✅    |      ✅      |    ✅     |                 |
 | Assignment Types   |            |                |          |        |            |         |            |         |                 |
-| Student Scores     |       ✅     |        ✅        |     ✅     |     ✅   |            |         |            |         |                 |
+| Student Scores     |       ✅     |        ✅        |     ✅     |     ✅   |   ✅          |  ✅        |  ✅           | ✅         |                |
 | SPED Roster        |            |                |          |        |            |         |            |         |                 |
 | SPED Categories    |            |                |          |        |            |         |            |         |                 |
 | IEP                |            |                |          |        |            |         |            |         |                 |
