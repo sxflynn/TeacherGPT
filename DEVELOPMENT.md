@@ -97,14 +97,14 @@ deactivate
 | Relationship Type  |      ✅     |                |     ✅    |    ✅   |            |         |            |         |                 |
 | Daily Attendance   |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
 | Attendance Type    |      ✅     |        ✅       |     ✅    |    ✅   |      ✅     |    ✅    |      ✅     |    ✅    |        ✅        |
-| Staff              |     ✅       |       ✅         |    ✅      |   ✅     |     ✅       |     ✅    |      ✅      |     ✅    |                 |
+| Staff              |     ✅       |       ✅         |    ✅      |   ✅     |     ✅       |     ✅    |      ✅      |     ✅    |         ✅        |
 | Department         |            |                |          |        |            |         |            |         |                 |
-| Grade Level        |     ✅       |       ✅         |     ✅     |   ✅     |     ✅       |    ✅     |      ✅      |    ✅     |                 |
-| Course             |      ✅      |        ✅        |    ✅      |        |            |         |            |         |                 |
+| Grade Level        |     ✅       |       ✅         |     ✅     |   ✅     |     ✅       |    ✅     |      ✅      |    ✅     |         ✅        |
+| Course             |      ✅      |        ✅        |    ✅      |    ✅    |      ✅      |     ✅    |      ✅      |     ✅    |         ✅        |
 | Course Rosters     |      ✅      |         ✅       |    ✅      |        |            |         |            |         |                 |
-| Assignment         |            |                |          |        |            |         |            |         |                 |
+| Assignment         |     ✅       |        ✅        |    ✅      |     ✅   |      ✅      |     ✅    |      ✅      |    ✅     |                 |
 | Assignment Types   |            |                |          |        |            |         |            |         |                 |
-| Student Scores     |            |                |          |        |            |         |            |         |                 |
+| Student Scores     |       ✅     |        ✅        |     ✅     |     ✅   |            |         |            |         |                 |
 | SPED Roster        |            |                |          |        |            |         |            |         |                 |
 | SPED Categories    |            |                |          |        |            |         |            |         |                 |
 | IEP                |            |                |          |        |            |         |            |         |                 |
