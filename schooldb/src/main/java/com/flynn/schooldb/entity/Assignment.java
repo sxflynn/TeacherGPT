@@ -21,7 +21,7 @@ public class Assignment {
     private String assignmentType;
 
     @Column(name = "assignment_value", nullable = false)
-    private String assignmentValue;
+    private Long assignmentValue;
 
     @Column(name = "date_assigned", nullable = false)
     private LocalDate dateAssigned;
@@ -36,7 +36,7 @@ public class Assignment {
     public Assignment() {
     }
 
-    public Assignment(Long assignmentId, String assignmentTitle, String assignmentType, String assignmentValue, LocalDate dateAssigned, LocalDate dateDue, Course course) {
+    public Assignment(Long assignmentId, String assignmentTitle, String assignmentType, Long assignmentValue, LocalDate dateAssigned, LocalDate dateDue, Course course) {
         this.assignmentId = assignmentId;
         this.assignmentTitle = assignmentTitle;
         this.assignmentType = assignmentType;
@@ -70,11 +70,11 @@ public class Assignment {
         this.assignmentType = assignmentType;
     }
 
-    public String getAssignmentValue() {
+    public Long getAssignmentValue() {
         return assignmentValue;
     }
 
-    public void setAssignmentValue(String assignmentValue) {
+    public void setAssignmentValue(Long assignmentValue) {
         this.assignmentValue = assignmentValue;
     }
 
