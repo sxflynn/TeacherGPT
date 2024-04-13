@@ -163,7 +163,7 @@ CREATE TABLE "course_staff" (
 );
 
 CREATE TABLE "course_student" (
-  "student_id" bigint
+  "student_id" bigint,
   "course_id" bigint
 );
 
