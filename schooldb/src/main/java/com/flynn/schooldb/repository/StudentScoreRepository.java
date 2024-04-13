@@ -31,16 +31,24 @@ public interface StudentScoreRepository extends JpaRepository<StudentScore, Stud
 
     // CourseGradeDTO repository methods
 
-    // count all grades between dates
     @Query("SELECT COUNT(ss) FROM StudentScore ss WHERE ss.student.studentId = :studentId AND LOWER(ss.assignment.course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%')) AND ss.assignment.dateAssigned BETWEEN :startDate AND :endDate")
-    Long countByStudentIdAndCourseNameLikeAndDateAssignedBetween(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
+    Integer countByStudentIdAndCourseNameLikeAndDateAssignedBetween(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
 
-    // sum the points earned
     @Query("SELECT SUM(ss.pointsEarned) FROM StudentScore ss WHERE ss.student.studentId = :studentId AND LOWER(ss.assignment.course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%')) AND ss.assignment.dateAssigned BETWEEN :startDate AND :endDate")
-    Long sumPointsEarnedByStudentAndCourseBetweenDates(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
+    Integer sumPointsEarnedByStudentAndCourseBetweenDates(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
 
-    // sum the total values
     @Query("SELECT SUM(ss.assignment.assignmentValue) FROM StudentScore ss WHERE ss.student.studentId = :studentId AND LOWER(ss.assignment.course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%')) AND ss.assignment.dateAssigned BETWEEN :startDate AND :endDate")
-    Long sumAssignmentValueByStudentAndCourseBetweenDates(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
+    Integer sumAssignmentValueByStudentAndCourseBetweenDates(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
+
+
+    @Query("SELECT COUNT(ss) FROM StudentScore ss WHERE LOWER(ss.assignment.course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%')) AND ss.assignment.course.leadTeacher.lastName = :teacherLastName AND ss.assignment.dateAssigned BETWEEN :startDate AND :endDate")
+    Integer countByCourseNameLikeAndDateAssignedBetweenDates(String courseName, String teacherLastName, LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT SUM(ss.pointsEarned) FROM StudentScore ss WHERE LOWER(ss.assignment.course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%')) AND ss.assignment.course.leadTeacher.lastName = :teacherLastName AND ss.assignment.dateAssigned BETWEEN :startDate AND :endDate")
+    Integer sumPointsEarnedByCourseAndTeacherBetweenDates(String courseName, String teacherLastName, LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT SUM(ss.assignment.assignmentValue) FROM StudentScore ss WHERE LOWER(ss.assignment.course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%')) AND ss.assignment.course.leadTeacher.lastName = :teacherLastName AND ss.assignment.dateAssigned BETWEEN :startDate AND :endDate")
+    Integer sumAssignmentValueByCourseAndTeacherBetweenDates(String courseName, String teacherLastName, LocalDate startDate, LocalDate endDate);
+
 
 }

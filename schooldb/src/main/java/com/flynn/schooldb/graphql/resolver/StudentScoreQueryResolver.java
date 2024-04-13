@@ -1,10 +1,9 @@
 package com.flynn.schooldb.graphql.resolver;
 
+import com.flynn.schooldb.dto.CourseGradeDTO;
 import com.flynn.schooldb.entity.StudentScore;
-import com.flynn.schooldb.repository.StudentScoreRepository;
 import com.flynn.schooldb.service.StudentScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Limit;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -57,4 +56,15 @@ public class StudentScoreQueryResolver {
     public List<StudentScore> studentScoreFindByCourseNameContainsAndDateAssignedBetweenAndMissingIsTrue(@Argument String courseName, @Argument LocalDate startDate,@Argument LocalDate endDate) {
         return studentScoreService.findByCourseNameContainsAndDateAssignedBetweenAndMissingIsTrue(courseName,startDate,endDate);
     }
+
+    @QueryMapping
+    public CourseGradeDTO summarizeStudentCourseGradeBetweenDates(@Argument Long studentId, @Argument String courseName, @Argument LocalDate startDate, @Argument LocalDate endDate) {
+        return studentScoreService.summarizeStudentCourseGradeBetweenDates(studentId,courseName,startDate,endDate);
+    }
+
+    @QueryMapping
+    public CourseGradeDTO summarizeWholeClassCourseGradeBetweenDates(@Argument String teacherLastName, @Argument String courseName, @Argument LocalDate startDate, @Argument LocalDate endDate) {
+        return studentScoreService.summarizeWholeClassCourseGradeBetweenDates(teacherLastName,courseName,startDate,endDate);
+    }
+
 }

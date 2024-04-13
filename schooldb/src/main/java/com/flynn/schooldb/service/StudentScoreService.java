@@ -1,6 +1,8 @@
 package com.flynn.schooldb.service;
 
+import com.flynn.schooldb.dto.CourseGradeDTO;
 import com.flynn.schooldb.entity.StudentScore;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Limit;
 
 import java.time.LocalDate;
@@ -23,6 +25,10 @@ public interface StudentScoreService {
     List<StudentScore> findByCourseNameContainsAndDateAssignedBetweenAndPercentageScoreLessThan(String courseName, LocalDate startDate, LocalDate endDate, Float threshold);
 
     List<StudentScore> findByCourseNameContainsAndDateAssignedBetweenAndMissingIsTrue(String courseName, LocalDate startDate, LocalDate endDate);
+
+    CourseGradeDTO summarizeStudentCourseGradeBetweenDates(Long studentId, String courseName, LocalDate startDate, LocalDate endDate);
+
+    CourseGradeDTO summarizeWholeClassCourseGradeBetweenDates(String teacherLastName, String courseName, LocalDate startDate, LocalDate endDate);
 
 
 }

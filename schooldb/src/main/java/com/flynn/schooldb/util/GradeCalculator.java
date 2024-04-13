@@ -20,7 +20,7 @@ public class GradeCalculator {
         int counter = 0;
 
         for (CourseGradeDTO courseGradeDTO : allGradeSummaries) {
-            Float averageScore = courseGradeDTO.getAverageScore();
+            Float averageScore = courseGradeDTO.getAverageScoreFloat();
             if (averageScore != null) {
                 localSum += averageScore;
                 counter++;

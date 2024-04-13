@@ -106,3 +106,14 @@ type StudentScore {
     percentageScore:String!
     missing:Boolean
 }
+
+type CourseSummary {
+    studentId: Int
+    teacherLastName: String
+    courseName: String!
+    startDate: String!
+    endDate: String!
+    numberOfGradedAssignments: Int
+    averageScore: String!
+    letterGrade: String
+}

@@ -1,20 +1,20 @@
 package com.flynn.schooldb.dto;
 
-import com.flynn.schooldb.entity.Course;
-import com.flynn.schooldb.entity.Student;
-import com.flynn.schooldb.util.LetterGrade;
-
 import java.time.LocalDate;
 
 public class CourseGradeDTO {
 
-    private Student student;
+    private Long studentId;
 
-    private Course course;
+    private String teacherLastName;
+
+    private String courseName;
 
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    private Integer numberOfGradedAssignments;
 
     private Float averageScore;
 
@@ -22,29 +22,41 @@ public class CourseGradeDTO {
 
     public CourseGradeDTO() {
     }
-    public CourseGradeDTO(Student student, Course course, LocalDate startDate, LocalDate endDate, Float averageScore, String letterGrade) {
-        this.student = student;
-        this.course = course;
+
+    public CourseGradeDTO(Long studentId, String courseName, LocalDate startDate, LocalDate endDate, Integer numberOfGradedAssignments, Float averageScore, String letterGrade) {
+        this.studentId = studentId;
+        this.courseName = courseName;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.numberOfGradedAssignments = numberOfGradedAssignments;
         this.averageScore = averageScore;
         this.letterGrade = letterGrade;
     }
 
-    public Student getStudent() {
-        return student;
+    public CourseGradeDTO(String teacherLastName, String courseName, LocalDate startDate, LocalDate endDate, Integer numberOfGradedAssignments, Float averageScore, String letterGrade) {
+        this.teacherLastName = teacherLastName;
+        this.courseName = courseName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.numberOfGradedAssignments = numberOfGradedAssignments;
+        this.averageScore = averageScore;
+        this.letterGrade = letterGrade;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public Long getStudentId() {
+        return studentId;
     }
 
-    public Course getCourse() {
-        return course;
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
     }
 
     public LocalDate getStartDate() {
@@ -63,17 +75,31 @@ public class CourseGradeDTO {
         this.endDate = endDate;
     }
 
-    public Float getAverageScore() {
-        return averageScore;
+    public String getAverageScore() {
+        return String.format("%.2f%%", averageScore * 100);
+    }
+
+    public Integer getNumberOfGradedAssignments() {
+        return numberOfGradedAssignments;
+    }
+
+    public void setNumberOfGradedAssignments(Integer numberOfGradedAssignments) {
+        this.numberOfGradedAssignments = numberOfGradedAssignments;
+    }
+
+    public Float getAverageScoreFloat(){
+        return this.averageScore;
     }
 
     public void setAverageScore(Float averageScore) {
         this.averageScore = averageScore;
-        this.letterGrade = LetterGrade.toLetterGrade(averageScore.intValue());
     }
 
     public String getLetterGrade() {
         return letterGrade;
     }
 
+    public void setLetterGrade(String letterGrade) {
+        this.letterGrade = letterGrade;
+    }
 }

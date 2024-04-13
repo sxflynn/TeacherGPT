@@ -96,4 +96,7 @@ type Query {
     studentScoreFindByCourseNameContainsAndDateAssignedBetweenAndPercentageScoreLessThan(courseName:String!, startDate:String!,endDate:String!,threshold:Float!):[StudentScore]
     studentScoreFindByCourseNameContainsAndDateAssignedBetweenAndMissingIsTrue(courseName:String!,startDate:String!,endDate:String!):[StudentScore]
 
+    #CourseDTO
+    summarizeStudentCourseGradeBetweenDates(studentId: Int!, courseName: String!, startDate: String!, endDate: String!):CourseSummary
+    summarizeWholeClassCourseGradeBetweenDates(teacherLastName: String!, courseName: String!, startDate: String!, endDate: String!):CourseSummary
 }
