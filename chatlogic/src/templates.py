@@ -174,7 +174,7 @@ Response:
   "data": [
     {
       "person_type": "staff",
-      "query": "Search for a person member with the keyword Rosada in the name."
+      "query": "Search for a staff member with the keyword Rosada in the name."
     }
   ]
 }
