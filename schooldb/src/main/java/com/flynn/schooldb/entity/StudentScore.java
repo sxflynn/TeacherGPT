@@ -16,7 +16,7 @@ public class StudentScore {
     private Long assignmentId;
 
     @Column(name = "points_earned")
-    private Long pointsEarned;
+    private Integer pointsEarned;
 
     @Column(name = "percentage_score")
     private Float percentageScore;
@@ -35,7 +35,7 @@ public class StudentScore {
     public StudentScore() {
     }
 
-    public StudentScore(Long studentId, Long assignmentId, Long pointsEarned, Float percentageScore, Boolean missing, Student student, Assignment assignment) {
+    public StudentScore(Long studentId, Long assignmentId, Integer pointsEarned, Float percentageScore, Boolean missing, Student student, Assignment assignment) {
         this.studentId = studentId;
         this.assignmentId = assignmentId;
         this.pointsEarned = pointsEarned;
@@ -61,11 +61,11 @@ public class StudentScore {
         this.assignmentId = assignmentId;
     }
 
-    public Long getPointsEarned() {
+    public Integer getPointsEarned() {
         return pointsEarned;
     }
 
-    public void setPointsEarned(Long pointsEarned) {
+    public void setPointsEarned(Integer pointsEarned) {
         this.pointsEarned = pointsEarned;
     }
 
