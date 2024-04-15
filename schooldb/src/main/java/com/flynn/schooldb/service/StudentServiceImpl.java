@@ -153,6 +153,7 @@ public class StudentServiceImpl implements StudentService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Student> studentsFindByGradeLevel(String gradeLevel) {
         return studentRepository.findByGradeLevelGradeLevelNameContains(gradeLevel);
     }
