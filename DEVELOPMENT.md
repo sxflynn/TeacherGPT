@@ -105,8 +105,8 @@ deactivate
 | Assignment         |     ✅       |        ✅        |    ✅      |     ✅   |      ✅      |     ✅    |      ✅      |    ✅     |                 |
 | Assignment Types   |            |                |          |        |            |         |            |         |                 |
 | Student Scores     |       ✅     |        ✅        |     ✅     |     ✅   |   ✅          |  ✅        |  ✅           | ✅         |                |
-| SPED Roster        |            |                |          |        |            |         |            |         |                 |
-| SPED Categories    |            |                |          |        |            |         |            |         |                 |
+| SPED Roster        |       ✅     |        ✅        |      ✅    |        |            |         |            |         |                 |
+| SPED Categories    |        ✅    |        ✅        |      ✅    |        |            |         |            |         |                 |
 | IEP                |            |                |          |        |            |         |            |         |                 |
 | IEP Goals          |            |                |          |        |            |         |            |         |                 |
 | IEP Accomodations  |            |                |          |        |            |         |            |         |                 |
