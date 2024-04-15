@@ -23,7 +23,7 @@ class SpedCategories(BaseModel):
     
 class StudentSpedCategories(BaseModel):
     student: SpedRoster
-    category: list[SpedCategories]
+    category: SpedCategories
     
 
 # Source of probabilities:
@@ -70,7 +70,7 @@ def parse_students_from_csv(csv_file_name) -> list[Student]:
     return student_list  
 
 def generate_sped_roster(student_list: list[Student]) -> list[SpedRoster]:
-    sped_roster_list = []
+    sped_roster_list:list[SpedRoster] = []
     for student in student_list:
         has_iep = random.random() < PROBABILITY_IN_SPED
         has_504 = random.random() < PROBABILITY_504
@@ -91,65 +91,118 @@ def create_category_list(probabilities:dict[str,float]) -> list[SpedCategories]:
         ))
     return sped_categories_list
 
-def _assign_multiple_categories(shuffled_categories:list[tuple[str, float]]) -> list[SpedCategories]:
-    categories = []
-    attempts = 0
-    while len(categories) < 2:
-        random.shuffle(shuffled_categories)
-        for category, probability in shuffled_categories:
-            if random.random() < probability:
-                if all(c.sped_category != convert_snake_to_capitalized(category) for c in categories):
-                    categories.append(SpedCategories(sped_category=convert_snake_to_capitalized(category)))
-                if len(categories) >= 2:
-                    return categories
-        attempts += 1
-        if attempts > 10:
-            while len(categories) < 2:
-                random_category = random.choice(shuffled_categories)
-                if all(c.sped_category != convert_snake_to_capitalized(random_category[0]) for c in categories):
-                    categories.append(SpedCategories(sped_category=convert_snake_to_capitalized(random_category[0])))
-            break
-    return categories
-
-def _assign_single_category(shuffled_categories:list[tuple[str, float]]) -> list[SpedCategories]:
-    categories = []
+def _assign_single_category(shuffled_categories:list[tuple[str, float]]) -> SpedCategories:
     for category, probability in shuffled_categories:
         if random.random() < probability:
-            categories.append(SpedCategories(sped_category=convert_snake_to_capitalized(category)))
-            break
-    return categories
+            return SpedCategories(sped_category=convert_snake_to_capitalized(category))
+    return None
 
-def _ensure_at_least_one_category(categories, shuffled_categories:list[tuple[str, float]]) -> list[SpedCategories]:
-    if not categories:
-        category = random.choice(list(shuffled_categories))
-        categories.append(SpedCategories(sped_category=convert_snake_to_capitalized(category[0])))
-    return categories
+def _ensure_at_least_one_category(assigned_category, shuffled_categories):
+    if assigned_category is None:
+        category_name, _ = random.choice(shuffled_categories)
+        return SpedCategories(sped_category=convert_snake_to_capitalized(category_name))
+    return assigned_category
 
-def add_sped_category(sped_roster_list: list[SpedRoster]) -> list[StudentSpedCategories]:
-    student_sped_category_list: list[StudentSpedCategories] = []
+def add_sped_category(sped_roster_list:list[SpedRoster]):
+    student_sped_category_list:list[StudentSpedCategories] = []
     for sped_student in sped_roster_list:
         if not sped_student.has_iep:
             continue
-        has_multiple_categories: bool = random.random() < CATEGORY_PROBABILITIES["multiple_disabilities"]
         shuffled_categories = [(cat, prob) for cat, prob in CATEGORY_PROBABILITIES.items() if cat != "multiple_disabilities"]
         random.shuffle(shuffled_categories)
-        if has_multiple_categories:
-            categories = _assign_multiple_categories(shuffled_categories)
-        else:
-            categories = _assign_single_category(shuffled_categories)
-            categories = _ensure_at_least_one_category(categories, shuffled_categories)
+        assigned_category = _assign_single_category(shuffled_categories)
+        ensured_category = _ensure_at_least_one_category(assigned_category, shuffled_categories)
         student_sped_category_list.append(StudentSpedCategories(
             student=sped_student,
-            category=categories
+            category=ensured_category
         ))
     return student_sped_category_list
 
+def summarize_sped_statistics(student_roster: list[StudentSpedCategories]) -> str:
+    category_count = {}  # Dictionary to store the count of each category
+    student_count = len(student_roster)
+    # Iterate through the student roster to count categories
+    for student_category in student_roster:
+        # Assume each student can have multiple categories
+        category_name = student_category.category.sped_category  # Get the category name
+        if category_name in category_count:
+            category_count[category_name] += 1
+        else:
+            category_count[category_name] = 1
+
+    # Format the summary string
+    summary_lines = []
+    summary_lines.append(f"{student_count} in SPED")
+    for category, count in category_count.items():
+        percentage:float = round(count/student_count * 100, ndigits=3)
+        summary_lines.append(f"{percentage}% - {category}: {count} students")
+        
+    summary_string = "\n".join(summary_lines)
+    return summary_string
+
+def _generate_sped_categories_sql_value_from_object(sped_category:SpedCategories) -> str:
+    return f"('{sped_category.sped_category}')"
+
+def generate_sped_categories_sql_values(sped_category_list:list[SpedCategories]) -> list[str]:
+    values:list[str] = []
+    for category in sped_category_list:
+        values.append(_generate_sped_categories_sql_value_from_object(category))
+    return values
+
+def _generate_sped_roster_sql_value_from_object(sped_roster:SpedRoster) -> str:
+    return f"((SELECT student_id FROM student WHERE email = '{sped_roster.student.email}'), {sped_roster.has_iep},{sped_roster.has_504})"
+
+def generate_sped_roster_sql_values(sped_roster_list:list[SpedRoster]) -> list[str]:
+    values:list[str] = []
+    for student in sped_roster_list:
+        values.append(_generate_sped_roster_sql_value_from_object(student))
+    return values
+
+def _generate_student_sped_roster_sql_value_from_object(student_sped_category:StudentSpedCategories) -> str:
+    return f"((SELECT student_id FROM student WHERE email = '{student_sped_category.student.student.email}'), (SELECT category_id FROM sped_categories WHERE sped_category = '{student_sped_category.category.sped_category}'))"
+
+def generate_student_sped_categories_sql_values(student_sped_category_roster:list[StudentSpedCategories]) -> str:
+    values:list[str] = []
+    for student in student_sped_category_roster:
+        values.append(_generate_student_sped_roster_sql_value_from_object(student))
+    return values
+
+def generate_insert_statement(table_name, columns: list[str], values: list[str]) -> str:
+    def chunked_list(lst, n):
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+    columns_formatted = ', '.join([f'"{column}"' for column in columns])
+    values_chunks = list(chunked_list(values, 1000))
+    insert_statements = []
+    for chunk in values_chunks:
+        values_formatted = ',\n'.join(chunk)
+        insert_statements.append(f'INSERT INTO "{table_name}" ({columns_formatted})\nVALUES\n{values_formatted};\n\n')
+    return ''.join(insert_statements)
+
 def main():
     STUDENT_CSV_FILE_NAME = '../03_student/students.csv'
+    sped_inserts_file_name = 'sped-inserts.sql'
     student_list = parse_students_from_csv(STUDENT_CSV_FILE_NAME)
     sped_roster_list = generate_sped_roster(student_list)
     sped_category_list = create_category_list(CATEGORY_PROBABILITIES)
     sped_roster_with_categories = add_sped_category(sped_roster_list)
+    print(summarize_sped_statistics(sped_roster_with_categories))
+    
+    # SpedRoster inserts
+    sped_roster_insert_statement = generate_insert_statement("sped_roster",["student_id","has_iep","has_504"],generate_sped_roster_sql_values(sped_roster_list))
+    
+    # SpedCategory inserts
+    sped_category_insert_statement = generate_insert_statement("sped_categories", ["sped_category"],generate_sped_categories_sql_values(sped_category_list))
+    
+    # StudentSpedCategories inserts
+    student_sped_categories_insert_statement = generate_insert_statement("students_sped_categories",["student_id","category_id"],generate_student_sped_categories_sql_values(sped_roster_with_categories))    
+    
+    print(sped_roster_insert_statement) 
+    print(sped_category_insert_statement)   
+    print(student_sped_categories_insert_statement)
+    
+    with open(sped_inserts_file_name, encoding="utf-8", mode='w', newline='') as sql_file:
+        sql_file.write(sped_roster_insert_statement + '\n' + sped_category_insert_statement + '\n' + student_sped_categories_insert_statement)
 
 if __name__ == "__main__":
     main()
