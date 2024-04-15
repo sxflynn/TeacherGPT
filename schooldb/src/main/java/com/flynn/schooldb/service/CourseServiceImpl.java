@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -37,6 +38,11 @@ public class CourseServiceImpl implements CourseService{
     }
 
     @Override
+    public Set<Course> findByTeacherLastNameContainsAndCourseNameContains(String lastName, String courseName) {
+        return courseRepository.findByLeadTeacherLastNameContainsIgnoreCaseAndCourseNameContainsIgnoreCase(lastName,courseName);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Set<Course> findByGradeLevelName(String gradeLevelName) {
         return courseRepository.findByGradeLevelGradeLevelNameContainsIgnoreCase(gradeLevelName);
@@ -47,4 +53,10 @@ public class CourseServiceImpl implements CourseService{
     public Set<Course> findByStudentId(Long studentId) {
         return courseRepository.findByStudentsStudentId(studentId);
     }
+
+    @Override
+    public Optional<Course> findByStudentIdAndCourseNameContains(Long studentId, String courseName) {
+        return courseRepository.findByStudentsStudentIdAndCourseNameContainsIgnoreCase(studentId,courseName);
+    }
+
 }

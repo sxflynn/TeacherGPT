@@ -1,6 +1,7 @@
 package com.flynn.schooldb.graphql.resolver;
 
 import com.flynn.schooldb.dto.CourseGradeDTO;
+import com.flynn.schooldb.dto.ReportCardDTO;
 import com.flynn.schooldb.entity.StudentScore;
 import com.flynn.schooldb.service.StudentScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,11 @@ public class StudentScoreQueryResolver {
     @QueryMapping
     public CourseGradeDTO summarizeWholeClassCourseGradeBetweenDates(@Argument String teacherLastName, @Argument String courseName, @Argument LocalDate startDate, @Argument LocalDate endDate) {
         return studentScoreService.summarizeWholeClassCourseGradeBetweenDates(teacherLastName,courseName,startDate,endDate);
+    }
+
+    @QueryMapping
+    public ReportCardDTO summarizeAllStudentGrades(@Argument Long studentId, @Argument LocalDate startDate, @Argument LocalDate endDate){
+        return studentScoreService.summarizeAllStudentGrades(studentId,startDate,endDate);
     }
 
 }

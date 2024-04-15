@@ -5,10 +5,11 @@ import com.flynn.schooldb.util.GradeCalculator;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public class ReportCardDTO {
 
-    private Student student;
+    private Optional<Student> student;
 
     private List<CourseGradeDTO> allGradeSummaries;
 
@@ -21,7 +22,7 @@ public class ReportCardDTO {
     public ReportCardDTO() {
     }
 
-    public ReportCardDTO(Student student, List<CourseGradeDTO> allGradeSummaries, Float gradeAverage, LocalDate startDate, LocalDate endDate) {
+    public ReportCardDTO(Optional<Student> student, List<CourseGradeDTO> allGradeSummaries, Float gradeAverage, LocalDate startDate, LocalDate endDate) {
         this.student = student;
         this.allGradeSummaries = allGradeSummaries;
         this.gradeAverage = gradeAverage;
@@ -29,11 +30,11 @@ public class ReportCardDTO {
         this.endDate = endDate;
     }
 
-    public Student getStudent() {
+    public Optional<Student> getStudent() {
         return student;
     }
 
-    public void setStudent(Student student) {
+    public void setStudent(Optional<Student> student) {
         this.student = student;
     }
 
@@ -43,11 +44,14 @@ public class ReportCardDTO {
 
     public void setAllGradeSummaries(List<CourseGradeDTO> allGradeSummaries) {
         this.allGradeSummaries = allGradeSummaries;
-        this.gradeAverage = GradeCalculator.calculateGradeAverage(allGradeSummaries);
     }
 
-    public Float getGradeAverage() {
-        return gradeAverage;
+    public void setGradeAverage(Float gradeAverage) {
+        this.gradeAverage = gradeAverage;
+    }
+
+    public String getGradeAverage() {
+        return String.format("%.2f%%", gradeAverage * 100);
     }
 
     public LocalDate getStartDate() {

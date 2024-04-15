@@ -108,12 +108,19 @@ type StudentScore {
 }
 
 type CourseSummary {
-    studentId: Int
-    teacherLastName: String
-    courseName: String!
+    student: Student
+    course: Course!
     startDate: String!
     endDate: String!
     numberOfGradedAssignments: Int
     averageScore: String!
     letterGrade: String
+}
+
+type ReportCard {
+    student: Student!
+    allGradeSummaries: [CourseSummary]!
+    gradeAverage: String!
+    startDate: String!
+    endDate: String!
 }

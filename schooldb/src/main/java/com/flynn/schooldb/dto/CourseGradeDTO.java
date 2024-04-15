@@ -1,14 +1,16 @@
 package com.flynn.schooldb.dto;
 
+import com.flynn.schooldb.entity.Course;
+import com.flynn.schooldb.entity.Student;
+
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class CourseGradeDTO {
 
-    private Long studentId;
+    private Optional<Student> student;
 
-    private String teacherLastName;
-
-    private String courseName;
+    private Optional<Course> course;
 
     private LocalDate startDate;
 
@@ -23,9 +25,9 @@ public class CourseGradeDTO {
     public CourseGradeDTO() {
     }
 
-    public CourseGradeDTO(Long studentId, String courseName, LocalDate startDate, LocalDate endDate, Integer numberOfGradedAssignments, Float averageScore, String letterGrade) {
-        this.studentId = studentId;
-        this.courseName = courseName;
+    public CourseGradeDTO(Optional<Student> student, Optional<Course> course, LocalDate startDate, LocalDate endDate, Integer numberOfGradedAssignments, Float averageScore, String letterGrade) {
+        this.student = student;
+        this.course = course;
         this.startDate = startDate;
         this.endDate = endDate;
         this.numberOfGradedAssignments = numberOfGradedAssignments;
@@ -33,9 +35,8 @@ public class CourseGradeDTO {
         this.letterGrade = letterGrade;
     }
 
-    public CourseGradeDTO(String teacherLastName, String courseName, LocalDate startDate, LocalDate endDate, Integer numberOfGradedAssignments, Float averageScore, String letterGrade) {
-        this.teacherLastName = teacherLastName;
-        this.courseName = courseName;
+    public CourseGradeDTO(Optional<Course> course, LocalDate startDate, LocalDate endDate, Integer numberOfGradedAssignments, Float averageScore, String letterGrade) {
+        this.course = course;
         this.startDate = startDate;
         this.endDate = endDate;
         this.numberOfGradedAssignments = numberOfGradedAssignments;
@@ -43,20 +44,20 @@ public class CourseGradeDTO {
         this.letterGrade = letterGrade;
     }
 
-    public Long getStudentId() {
-        return studentId;
+    public Optional<Student> getStudent() {
+        return student;
     }
 
-    public void setStudentId(Long studentId) {
-        this.studentId = studentId;
+    public void setStudent(Optional<Student> student) {
+        this.student = student;
     }
 
-    public String getCourseName() {
-        return courseName;
+    public Optional<Course> getCourse() {
+        return course;
     }
 
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
+    public void setCourse(Optional<Course> course) {
+        this.course = course;
     }
 
     public LocalDate getStartDate() {

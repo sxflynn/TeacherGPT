@@ -99,4 +99,5 @@ type Query {
     #CourseDTO
     summarizeStudentCourseGradeBetweenDates(studentId: Int!, courseName: String!, startDate: String!, endDate: String!):CourseSummary
     summarizeWholeClassCourseGradeBetweenDates(teacherLastName: String!, courseName: String!, startDate: String!, endDate: String!):CourseSummary
+    summarizeAllStudentGrades(studentId: Int!, startDate: String!, endDate: String!):ReportCard
 }
