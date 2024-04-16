@@ -2,9 +2,7 @@ package com.flynn.schooldb.graphql.resolver;
 
 import com.flynn.schooldb.entity.Assignment;
 import com.flynn.schooldb.service.AssignmentService;
-import com.flynn.schooldb.service.AssignmentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
