@@ -1,6 +1,5 @@
 import csv
 import random
-import pprint
 from pydantic import BaseModel
 
 class Student(BaseModel):
