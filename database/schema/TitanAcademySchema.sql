@@ -160,7 +160,8 @@ CREATE TABLE "students_sped_categories" (
 
 CREATE TABLE "iep" (
   "iep_id" SERIAL PRIMARY KEY,
-  "student_id" int
+  "student_id" int,
+  "iep_summary" varchar
   -- "last_updated" date
 );
 

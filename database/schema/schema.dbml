@@ -147,6 +147,7 @@ Table students_sped_categories {
 Table iep {
   iep_id int [pk]
   student_id int [ref:> student.student_id]
+  iep_summary varchar
   // last_updated date
 }
 
