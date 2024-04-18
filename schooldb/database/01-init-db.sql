@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS
     "behavior_plan",
     "behavior_referrals",
     "etr",
-    "iep_accomodations",
+    "iep_accommodations",
     "iep_goals",
     "iep",
     "students_sped_categories",
@@ -330,7 +330,7 @@ ALTER TABLE "iep" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_
 
 ALTER TABLE "iep_goals" ADD FOREIGN KEY ("iep_id") REFERENCES "iep" ("iep_id");
 
-ALTER TABLE "iep_accomodations" ADD FOREIGN KEY ("iep_id") REFERENCES "iep" ("iep_id");
+ALTER TABLE "iep_accommodations" ADD FOREIGN KEY ("iep_id") REFERENCES "iep" ("iep_id");
 
 ALTER TABLE "etr" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
