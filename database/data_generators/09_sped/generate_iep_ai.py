@@ -284,28 +284,8 @@ def get_iep_keywords(category:str) -> str:
     else:
         raise ValueError(f"Category '{category}' not found. Please provide a valid IEP category.")
 
-
-def main():
-
-    STUDENT_CSV_FILE_NAME = '../03_student/students.csv'
-    SPED_ROSTER_SQL_FILE_NAME = 'sped-inserts.sql'
-    STUDENT_SCORE_SQL_FILE_NAME = '../08_student_scores/student-score-insert.sql'
-    student_list = parse_students_from_csv(STUDENT_CSV_FILE_NAME)
-    email_list = create_email_list_from_sql(SPED_ROSTER_SQL_FILE_NAME)
-    student_list_sped_filtered = filter_students_by_email(student_list,email_list)    
-    sped_roster_list = create_sped_roster_from_sql(student_list_sped_filtered,SPED_ROSTER_SQL_FILE_NAME)
-    sped_category_list = create_student_sped_category_from_sql(sped_roster_list,SPED_ROSTER_SQL_FILE_NAME)
-    student_score_list = parse_student_score_from_sql(STUDENT_SCORE_SQL_FILE_NAME)    
-    report_cards = calculate_grades(student_score_list) # comment out for testing OpenAI
-    
-    test_student:StudentSpedCategories = sped_category_list[0]
-    
-    # student:Student = test_student.student.student
-    # diagnosis = test_student.category
-    # student_email = student.email
-    # report_card = report_cards[student_email]    
-    
-    template = Template(
+def get_template() -> Template:
+    return Template(
     """
     Your job is to write a fictional IEP for a fictional student for a simulation of a school for an AI Project.
     Do not refer to AI or fictional schools in your output. Output as if this were a real school.
@@ -349,39 +329,58 @@ def main():
     You must include ALL of the elements of the JSON. You must include "iep_summary", "iep_goals" and "iep_accomodations"
     """
     )
-    
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    
-    counter = 0
-    for student_sped in sped_category_list:
-        if counter > 1:
-            break
-        student = student_sped.student.student
-        diagnosis = student_sped.category
-        student_email = student.email
-        report_card = report_cards[student_email]  
-        prompt = template.render(student=student,
-                iep_category = diagnosis,
-                report_card = report_card,
-                iep_keywords = get_iep_keywords(diagnosis)
-                )
-        counter += 1
-        
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-            ],
-            response_format= {"type": "json_object"}
-    )
-        response_content = response.choices[0].message.content
-        iep_and_goals = IEPAndGoals(
+
+def create_ieps_and_goals(student_email:str, response_content:dict) -> IEPAndGoals:
+    return IEPAndGoals(
             student_email=student_email,
             iep_summary=json.loads(response_content)["iep_summary"],
             iep_accomodations=json.loads(response_content)["iep_accomodations"],
             iep_goals=json.loads(response_content)["iep_goals"]
         )
+    
+def get_llm_response(client:OpenAI, prompt: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt},
+        ],
+        response_format= {"type": "json_object"}
+    )
+    return response.choices[0].message.content
+
+def build_prompt(template:Template, student_sped:StudentSpedCategories, report_cards) -> str:
+    return template.render(student=student_sped.student.student,
+                iep_category = student_sped.category,
+                report_card = report_cards[student_sped.student.student.email],
+                iep_keywords = get_iep_keywords(student_sped.category)
+                )
+    
+def main():
+    STUDENT_CSV_FILE_NAME = '../03_student/students.csv'
+    SPED_ROSTER_SQL_FILE_NAME = 'sped-inserts.sql'
+    STUDENT_SCORE_SQL_FILE_NAME = '../08_student_scores/student-score-insert.sql'
+    student_list = parse_students_from_csv(STUDENT_CSV_FILE_NAME)
+    email_list = create_email_list_from_sql(SPED_ROSTER_SQL_FILE_NAME)
+    student_list_sped_filtered = filter_students_by_email(student_list,email_list)    
+    sped_roster_list = create_sped_roster_from_sql(student_list_sped_filtered,SPED_ROSTER_SQL_FILE_NAME)
+    sped_category_list = create_student_sped_category_from_sql(sped_roster_list,SPED_ROSTER_SQL_FILE_NAME)
+    student_score_list = parse_student_score_from_sql(STUDENT_SCORE_SQL_FILE_NAME)    
+    report_cards = calculate_grades(student_score_list) # comment out for testing OpenAI
+            
+    template = get_template()
+    
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    counter = 1
+    for student_sped in sped_category_list:
+        print(f"Processing {counter} of {len(sped_category_list)}")
+        if counter > 1:
+            break
+        prompt = build_prompt(template,student_sped,report_cards)
+        counter += 1
+        response_content = get_llm_response(client, prompt)
+        iep_and_goals = create_ieps_and_goals(student_email=student_sped.student.student.email, response_content=response_content)
         pprint.pprint(iep_and_goals)
 
 if __name__ == "__main__":
