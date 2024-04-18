@@ -160,8 +160,8 @@ CREATE TABLE "students_sped_categories" (
 
 CREATE TABLE "iep" (
   "iep_id" SERIAL PRIMARY KEY,
-  "student_id" int,
-  "last_updated" date
+  "student_id" int
+  -- "last_updated" date
 );
 
 CREATE TABLE "iep_goals" (

@@ -147,7 +147,7 @@ Table students_sped_categories {
 Table iep {
   iep_id int [pk]
   student_id int [ref:> student.student_id]
-  last_updated date
+  // last_updated date
 }
 
 Table iep_goals {
