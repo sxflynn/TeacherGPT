@@ -220,9 +220,9 @@ CREATE TABLE "iep_goals" (
   "goal" varchar
 );
 
-CREATE TABLE "iep_accomodations" (
+CREATE TABLE "iep_accommodations" (
   "iep_id" bigint,
-  "accomodation" varchar
+  "accommodation" varchar
 );
 
 CREATE TABLE "etr" (

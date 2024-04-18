@@ -156,9 +156,9 @@ Table iep_goals {
   goal varchar
 }
 
-Table iep_accomodations {
+Table iep_accommodations {
     iep_id int [ref: > iep.iep_id]
-    accomodation varchar
+    accommodations varchar
 }
 
 Table etr {
