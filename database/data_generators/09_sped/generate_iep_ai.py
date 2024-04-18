@@ -54,9 +54,7 @@ class IEPAndGoals(BaseModel):
     student_email: str
     iep_summary: str
     iep_goals: list[str]
-    iep_accomodations: list[str]
-
-
+    iep_accommodations: list[str]
     
 def parse_students_from_csv(csv_file_name) -> list[Student]:
     student_list:list[Student] = []
@@ -135,7 +133,7 @@ def create_student_sped_category_from_sql(sped_roster_list:list[SpedRoster], fil
                     print(f"Error processing line: {line}\n{e}")
     return student_sped_categories_list
 
-def parse_student_score_from_sql(file_path: str) -> list[StudentScore]:
+def _parse_student_score_from_sql(file_path: str) -> list[StudentScore]:
     student_score_list:list[StudentScore] = []
     with open(file_path, 'r') as file:
         lines = file.readlines()
@@ -159,6 +157,17 @@ def parse_student_score_from_sql(file_path: str) -> list[StudentScore]:
                     print(f"Error processing line: {line}\n{e}")
         line_count += 1
     return student_score_list
+
+def load_or_create_student_scores(file_name: str, sql_file_path: str) -> list[StudentScore]:
+    if os.path.exists(file_name):
+        with open(file_name, 'r') as file:
+            student_scores = json.load(file)
+            return [StudentScore(**score) for score in student_scores]
+    else:
+        student_scores = _parse_student_score_from_sql(sql_file_path)
+        with open(file_name, 'w') as file:
+            json.dump([score.model_dump() for score in student_scores], file, indent=4)
+        return student_scores
 
 def _truncate_to_one_decimal(number: float) -> float:
     return int(number * 10) / 10.0
@@ -319,14 +328,14 @@ def get_template() -> Template:
             "Write the second IEP goal here",
             "Write the 3rd IEP goal here, etc"
         ],
-        "iep_accomodations":[
+        "iep_accommodations":[
             "Write the first IEP accomodation here",
             "Write the second IEP accomodation here",
             "Write the 3rd IEP accomodation here, etc"
         ]
     }
     
-    You must include ALL of the elements of the JSON. You must include "iep_summary", "iep_goals" and "iep_accomodations"
+    You must include ALL of the elements of the JSON. You must include "iep_summary", "iep_goals" and "iep_aaccommodations"
     """
     )
 
@@ -334,7 +343,7 @@ def create_ieps_and_goals(student_email:str, response_content:dict) -> IEPAndGoa
     return IEPAndGoals(
             student_email=student_email,
             iep_summary=json.loads(response_content)["iep_summary"],
-            iep_accomodations=json.loads(response_content)["iep_accomodations"],
+            iep_accommodations=json.loads(response_content)["iep_accommodations"],
             iep_goals=json.loads(response_content)["iep_goals"]
         )
     
@@ -347,6 +356,7 @@ def get_llm_response(client:OpenAI, prompt: str) -> str:
         ],
         response_format= {"type": "json_object"}
     )
+    print(response.choices[0].message.content)
     return response.choices[0].message.content
 
 def build_prompt(template:Template, student_sped:StudentSpedCategories, report_cards) -> str:
@@ -356,32 +366,81 @@ def build_prompt(template:Template, student_sped:StudentSpedCategories, report_c
                 iep_keywords = get_iep_keywords(student_sped.category)
                 )
     
+def generate_single_string_sql_values(list_of_strings: list[str], student_email: str) -> list[str]:
+    values = []
+    iep_id_insert = f"(SELECT iep_id FROM iep WHERE student_id = (SELECT student_id FROM student WHERE email = '{student_email}'))"
+    for single_item in list_of_strings:
+        safe_item = single_item.replace("'", "''")
+        values.append(f"({iep_id_insert}, '{safe_item}')")
+    return values
+
+def generate_iep_sql_value(iep_summary: str, student_email: str) -> str:
+    safe_summary = iep_summary.replace("'", "''")
+    return f"((SELECT student_id FROM student WHERE email = '{student_email}'), '{safe_summary}')"
+
+def return_mock_response() -> str:
+    return """
+{
+    "iep_summary": "Helen Moore's Individual Education Program (IEP) focuses on enhancing her skills in dyslexia management, reading comprehension, math reasoning, writing proficiency, and learning strategies. Through personalized instruction and support, Helen aims to advance her literacy and numeracy abilities, improve her writing coherence, and develop effective study techniques, building on her strong academic foundation in various subjects.",
+    "iep_goals": [
+        "Helen will demonstrate improved phonological awareness and decoding skills to manage dyslexia more effectively, achieving at least 90% accuracy in phonetic exercises by the end of the semester.",
+        "Helen will enhance her reading comprehension abilities by employing visualization techniques and summarization strategies, aiming to achieve a 10% increase in her reading fluency rate over the academic year.",
+        "Helen will strengthen her math reasoning skills through problem-solving tasks and real-world applications, aiming to consistently solve multi-step word problems with 80% accuracy by the end of the school term.",
+        "Helen will refine her writing skills, focusing on organization, coherence, and elaboration, with the goal of producing structured essays with varied sentence structures and transitions, reaching a score of 4 out of 5 on a holistic writing rubric by the next reporting period.",
+        "Helen will develop effective learning strategies, including time management, note-taking, and self-regulation skills, to enhance her overall academic performance and independence in learning, as evidenced by increased task completion and self-monitoring abilities throughout the school year."
+    ],
+    "iep_accommodations": [
+        "During district and statewide assessments, Helen will be provided with extended time accommodations, allowing her 50% additional time to complete the tests to alleviate time pressure and enable her to demonstrate her knowledge effectively.",
+        "For written assignments, Helen will have access to a word processor or speech-to-text software to support her writing process and transcription, ensuring that her ideas are accurately conveyed despite potential spelling or handwriting challenges.",
+        "Helen will receive preferential seating in the classroom to minimize distractions and maximize her focus during instruction and assessments, enabling her to engage more effectively with academic tasks and demonstrate her true abilities.",
+        "To facilitate comprehension and retention, Helen will be allowed to use graphic organizers and visual aids during lessons and assessments, aiding her in organizing information and making connections between concepts in a structured manner.",
+        "In order to support her individualized educational needs, Helen will receive frequent check-ins with a designated support staff member, who will provide additional clarification, feedback, and reinforcement of key concepts presented in class, ensuring her continued progress and understanding of the curriculum."
+    ]
+}
+"""
+
 def main():
     STUDENT_CSV_FILE_NAME = '../03_student/students.csv'
     SPED_ROSTER_SQL_FILE_NAME = 'sped-inserts.sql'
+    IEPS_AND_GOALS_SQL_FILE_NAME = 'ieps-and-goals.sql'
+    JSON_FILE_NAME = 'student_scores.json'
     STUDENT_SCORE_SQL_FILE_NAME = '../08_student_scores/student-score-insert.sql'
+
     student_list = parse_students_from_csv(STUDENT_CSV_FILE_NAME)
     email_list = create_email_list_from_sql(SPED_ROSTER_SQL_FILE_NAME)
-    student_list_sped_filtered = filter_students_by_email(student_list,email_list)    
-    sped_roster_list = create_sped_roster_from_sql(student_list_sped_filtered,SPED_ROSTER_SQL_FILE_NAME)
-    sped_category_list = create_student_sped_category_from_sql(sped_roster_list,SPED_ROSTER_SQL_FILE_NAME)
-    student_score_list = parse_student_score_from_sql(STUDENT_SCORE_SQL_FILE_NAME)    
-    report_cards = calculate_grades(student_score_list) # comment out for testing OpenAI
-            
-    template = get_template()
-    
+    student_list_sped_filtered = filter_students_by_email(student_list, email_list)
+    sped_roster_list = create_sped_roster_from_sql(student_list_sped_filtered, SPED_ROSTER_SQL_FILE_NAME)
+    sped_category_list = create_student_sped_category_from_sql(sped_roster_list, SPED_ROSTER_SQL_FILE_NAME)
+    student_score_list = load_or_create_student_scores(sql_file_path=STUDENT_SCORE_SQL_FILE_NAME, file_name=JSON_FILE_NAME)
+    report_cards = calculate_grades(student_score_list)
+
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    
+    template = get_template()
+
+    with open(IEPS_AND_GOALS_SQL_FILE_NAME, 'w') as sql_file:
+        sql_file.write('')
+
     counter = 1
     for student_sped in sped_category_list:
-        print(f"Processing {counter} of {len(sped_category_list)}")
-        if counter > 1:
+        if counter > 1: # for development
             break
-        prompt = build_prompt(template,student_sped,report_cards)
+        prompt = build_prompt(template, student_sped, report_cards)
+        # response_content = get_llm_response(client, prompt)  # Network call
+        response_content = return_mock_response()
+        student_iep_and_goals = create_ieps_and_goals(student_email=student_sped.student.student.email, response_content=response_content)
+
+        iep_value_insert = generate_iep_sql_value(student_iep_and_goals.iep_summary, student_iep_and_goals.student_email)
+        iep_goals_values_inserts = generate_single_string_sql_values(student_iep_and_goals.iep_goals, student_iep_and_goals.student_email)
+        iep_accommodations_values_inserts = generate_single_string_sql_values(student_iep_and_goals.iep_accommodations, student_iep_and_goals.student_email)
+
+        # rewriting file for each loop iteration to store expensive API calls to disk
+        with open(IEPS_AND_GOALS_SQL_FILE_NAME, 'a') as sql_file:
+            sql_file.write('BEGIN TRANSACTION;\n')
+            sql_file.write('INSERT INTO "iep" ("student_id", "iep_summary")\nVALUES\n' + iep_value_insert + ';\n\n')
+            sql_file.write('INSERT INTO "iep_goals" ("iep_id", "goal")\nVALUES\n' + ',\n'.join(iep_goals_values_inserts) + ';\n\n')
+            sql_file.write('INSERT INTO "iep_accommodations" ("iep_id", "accommodation")\nVALUES\n' + ',\n'.join(iep_accommodations_values_inserts) + ';\n\n')
+            sql_file.write('COMMIT;\n\n')
         counter += 1
-        response_content = get_llm_response(client, prompt)
-        iep_and_goals = create_ieps_and_goals(student_email=student_sped.student.student.email, response_content=response_content)
-        pprint.pprint(iep_and_goals)
 
 if __name__ == "__main__":
     main()
