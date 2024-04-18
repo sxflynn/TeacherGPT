@@ -356,7 +356,6 @@ def get_llm_response(client:OpenAI, prompt: str) -> str:
         ],
         response_format= {"type": "json_object"}
     )
-    print(response.choices[0].message.content)
     return response.choices[0].message.content
 
 def build_prompt(template:Template, student_sped:StudentSpedCategories, report_cards) -> str:
@@ -422,13 +421,14 @@ def main():
 
     counter = 1
     for student_sped in sped_category_list:
-        if counter > 1: # for development
-            break
+        # if counter > 1: # for development
+        #     break
+        print(f"Completing {counter} of {len(sped_category_list)}")
         prompt = build_prompt(template, student_sped, report_cards)
-        # response_content = get_llm_response(client, prompt)  # Network call
-        response_content = return_mock_response()
+        response_content = get_llm_response(client, prompt)  # Network call
+        # response_content = return_mock_response()
         student_iep_and_goals = create_ieps_and_goals(student_email=student_sped.student.student.email, response_content=response_content)
-
+        pprint.pprint(student_iep_and_goals)
         iep_value_insert = generate_iep_sql_value(student_iep_and_goals.iep_summary, student_iep_and_goals.student_email)
         iep_goals_values_inserts = generate_single_string_sql_values(student_iep_and_goals.iep_goals, student_iep_and_goals.student_email)
         iep_accommodations_values_inserts = generate_single_string_sql_values(student_iep_and_goals.iep_accommodations, student_iep_and_goals.student_email)
