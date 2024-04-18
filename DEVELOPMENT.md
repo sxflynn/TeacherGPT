@@ -107,9 +107,9 @@ deactivate
 | Student Scores     |       ✅     |        ✅        |     ✅     |     ✅   |   ✅          |  ✅        |  ✅           | ✅         |                |
 | SPED Roster        |       ✅     |        ✅        |      ✅    |        |            |         |            |         |                 |
 | SPED Categories    |        ✅    |        ✅        |      ✅    |        |            |         |            |         |                 |
-| IEP                |            |                |          |        |            |         |            |         |                 |
-| IEP Goals          |            |                |          |        |            |         |            |         |                 |
-| IEP Accomodations  |            |                |          |        |            |         |            |         |                 |
+| IEP                |      ✅     |          ✅      |     ✅     |        |            |         |            |         |                 |
+| IEP Goals          |        ✅    |        ✅        |     ✅     |        |            |         |            |         |                 |
+| IEP Accomodations  |       ✅     |           ✅     |      ✅    |        |            |         |            |         |                 |
 | ETR                |            |                |          |        |            |         |            |         |                 |
 | Behavior Referrals |            |                |          |        |            |         |            |         |                 |
 | Behavior Plans     |            |                |          |        |            |         |            |         |                 |
