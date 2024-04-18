@@ -349,7 +349,7 @@ def create_ieps_and_goals(student_email:str, response_content:dict) -> IEPAndGoa
     
 def get_llm_response(client:OpenAI, prompt: str) -> str:
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-turbo",
         messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": prompt},
