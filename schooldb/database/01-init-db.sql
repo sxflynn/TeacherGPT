@@ -232,11 +232,11 @@ CREATE TABLE "etr" (
   "executive_summary" varchar
 );
 
-CREATE TABLE "behavior_referrals" (
+CREATE TABLE "behavior_referral" (
   "student_id" bigint,
   "reporting_staff" bigint,
   "date" date,
-  "period_id" bigint,
+  -- "period_id" bigint,
   "student_report" varchar,
   "internal_report" varchar
 );
@@ -249,14 +249,14 @@ CREATE TABLE "behavior_plan" (
   "active" bool
 );
 
-CREATE TABLE "suspensions" (
+CREATE TABLE "suspension" (
   "suspension_id" SERIAL PRIMARY KEY,
   "student_id" bigint,
   "startdate" date,
   "enddate" date
 );
 
-CREATE TABLE "expulsions" (
+CREATE TABLE "expulsion" (
   "expulsion_id" SERIAL PRIMARY KEY,
   "student_id" bigint,
   "date" date NOT NULL,
@@ -334,19 +334,19 @@ ALTER TABLE "iep_accommodations" ADD FOREIGN KEY ("iep_id") REFERENCES "iep" ("i
 
 ALTER TABLE "etr" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
-ALTER TABLE "behavior_referrals" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
+ALTER TABLE "behavior_referral" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
-ALTER TABLE "behavior_referrals" ADD FOREIGN KEY ("reporting_staff") REFERENCES "staff" ("staff_id");
+ALTER TABLE "behavior_referral" ADD FOREIGN KEY ("reporting_staff") REFERENCES "staff" ("staff_id");
 
-ALTER TABLE "behavior_referrals" ADD FOREIGN KEY ("period_id") REFERENCES "period_list" ("period_id");
+-- ALTER TABLE "behavior_referral" ADD FOREIGN KEY ("period_id") REFERENCES "period_list" ("period_id");
 
 ALTER TABLE "behavior_plan" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
 ALTER TABLE "behavior_plan" ADD FOREIGN KEY ("staff_author") REFERENCES "staff" ("staff_id");
 
-ALTER TABLE "suspensions" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
+ALTER TABLE "suspension" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
-ALTER TABLE "expulsions" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
+ALTER TABLE "expulsion" ADD FOREIGN KEY ("student_id") REFERENCES "student" ("student_id");
 
 ALTER TABLE "course_period_room" ADD FOREIGN KEY ("course_id") REFERENCES "course" ("course_id");
 
