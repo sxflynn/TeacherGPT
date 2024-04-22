@@ -20,6 +20,12 @@ class Student(BaseModel):
     sped_category: str = None
     sped_goals_accommodations: list[str] = []
 
+class StudentAttendanceDay(BaseModel):
+    email: str
+    date: str
+    attendance_type: str
+    absent: bool = False
+
 class StaffMember(BaseModel):
     first_name: str
     middle_name: str
@@ -86,6 +92,21 @@ def parse_students_from_csv(csv_file_name) -> list[Student]:
             )
             student_list.append(new_student)
     return student_list
+
+def parse_attendance_sql_file(file_path: str) -> list[StudentAttendanceDay]:
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    attendance_data:list[StudentAttendanceDay] = []
+    absence_types = ['Partial Unexcused Absence', 'Partial Excused Absence', 'Full Absence', 'Unexcused Absence', 'Excused Absence']
+    for line in lines:
+        if not line.startswith(("INSERT INTO", "BEGIN", "COMMIT")):
+            match = re.search(r"email = '(.+?)'.+?'(\d{4}-\d{2}-\d{2})', \(SELECT attendance_type_id FROM attendance_type WHERE attendance_type = '(.+?)'\)", line)
+            if match:
+                email, date_str, attendance_type = match.groups()
+                absent = attendance_type in absence_types
+                attendance_data.append(StudentAttendanceDay(email=email, date=date_str, attendance_type=attendance_type, absent=absent))
+    return attendance_data
+
 
 def create_staff_roster_from_sql(file_path: str) -> list[StaffMember]:
     staff_roster_list: list[StaffMember] = []
@@ -276,9 +297,9 @@ def get_scenario(staff_member:StaffMember) -> str:
     random_num = random.random()
     if random_num < .2:
         if random.random() < .5:
-            return "In the lunch cafeteria"
+            return "in the lunch cafeteria"
         else:
-            return "Outside on the recess area"
+            return "outside on the recess area"
     return f"{ staff_member.position } class"
 
 def build_prompt(template:Template, student:Student, report_cards, staff_member:StaffMember) -> str:
@@ -326,11 +347,12 @@ def main():
     STUDENT_SCORES_JSON_FILE_NAME = 'student_scores.json'
     STUDENT_SCORE_SQL_FILE_NAME = '../08_student_scores/student-score-insert.sql'
     REPORTCARDS_JSON_FILE_NAME = 'report_cards.json'
+    DAILY_ATTENDANCE_SQL_FILE_NAME = '../04_dailyattendance/daily-attendance-insert.sql'
 
     original_student_list = parse_students_from_csv(STUDENT_CSV_FILE_NAME)
     sped_categories_student_list = create_sped_roster_from_sql(original_student_list,SPED_ROSTER_SQL_FILE_NAME)
     student_list_full_sped = hydrate_iep_goals_from_sql(sped_categories_student_list,IEPS_AND_GOALS_FILE_NAME)
-    
+    attendance_data = parse_attendance_sql_file(DAILY_ATTENDANCE_SQL_FILE_NAME)
     staff_list = create_staff_roster_from_sql(STAFF_SQL_FILE_NAME)
 
     
@@ -344,8 +366,6 @@ def main():
     
     print(scenario)
     
-    # import all days of the school year
-    # import course sequence so we know what's happening that day.
     # generate all behavior referrals and plans (all_students, all_staff, all_dates, all_courses)
     
     
