@@ -1,12 +1,14 @@
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
 from collections import defaultdict
 import csv
 import json
 import os
 import pprint
 import re
+from typing import Optional
 from jinja2 import Template
+from openai import OpenAI
 from pydantic import BaseModel
 
 class Student(BaseModel):
@@ -71,11 +73,8 @@ class ReportCard(BaseModel):
     science_percentage:str | float
 
 
-# create behavior profile(all_students)
-# create carveout for sped students with ED
-
-    
-#* generate all behavior referrals (all_students, all_staff, all_dates, all_courses)
+def _convert_date_to_string(date:datetime) -> str:
+    return date.strftime('%Y-%m-%d')
 
 def parse_students_from_csv(csv_file_name) -> list[Student]:
     student_list:list[Student] = []
@@ -130,6 +129,16 @@ def create_staff_roster_from_sql(file_path: str) -> list[StaffMember]:
                 except ValueError as e:
                     print(f"Error processing line: {line}\n{e}")
     return staff_roster_list
+
+def filter_staff_by_grade_level(staff_list:list[StaffMember], grade_level:int) -> list[StaffMember]:
+    new_staff_list = [staff for staff in staff_list if _extract_grade_level(staff.position) == grade_level]
+    return new_staff_list
+
+def _extract_grade_level(position: str) -> int:
+    match = re.search(r'\d+', position)
+    if match:
+        return int(match.group())
+    return -1
 
 def create_sped_roster_from_sql(student_list:list[Student], file_path: str) -> list[Student]:
     updated_students = {student.email: student for student in student_list}
@@ -301,21 +310,30 @@ def generate_school_days(start, end):
             yield day
         day += timedelta(days=1)
 
+def find_absence_status(attendance_records: list[StudentAttendanceDay], email: str, date: str) -> Optional[bool]:
+    for record in attendance_records:
+        if record.email == email and record.date == date:
+            return record.absent
+    return None  # or raise an exception, e.g., ValueError("Record not found")
+
+
 def get_scenario(staff_member:StaffMember) -> str:
     random_num = random.random()
     if random_num < .2:
         if random.random() < .5:
-            return "in the lunch cafeteria"
+            return "in the lunch cafeteria, which means the behavior has to be really extreme to warrant a referral write-up, usually swearing or fighting"
         else:
-            return "outside on the recess area"
+            return "outside on the recess area, which means the behavior has to be really extreme to warrant a referral write-up, usually swearing or fighting"
     return f"{ staff_member.position } class"
 
-def build_prompt(template:Template, student:Student, report_cards, staff_member:StaffMember) -> str:
+def build_prompt(template:Template, student:Student, report_cards, staff_member:StaffMember, behavior_profile:str, scenario:str, date_string:str) -> str:
     return template.render(student=student,
                 report_card = report_cards[student.email],
                 staff_member = staff_member,
                 iep_statement = get_iep_statement(student),
-                behavior_profile = "Deliberately provokes peers and teachers by challenging classroom rules and debating instructions, disrupting the learning process.",
+                behavior_profile = behavior_profile,
+                scenario = scenario,
+                date_string = date_string
                 )
 
 def get_behavior_archetypes() -> dict[str,str]:
@@ -388,12 +406,14 @@ def get_template() -> Template:
     Direct Quotes: Include direct quotes from the student, teachers, or classmates involved to add depth and personal perspective to the events described.
     Dramatic Impact: Emphasize how the behavior affected the entire classroom, including reactions from other students and any interruptions to learning activities. Highlight emotional responses and the broader impact on the day's lesson.
     Narrative Structure: Write the report like a story, with a beginning that sets the scene, a middle that escalates the tension, and a conclusion that resolves the incident. This approach should make the events compelling and memorable.
-    Teacher’s Insight: Provide insight into the teacher's strategies and emotional journey through the incident. Describe what the teacher tried to do to manage the situation and their reflections on the outcome.
+    Teacher's Insight: Provide insight into the teacher's strategies and emotional journey through the incident. Describe what the teacher tried to do to manage the situation and their reflections on the outcome.
+    Teacher emotions: The teacher should be emotionally invested in the student's success, and the success of the school environment.
         
     
     DIRECTIONS:
     
     Write a behavior report from the point of view of the teacher {{ staff_member.first_name }} {{ staff_member.last_name }}
+    The date of the report is: {{ date_string }}
     Your position is {{ staff_member.position }} in the Titan Academy School.
     The location/context where the behavior incident occured was {{ scenario }}
     
@@ -426,6 +446,25 @@ def get_template() -> Template:
     """
     )
 
+def get_llm_response(client:OpenAI, prompt: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt},
+        ],
+        response_format= {"type": "json_object"}
+    )
+    return response.choices[0].message.content
+
+
+def get_mock_response(student_name:str, staff_member_last_name:str, behavior_profile, scenario, day_string) -> dict[str,str]:
+    return {
+    "student_report": f"Mock Behavior Report for {student_name} on date {day_string} written by {staff_member_last_name}, with behavior profile {behavior_profile}. Scenario: {scenario}",
+    "internal_report": "Internal Report",
+    "summary": "Summary."
+}
+
 def main():
     STUDENT_CSV_FILE_NAME = '../03_student/students.csv'
     STAFF_SQL_FILE_NAME = '../02_staff/staff-insert.sql'
@@ -441,7 +480,7 @@ def main():
     student_list_full_sped = hydrate_iep_goals_from_sql(sped_categories_student_list,IEPS_AND_GOALS_FILE_NAME)
     attendance_data = parse_attendance_sql_file(DAILY_ATTENDANCE_SQL_FILE_NAME)
     staff_list = create_staff_roster_from_sql(STAFF_SQL_FILE_NAME)
-    
+        
     report_cards = get_or_create_report_cards(
         scores_json_file=STUDENT_SCORES_JSON_FILE_NAME,
         report_cards_json_file=REPORTCARDS_JSON_FILE_NAME,
@@ -451,18 +490,49 @@ def main():
     start_date = datetime(2023, 9, 1)
     end_date = datetime(2024, 5, 30)
     school_days:list[datetime] = list(generate_school_days(start_date, end_date))
-    scenario = get_scenario(staff_list[0])
-    
+    archetypes = get_behavior_archetypes()
+    archetypes_list = list(archetypes.values())
     template = get_template()
-    prompt = build_prompt(template,report_cards=report_cards,student=student_list_full_sped[12],staff_member=staff_list[0])
-    print(prompt)
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    
+    counter = 1
+    for student in student_list_full_sped:
+        behavior_temperature = random.random() 
+        if behavior_temperature < .7: # 70% of students never get in trouble
+            print(f"{student.first_name} {student.last_name} never gets in trouble.")
+            continue
         
-    # generate all behavior referrals and plans (all_students, all_staff, all_dates, all_courses)
+        high_flyer_status = True if random.random() < .30 else False # of the remaining 30% who do get in trouble, 30% of those are high flyers (9% of the whole school)
+        
+        behavior_status_text = f"{student.first_name} is a high flyer" if high_flyer_status else f"{student.first_name} only sometimes gets in trouble"
+        print(behavior_status_text)
+        
+        behavior_profile_list = random.sample(archetypes_list, 3)
+        grade_level_staff_list = filter_staff_by_grade_level(staff_list,student.grade_level)
+
+        for day in school_days:
+            if counter > 2: # for development
+                break
+            
+            if find_absence_status(attendance_data,student.email,_convert_date_to_string(day)):
+                print(f"{student.first_name} absent today.")
+                continue
+            
+            if (high_flyer_status and random.random() < .4) or (not high_flyer_status and random.random() < .1): # on any particular day a high flyer has a 40% chance of getting in trouble, a non high flyer 10% chance
+                behavior_profile = random.choice(behavior_profile_list)
+                staff_member = random.choice(grade_level_staff_list)
+                scenario = get_scenario(staff_member)
+                day_string = _convert_date_to_string(day)
+                prompt = build_prompt(template,student,report_cards,staff_member, behavior_profile, scenario, day_string)
+                response_content = get_mock_response(student.first_name, staff_member.last_name, behavior_profile, scenario, day_string)
+                # response_content = get_llm_response(client, prompt)  # Network call
+                print(response_content)
+                counter += 1
+    print (counter)
+    print (counter / len(school_days))
     
-    
-    
-    
-    pass
+    #Final Todo: Write each LLM call to SQL file
 
 if __name__ == "__main__":
     main()
