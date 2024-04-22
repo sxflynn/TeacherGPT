@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import random
 from collections import defaultdict
 import csv
@@ -39,6 +40,7 @@ class BehaviorReferral(BaseModel):
     date: str
     student_report: str
     internal_report: str
+    summary: str
 
 class BehaviorPlan(BaseModel):
     student: Student
@@ -283,7 +285,6 @@ def get_or_create_report_cards(scores_json_file: str, report_cards_json_file: st
 
 def get_iep_statement(student: Student) -> str:
     if student.sped_category and student.sped_goals_accommodations:
-        # Join the list into a single string with commas
         goals_accommodations_str = ", ".join(student.sped_goals_accommodations)
         return (
             f"{student.first_name} is on the Special Education roster, "
@@ -292,6 +293,13 @@ def get_iep_statement(student: Student) -> str:
         )
     else:
         return ""
+
+def generate_school_days(start, end):
+    day = start
+    while day <= end:
+        if day.weekday() < 5:
+            yield day
+        day += timedelta(days=1)
 
 def get_scenario(staff_member:StaffMember) -> str:
     random_num = random.random()
@@ -305,14 +313,89 @@ def get_scenario(staff_member:StaffMember) -> str:
 def build_prompt(template:Template, student:Student, report_cards, staff_member:StaffMember) -> str:
     return template.render(student=student,
                 report_card = report_cards[student.email],
-                staff_member = staff_member
+                staff_member = staff_member,
+                iep_statement = get_iep_statement(student),
+                behavior_profile = "Deliberately provokes peers and teachers by challenging classroom rules and debating instructions, disrupting the learning process.",
                 )
+
+def get_behavior_archetypes() -> dict[str,str]:
+    return {
+    "The Escapist": "Often tries to leave the classroom without permission, showing a preference for wandering the halls over attending lessons.",
+    "The Agitator": "Deliberately provokes peers and teachers by challenging classroom rules and debating instructions, disrupting the learning process.",
+    "The Saboteur": "Intentionally interferes with classroom technology or peers’ work, aiming to disrupt lessons or presentations.",
+    "The Gossip": "Spreads rumors and gossip, creating social conflicts and distracting others from academic and social activities.",
+    "The Uncooperative": "Shows reluctance or outright refusal to participate in group work or school projects, often hindering team progress and dynamics.",
+    "The Distractor": "Regularly distracts peers with off-topic conversations during lessons, hindering the class's ability to focus.",
+    "The Rule Tester": "Constantly tests the limits of school rules, often bending them to see how much can be gotten away with without direct defiance.",
+    "The Property Misuser": "Uses school equipment and materials inappropriately, often resulting in broken or lost items.",
+    "The Space Invader": "Frequently invades personal space of others, making peers uncomfortable with too-close interactions or unwelcome physical contact.",
+    "The Attention Seeker": "Engages in exaggerated behaviors or fabricates stories to gain the attention of peers and teachers, often distracting from class activities.",
+    "The Disruptor": "Frequently talks out of turn and makes loud noises, disrupting the class environment.",
+    "The Bully": "Often involved in verbal and occasional physical altercations with peers, intimidating them in and out of the classroom.",
+    "The Prankster": "Engages in practical jokes that sometimes go too far, affecting the safety and comfort of other students.",
+    "The Defiant": "Openly refuses to follow instructions and challenges authority, questioning teacher's directives and decisions.",
+    "The Vandal": "Responsible for graffiti and damage to school property, leaving behind a trail of defaced desks and walls.",
+    "The Cheater": "Frequently caught cheating on tests or plagiarizing assignments, undermining academic integrity.",
+    "The Truant": "Regularly skips classes or shows up late, showing a clear disregard for school attendance policies.",
+    "The Instigator": "Incites and encourages disruptive behavior among classmates, often leading group disruptions or conspiracies.",
+    "The Cyberbully": "Uses social media and other digital platforms to harass peers, spreading rumors and sending hurtful messages.",
+    "The Disengaged": "Often appears uninterested or withdrawn, not participating in any school work or activities, and sometimes sleeping in class."
+}
 
 def get_template() -> Template:
     return Template(
-    """    
-    Write this behavior report from the point of view of the teacher {{ staff_member.first_name }} {{ staff_member.last_name }}
-    Your position is {{ staff_member.position }} in the school. The location where the behavior incident occured was {{ scenario }}
+    """  
+    This task is for a fictional school called Titan Academy, as part of an AI project.
+    BACKGROUND CONTEXT:      
+    School policy: In order for a student at Titan Academy to earn a behavior referral, they must be explicitly warned twice by the teacher in class,
+    and upon the 3rd infraction they will be written up and sent to the Administration Office.
+    
+    Students will receive a verbal warning if they commit any of the following actions: 
+    
+    1) Not following directions
+    2) Talking out of turn
+    3) Being willfully off-task
+    4) Being out of uniform
+    5) Making distracting noise
+    6) Being disrespectful to property, like drawing on desks or ripping up school papers
+    7) Going on their phone (and the phone will be confiscated)
+    8) Being openly disruptive
+    
+    Students will automatically be written up without any warnings if they commit any of the major offences:
+    
+    1) Cursing/swearing
+    2) Gross disrespect to the staff or another student
+    3) Physical contact with staff
+    4) Posturing to fight
+    5) Making a comment that goes against someone's racial, gender, or religious identity.
+    6) Cheating on a graded assignment
+    
+    The behavior report will contain 3 elements:
+    
+    1) Student Report: The student report is the teacher's formal write up of the behavior incident.
+    A Student Report should contain 3 overall parts of its strcture: what specific actions the student took that made them earn a verbal warning,
+    how the teacher tried to support the student by modifying the situation to encourage the student to make the right decisions, 
+    and ultimately what happened that led to the student continuing to make bad decisions and earn that 3rd warning and a write up.
+    The student's parents will be able to view this report, so make sure to be thorough to justify the teacher's actions.
+    
+    2) Internal report: The internal report is usually very short and will only be viewed by other staff and administrators. It should only
+    contain information that other staff might find useful.
+    
+    3) Summary: A one-sentence summary of the student report.
+    
+    Guidelines for Behavior Report Writing:
+    Vivid Descriptions: Describe each incident with rich detail. Use expressive language to paint a clear picture of the student's actions and the classroom atmosphere.
+    Direct Quotes: Include direct quotes from the student, teachers, or classmates involved to add depth and personal perspective to the events described.
+    Dramatic Impact: Emphasize how the behavior affected the entire classroom, including reactions from other students and any interruptions to learning activities. Highlight emotional responses and the broader impact on the day's lesson.
+    Narrative Structure: Write the report like a story, with a beginning that sets the scene, a middle that escalates the tension, and a conclusion that resolves the incident. This approach should make the events compelling and memorable.
+    Teacher’s Insight: Provide insight into the teacher's strategies and emotional journey through the incident. Describe what the teacher tried to do to manage the situation and their reflections on the outcome.
+        
+    
+    DIRECTIONS:
+    
+    Write a behavior report from the point of view of the teacher {{ staff_member.first_name }} {{ staff_member.last_name }}
+    Your position is {{ staff_member.position }} in the Titan Academy School.
+    The location/context where the behavior incident occured was {{ scenario }}
     
     The fictional student you need to write a behavior referral report for:
     Student name: {{ student.first_name }} {{ student.last_name }}
@@ -322,20 +405,24 @@ def get_template() -> Template:
     
     {{ iep_statement }}
     
+    This is the general behavior pattern of this student, so make sure the behavior report follows this:
+    {{ behavior_profile }}
+    
     This is {{ student.first_name }}'s report card:
     Math Grade: {{ report_card.math_grade }} {{report_card.math_percentage }}
     Reading Grade: {{ report_card.reading_grade }} {{ report_card.reading_percentage }}
     Social Studies Grade {{ report_card.social_studies_grade }} {{ report_card.social_studies_percentage }}
     Writing Grade: {{ report_card.writing_grade }} {{ report_card.writing_percentage }}
     Science Grade: {{ report_card.science_grade }} {{ report_card.science_percentage }}
-        
+    
     Output a JSON object that will form this shape:
     {
         "student_report": "You will write the student report here",
-        "internal_report": "You will write the internal report here"
+        "internal_report": "You will write the internal report here",
+        "summary":"A one sentence summary of the behavior report"
     }
     
-    You must include ALL of the elements of the JSON. You must include "student_report", and "internal_report"
+    You must complete ALL of the elements of the JSON. You must include "student_report", "internal_report" and "summary"
     """
     )
 
@@ -354,18 +441,22 @@ def main():
     student_list_full_sped = hydrate_iep_goals_from_sql(sped_categories_student_list,IEPS_AND_GOALS_FILE_NAME)
     attendance_data = parse_attendance_sql_file(DAILY_ATTENDANCE_SQL_FILE_NAME)
     staff_list = create_staff_roster_from_sql(STAFF_SQL_FILE_NAME)
-
     
     report_cards = get_or_create_report_cards(
         scores_json_file=STUDENT_SCORES_JSON_FILE_NAME,
         report_cards_json_file=REPORTCARDS_JSON_FILE_NAME,
         scores_sql_file=STUDENT_SCORE_SQL_FILE_NAME
     )
-
+    
+    start_date = datetime(2023, 9, 1)
+    end_date = datetime(2024, 5, 30)
+    school_days:list[datetime] = list(generate_school_days(start_date, end_date))
     scenario = get_scenario(staff_list[0])
     
-    print(scenario)
-    
+    template = get_template()
+    prompt = build_prompt(template,report_cards=report_cards,student=student_list_full_sped[12],staff_member=staff_list[0])
+    print(prompt)
+        
     # generate all behavior referrals and plans (all_students, all_staff, all_dates, all_courses)
     
     
