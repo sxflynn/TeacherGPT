@@ -111,7 +111,7 @@ deactivate
 | IEP Goals          |        ✅    |        ✅        |     ✅     |        |            |         |            |         |                 |
 | IEP Accomodations  |       ✅     |           ✅     |      ✅    |        |            |         |            |         |                 |
 | ETR                |            |                |          |        |            |         |            |         |                 |
-| Behavior Referrals |            |                |          |        |            |         |            |         |                 |
+| Behavior Referrals |       ✅     |        ✅        |          |        |            |         |            |         |                 |
 | Behavior Plans     |            |                |          |        |            |         |            |         |                 |
 | Suspensions        |            |                |          |        |            |         |            |         |                 |
 | Expulsions         |            |                |          |        |            |         |            |         |                 |
