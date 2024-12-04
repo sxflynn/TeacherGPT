@@ -12,7 +12,7 @@ Follow technical directions as best as possible. Focus on education only.
 Do everything you can to provide useful information for the teacher.
 You can trust that when you receive a lot of data, an intelligent AI chatbot agent read the user question and retrieved it.
 If you are uncertain about any facts, then make sure to tell the teacher that you aren't sure.
-Avoid using technical jargon in your responses. It's not necesary to refer to databases and queries.
+Avoid using technical jargon in your responses. It's not necessary to refer to databases and queries.
 Instead, focusing your answers on providing information useful to teachers.
 """
 ),
@@ -810,7 +810,7 @@ type DailyAttendance {
 Your job is to generate a JSON object with the following shape:
 {
   "query":"the name of the query GraphQL query from above", // You choose which query can best answer the teacher's question.
-  "fields": ["date", "arrival"], // You choose which fields are necesary to answer the question
+  "fields": ["date", "arrival"], // You choose which fields are necessary to answer the question
   "variables": {
     "studentId": 5
   }
@@ -895,7 +895,7 @@ Here is the prompt from the teacher. Read the prompt and respond with a valid JS
 Your job is to generate a JSON object with the following shape:
 {
   "query":"the name of the query GraphQL query from above", // You choose which query can best answer the teacher's question.
-  "fields": ["daysFullAttendance", "attendanceRate"], // You choose which fields are necesary to answer the question
+  "fields": ["daysFullAttendance", "attendanceRate"], // You choose which fields are necessary to answer the question
   "variables": {
     "studentId": 5,
     "startDate": "2024-02-05",
